@@ -8,7 +8,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `PRODUCT`;
 CREATE TABLE `PRODUCT` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `sku` VARCHAR(255) NOT NULL,
+    `sku` VARCHAR(255) NOT NULL UNIQUE,
     `price` DECIMAL(12, 2) NOT NULL,
     `quantity` INT NOT NULL,
     `threshold` INT NOT NULL DEFAULT -1,
@@ -61,7 +61,7 @@ CREATE TABLE `CATEGORY` (
 DROP TABLE IF EXISTS `COUPON`;
 CREATE TABLE `COUPON` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `code` VARCHAR(255) NOT NULL,
+    `code` VARCHAR(255) NOT NULL UNIQUE,
     `value` DECIMAL(12, 2) NOT NULL,
     `type` INT NOT NULL DEFAULT 0,
     `description` LONGTEXT,
@@ -78,7 +78,7 @@ CREATE TABLE `EMPLOYEE` (
     `first_name` VARCHAR(255) NOT NULL,
     `middle_name` VARCHAR(255),
     `last_name` VARCHAR(255) NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL UNIQUE,
     `password` LONGTEXT NOT NULL,
     `role` INT NOT NULL DEFAULT 0,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -93,7 +93,7 @@ CREATE TABLE `CUSTOMER` (
     `first_name` VARCHAR(255) NOT NULL,
     `middle_name` VARCHAR(255),
     `last_name` VARCHAR(255) NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL UNIQUE,
     `password` LONGTEXT NOT NULL,
     `shipping_address_1` VARCHAR(255),
     `shipping_address_2` VARCHAR(255),
