@@ -332,6 +332,30 @@ CREATE TABLE `PRODUCT_IMAGE` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `SALE_EVENT`
+--
+
+DROP TABLE IF EXISTS `SALE_EVENT`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `SALE_EVENT` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `coupon_id` int NOT NULL,
+  `start_at` timestamp NOT NULL,
+  `end_at` timestamp NOT NULL,
+  `title` longtext NOT NULL,
+  `description` longtext,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coupon_id` (`coupon_id`),
+  CONSTRAINT `SALE_EVENT_ibfk_1` FOREIGN KEY (`coupon_id`) REFERENCES `COUPON` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `SUBSCRIPTION`
 --
 
@@ -382,4 +406,4 @@ CREATE TABLE `SUBSCRIPTION` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-26  0:04:50
+-- Dump completed on 2025-02-28  1:59:10
