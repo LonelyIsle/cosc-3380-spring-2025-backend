@@ -16,13 +16,13 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `CATEGORY`
+-- Table structure for table `category`
 --
 
-DROP TABLE IF EXISTS `CATEGORY`;
+DROP TABLE IF EXISTS `category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `CATEGORY` (
+CREATE TABLE `category` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` longtext NOT NULL,
   `description` longtext,
@@ -35,13 +35,13 @@ CREATE TABLE `CATEGORY` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `CONFIG`
+-- Table structure for table `config`
 --
 
-DROP TABLE IF EXISTS `CONFIG`;
+DROP TABLE IF EXISTS `config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `CONFIG` (
+CREATE TABLE `config` (
   `id` int NOT NULL AUTO_INCREMENT,
   `key` longtext NOT NULL,
   `value` longtext NOT NULL,
@@ -54,13 +54,13 @@ CREATE TABLE `CONFIG` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `COUPON`
+-- Table structure for table `coupon`
 --
 
-DROP TABLE IF EXISTS `COUPON`;
+DROP TABLE IF EXISTS `coupon`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `COUPON` (
+CREATE TABLE `coupon` (
   `id` int NOT NULL AUTO_INCREMENT,
   `code` varchar(255) NOT NULL,
   `value` decimal(12,2) NOT NULL,
@@ -74,18 +74,18 @@ CREATE TABLE `COUPON` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
-  CONSTRAINT `COUPON_chk_1` CHECK ((`value` >= 0))
+  CONSTRAINT `coupon_chk_1` CHECK ((`value` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `CUSTOMER`
+-- Table structure for table `customer`
 --
 
-DROP TABLE IF EXISTS `CUSTOMER`;
+DROP TABLE IF EXISTS `customer`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `CUSTOMER` (
+CREATE TABLE `customer` (
   `id` int NOT NULL AUTO_INCREMENT,
   `first_name` varchar(255) NOT NULL,
   `middle_name` varchar(255) DEFAULT NULL,
@@ -113,18 +113,18 @@ CREATE TABLE `CUSTOMER` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  CONSTRAINT `CUSTOMER_chk_1` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
+  CONSTRAINT `customer_chk_1` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `EMPLOYEE`
+-- Table structure for table `employee`
 --
 
-DROP TABLE IF EXISTS `EMPLOYEE`;
+DROP TABLE IF EXISTS `employee`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `EMPLOYEE` (
+CREATE TABLE `employee` (
   `id` int NOT NULL AUTO_INCREMENT,
   `first_name` varchar(255) NOT NULL,
   `middle_name` varchar(255) DEFAULT NULL,
@@ -132,24 +132,25 @@ CREATE TABLE `EMPLOYEE` (
   `email` varchar(255) NOT NULL,
   `password` longtext NOT NULL,
   `role` int NOT NULL DEFAULT '0',
+  `hourly_rate` decimal(12,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  CONSTRAINT `EMPLOYEE_chk_1` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
+  CONSTRAINT `employee_chk_1` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `NOTIFICATION`
+-- Table structure for table `notification`
 --
 
-DROP TABLE IF EXISTS `NOTIFICATION`;
+DROP TABLE IF EXISTS `notification`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `NOTIFICATION` (
+CREATE TABLE `notification` (
   `id` int NOT NULL AUTO_INCREMENT,
   `employee_id` int NOT NULL,
   `title` longtext NOT NULL,
@@ -162,18 +163,18 @@ CREATE TABLE `NOTIFICATION` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `employee_id` (`employee_id`),
-  CONSTRAINT `NOTIFICATION_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `EMPLOYEE` (`id`)
+  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `ORDER`
+-- Table structure for table `order`
 --
 
-DROP TABLE IF EXISTS `ORDER`;
+DROP TABLE IF EXISTS `order`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ORDER` (
+CREATE TABLE `order` (
   `id` int NOT NULL AUTO_INCREMENT,
   `customer_id` int DEFAULT NULL,
   `email` varchar(255) NOT NULL,
@@ -201,18 +202,18 @@ CREATE TABLE `ORDER` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`),
-  CONSTRAINT `ORDER_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `CUSTOMER` (`id`)
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `ORDER_COUPON`
+-- Table structure for table `order_coupon`
 --
 
-DROP TABLE IF EXISTS `ORDER_COUPON`;
+DROP TABLE IF EXISTS `order_coupon`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ORDER_COUPON` (
+CREATE TABLE `order_coupon` (
   `id` int NOT NULL AUTO_INCREMENT,
   `order_id` int NOT NULL,
   `coupon_id` int NOT NULL,
@@ -225,20 +226,20 @@ CREATE TABLE `ORDER_COUPON` (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   KEY `coupon_id` (`coupon_id`),
-  CONSTRAINT `ORDER_COUPON_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `ORDER` (`id`),
-  CONSTRAINT `ORDER_COUPON_ibfk_2` FOREIGN KEY (`coupon_id`) REFERENCES `COUPON` (`id`),
-  CONSTRAINT `ORDER_COUPON_chk_1` CHECK ((`value` >= 0))
+  CONSTRAINT `order_coupon_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
+  CONSTRAINT `order_coupon_ibfk_2` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`),
+  CONSTRAINT `order_coupon_chk_1` CHECK ((`value` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `ORDER_PRODUCT`
+-- Table structure for table `order_product`
 --
 
-DROP TABLE IF EXISTS `ORDER_PRODUCT`;
+DROP TABLE IF EXISTS `order_product`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ORDER_PRODUCT` (
+CREATE TABLE `order_product` (
   `id` int NOT NULL AUTO_INCREMENT,
   `order_id` int NOT NULL,
   `product_id` int NOT NULL,
@@ -251,21 +252,21 @@ CREATE TABLE `ORDER_PRODUCT` (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   KEY `product_id` (`product_id`),
-  CONSTRAINT `ORDER_PRODUCT_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `ORDER` (`id`),
-  CONSTRAINT `ORDER_PRODUCT_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `PRODUCT` (`id`),
-  CONSTRAINT `ORDER_PRODUCT_chk_1` CHECK ((`price` >= 0)),
-  CONSTRAINT `ORDER_PRODUCT_chk_2` CHECK ((`quantity` >= 0))
+  CONSTRAINT `order_product_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
+  CONSTRAINT `order_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
+  CONSTRAINT `order_product_chk_1` CHECK ((`price` >= 0)),
+  CONSTRAINT `order_product_chk_2` CHECK ((`quantity` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `PRODUCT`
+-- Table structure for table `product`
 --
 
-DROP TABLE IF EXISTS `PRODUCT`;
+DROP TABLE IF EXISTS `product`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `PRODUCT` (
+CREATE TABLE `product` (
   `id` int NOT NULL AUTO_INCREMENT,
   `sku` varchar(255) NOT NULL,
   `price` decimal(12,2) NOT NULL,
@@ -280,19 +281,19 @@ CREATE TABLE `PRODUCT` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `sku` (`sku`),
-  CONSTRAINT `PRODUCT_chk_1` CHECK ((`price` >= 0)),
-  CONSTRAINT `PRODUCT_chk_2` CHECK ((`quantity` >= 0))
+  CONSTRAINT `product_chk_1` CHECK ((`price` >= 0)),
+  CONSTRAINT `product_chk_2` CHECK ((`quantity` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `PRODUCT_CATEGORY`
+-- Table structure for table `product_category`
 --
 
-DROP TABLE IF EXISTS `PRODUCT_CATEGORY`;
+DROP TABLE IF EXISTS `product_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `PRODUCT_CATEGORY` (
+CREATE TABLE `product_category` (
   `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int NOT NULL,
   `category_id` int NOT NULL,
@@ -303,19 +304,19 @@ CREATE TABLE `PRODUCT_CATEGORY` (
   PRIMARY KEY (`id`),
   KEY `product_id` (`product_id`),
   KEY `category_id` (`category_id`),
-  CONSTRAINT `PRODUCT_CATEGORY_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `PRODUCT` (`id`),
-  CONSTRAINT `PRODUCT_CATEGORY_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `CATEGORY` (`id`)
+  CONSTRAINT `product_category_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
+  CONSTRAINT `product_category_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `PRODUCT_IMAGE`
+-- Table structure for table `product_image`
 --
 
-DROP TABLE IF EXISTS `PRODUCT_IMAGE`;
+DROP TABLE IF EXISTS `product_image`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `PRODUCT_IMAGE` (
+CREATE TABLE `product_image` (
   `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int DEFAULT NULL,
   `name` longtext NOT NULL,
@@ -327,18 +328,18 @@ CREATE TABLE `PRODUCT_IMAGE` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `product_id` (`product_id`),
-  CONSTRAINT `PRODUCT_IMAGE_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `PRODUCT` (`id`)
+  CONSTRAINT `product_image_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `SALE_EVENT`
+-- Table structure for table `sale_event`
 --
 
-DROP TABLE IF EXISTS `SALE_EVENT`;
+DROP TABLE IF EXISTS `sale_event`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `SALE_EVENT` (
+CREATE TABLE `sale_event` (
   `id` int NOT NULL AUTO_INCREMENT,
   `coupon_id` int NOT NULL,
   `start_at` timestamp NOT NULL,
@@ -351,18 +352,18 @@ CREATE TABLE `SALE_EVENT` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `coupon_id` (`coupon_id`),
-  CONSTRAINT `SALE_EVENT_ibfk_1` FOREIGN KEY (`coupon_id`) REFERENCES `COUPON` (`id`)
+  CONSTRAINT `sale_event_ibfk_1` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `SUBSCRIPTION`
+-- Table structure for table `subscription`
 --
 
-DROP TABLE IF EXISTS `SUBSCRIPTION`;
+DROP TABLE IF EXISTS `subscription`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `SUBSCRIPTION` (
+CREATE TABLE `subscription` (
   `id` int NOT NULL AUTO_INCREMENT,
   `customer_id` int NOT NULL,
   `price` decimal(12,2) NOT NULL,
@@ -384,8 +385,8 @@ CREATE TABLE `SUBSCRIPTION` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `customer_id` (`customer_id`),
-  CONSTRAINT `SUBSCRIPTION_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `CUSTOMER` (`id`),
-  CONSTRAINT `SUBSCRIPTION_chk_1` CHECK ((`price` >= 0))
+  CONSTRAINT `subscription_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
+  CONSTRAINT `subscription_chk_1` CHECK ((`price` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -406,4 +407,4 @@ CREATE TABLE `SUBSCRIPTION` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-28  1:59:10
+-- Dump completed on 2025-03-13 18:01:08
