@@ -1,0 +1,29 @@
+import http from "http";
+import config from "./config.js";
+import Router from "./router.js";
+import { 
+    httpUnhandledErrorHandler,
+    http404Handler
+} from "./utils/httpError.js";
+
+const server = http.createServer();
+const router = new Router();
+
+router.get("/echo", (req, res) => {
+    res.end(JSON.stringify(req.query) + "\n" + JSON.stringify(req.param));
+});
+
+router.all("/*",  http404Handler);
+
+server.on("request", (req, res) => {
+    try {
+        console.log(`server :: ${req.method} - ${req.url}`);
+        router.handle(req, res); 
+    } catch(e) {
+        httpUnhandledErrorHandler(req, res, e);
+    }
+});
+
+server.listen(config.APP_PORT, () => {
+    console.log(`server :: listening port ${config.APP_PORT}`);
+})
