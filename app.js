@@ -4,12 +4,12 @@ import Router from "./router.js";
 import { 
     httpUnhandledErrorHandler,
     http404Handler
-} from "./utils/httpError.js";
+} from "./helpers/httpResp.js";
 
 const server = http.createServer();
 const router = new Router();
 
-router.get("/echo", (req, res) => {
+router.post("/echo/:message", (req, res) => {
     res.end(JSON.stringify(req.query) + "\n" + JSON.stringify(req.param));
 });
 

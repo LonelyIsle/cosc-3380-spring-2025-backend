@@ -3,10 +3,10 @@ import { URL, URLSearchParams } from "url"
 // Route
 class Route {
     dispatch(req, res, handlers) {
-        if (this.middlewares.length === 0 && handlers.length === 0) {
+        if (this.midHandlers.length === 0 && handlers.length === 0) {
             return this.lastHandler(req, res);
         }
-        let routeComposition = this.middlewares.reduceRight(
+        let routeComposition = this.midHandlers.reduceRight(
             (next, middleware) => () => middleware(req, res, next), 
             () => this.lastHandler(req, res)
         );
@@ -22,7 +22,7 @@ class Route {
         this.path = path;
         this. urlObj = new URL(`http://fakehost${path}`);
         this.lastHandler = handlers.pop();
-        this.middlewares = handlers;
+        this.midHandlers = handlers;
     }
 }
 
@@ -54,10 +54,10 @@ class Router {
     }
 
     use(handler) {
-        this.globalMiddlewares.push(handler);
+        this.midHandlers.push(handler);
     }
 
-    getURLQuery(req, res) {
+    getURLQuery(req) {
         let urlObj = req.urlObj;
         let urlParams = new URLSearchParams(urlObj.search);
         let result = {}
@@ -67,7 +67,7 @@ class Router {
         return result;
     }
 
-    getURLParam(req, res, route) {
+    getURLParam(req, route) {
         const reqPathname = req.urlObj.pathname;
         const reqPaths = reqPathname.split("/");
         const routePaths = route.path.split("/");
@@ -110,11 +110,11 @@ class Router {
 
     handle(req, res) {
         req.urlObj = new URL(`http://fakehost${req.url}`);
-        req.query = this.getURLQuery(req, res);
+        req.query = this.getURLQuery(req);
         for(let route of this.routes) {
             if (this.match(req, route)) {
-                req.param = this.getURLParam(req, res, route);
-                route.dispatch(req, res, this.globalMiddlewares);
+                req.param = this.getURLParam(req, route);
+                route.dispatch(req, res, this.midHandlers);
                 break;
             }
         }
@@ -122,7 +122,7 @@ class Router {
 
     constructor() {
         this.routes = [];
-        this.globalMiddlewares = [];
+        this.midHandlers = [];
     }
 }
 
