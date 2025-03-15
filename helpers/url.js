@@ -17,7 +17,7 @@ function getPathnameObj(pathname) {
 }
 
 function getReqQuery(req) {
-    let urlObj = getURLObj(req.url);
+    let urlObj = req.urlObj;
     let urlParams = new URLSearchParams(urlObj.search);
     let result = {}
     for(let [key, value] of urlParams.entries()) { 
@@ -27,7 +27,7 @@ function getReqQuery(req) {
 }
 
 function getReqParam(req, route) {
-    const reqPathname = getURLObj(req.url).pathname;
+    const reqPathname = req.urlObj.pathname;
     const reqPaths = reqPathname.split("/");
     const routePathnames = route.pathname.split("/");
     let result = {};

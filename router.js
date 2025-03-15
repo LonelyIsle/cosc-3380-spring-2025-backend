@@ -1,28 +1,17 @@
 import url from "./helpers/url.js"
+import RequestHandler from "./helpers/reqHandler.js";
 
 // Route
 class Route {
-    dispatch(req, res, handlers) {
-        if (this.midHandlers.length === 0 && handlers.length === 0) {
-            return this.lastHandler(req, res);
-        }
-        let routeComposition = this.midHandlers.reduceRight(
-            (next, middleware) => () => middleware(req, res, next), 
-            () => this.lastHandler(req, res)
-        );
-        let composition = handlers.reduceRight(
-            (next, middleware) => () => middleware(req, res, next), 
-            () => routeComposition()
-        );
-        composition();
+    dispatch(req, res, next) {
+        return this.handler.compose(req, res, next);
     }
 
     constructor(method, pathname, ...handlers) {
         this.method = method.toUpperCase();
         this.pathname = pathname;
         this.pathnameObj = url.getPathnameObj(pathname);
-        this.lastHandler = handlers.pop();
-        this.midHandlers = handlers;
+        this.handler = new RequestHandler(handlers);
     }
 }
 
@@ -53,7 +42,7 @@ class Router {
     }
 
     use(handler) {
-        this.midHandlers.push(handler);
+        this.handler.push(handler);
     }
 
     match(req, route) {
@@ -82,21 +71,32 @@ class Router {
         return true;
     }
 
+    dispatch(req, res, next) {
+        return this.handler.compose(req, res, next)();
+    }
+
     handle(req, res) {
         req.urlObj = url.getURLObj(req.url);
         req.query = url.getReqQuery(req);
+        let matchedRoute = null;
         for(let route of this.routes) {
             if (this.match(req, route)) {
                 req.param = url.getReqParam(req, route);
-                route.dispatch(req, res, this.midHandlers);
+                matchedRoute = route;
                 break;
             }
+        }
+        // Router handler will always run, matched or not
+        if (matchedRoute === null) {
+            this.dispatch(req, res);
+        } else {
+            this.dispatch(req, res, matchedRoute.dispatch(req, res));
         }
     }
 
     constructor() {
         this.routes = [];
-        this.midHandlers = [];
+        this.handler = new RequestHandler();
     }
 }
 
