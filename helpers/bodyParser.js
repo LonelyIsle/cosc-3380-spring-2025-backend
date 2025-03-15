@@ -1,15 +1,9 @@
 import httpResp from "./httpResp.js";
-import multer from "multer";
-
-const upload = multer({ dest: 'uploads/' });
 
 function json(req, res, next) {
     let contentType = req.headers["content-type"];
-    if (contentType.toLowerCase() !== "application/json") {
-        // multipart/form-data
-        res.setHeader('content-type', 'application/json');
-        next();
-    } else {
+    contentType = contentType === undefined ? undefined : contentType.toLowerCase();
+    if (contentType !== undefined && contentType === "application/json") {
         let body = [];
         req.on('data', chunk => {
             body.push(chunk);
@@ -20,22 +14,18 @@ function json(req, res, next) {
                 try {
                     req.body = JSON.parse(body);
                 } catch (e) {
-                    httpResp.error400Handler(req, res);
+                    httpResp.Error[400](req, res);
                 }
-                res.setHeader('content-type', 'application/json');
                 next();
             } catch(e) {
-                httpResp.unhandledErrorHandler(req, res, e);
+                httpResp.Error.unhandled(req, res, e);
             }
         });
-    } 
-}
-
-function formData(req, res, next) {
-    upload(req, res, next);
+    } else {
+        next();
+    }
 }
 
 export default {
-    json,
-    formData
+    json
 }

@@ -1,27 +1,37 @@
-// only for unhandled exception handler
-function unhandledErrorHandler(req, res, error) {
-    res.statusCode = 500;
-    console.error(`error :: ${error.stack}`);
-    res.end(error.stack);
+class Success {
+    static 200(req, res, message, data) {
+        res.setHeader("content-type", "application/json");
+        res.statusCode = 200;
+        res.end(JSON.stringify({
+            message,
+            data
+        }));
+    }
 }
 
-function errorHandler(req, res, code, error) {
-    res.statusCode = code;
-    res.end(error.message);
-}
+class Error {
+    static unhandled(req, res, error) {
+        res.setHeader("content-type", "application/json");
+        res.statusCode = 500;
+        console.error(`error :: ${error.stack}`);
+        res.end(error.stack);
+    }
 
-function error404Handler(req, res, next) {
-    errorHandler(req, res, 404, new Error("Not Found"));
-}
+    static 404(req, res) {
+        res.setHeader("content-type", "application/json");
+        res.statusCode = 404;
+        res.end("Not Found");
+    }
 
-function error400Handler(req, res, next) {
-    errorHandler(req, res, 404, new Error("Bad Request"));
+    static 400(req, res) {
+        res.setHeader("content-type", "application/json");
+        res.statusCode = 400;
+        res.end("Bad Request");
+    }
 }
 
 export default {
-    unhandledErrorHandler,
-    errorHandler,
-    error404Handler,
-    error400Handler
+    Success,
+    Error,
 }
 
