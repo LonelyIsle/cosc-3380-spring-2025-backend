@@ -3,7 +3,7 @@ import httpResp from "./httpResp.js";
 function json(req, res, next) {
     let contentType = req.headers["content-type"];
     contentType = contentType === undefined ? undefined : contentType.toLowerCase();
-    if (contentType !== undefined && contentType === "application/json") {
+    if (contentType === "application/json") {
         let body = [];
         req.on('data', chunk => {
             body.push(chunk);
