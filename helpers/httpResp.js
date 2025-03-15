@@ -14,9 +14,14 @@ function error404Handler(req, res, next) {
     errorHandler(req, res, 404, new Error("Not Found"));
 }
 
+function error400Handler(req, res, next) {
+    errorHandler(req, res, 404, new Error("Bad Request"));
+}
+
 export default {
     unhandledErrorHandler,
     errorHandler,
-    error404Handler
+    error404Handler,
+    error400Handler
 }
 
