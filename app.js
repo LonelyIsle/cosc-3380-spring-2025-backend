@@ -2,9 +2,12 @@ import http from "http";
 import config from "./config.js";
 import Router from "./router.js";
 import httpResp from "./helpers/httpResp.js";
+import corsHandler from "./helpers/cors.js";
 
 const server = http.createServer();
 const router = new Router();
+
+router.use(corsHandler);
 
 router.post("/echo/:message", (req, res) => {
     res.end(JSON.stringify(req.query) + "\n" + JSON.stringify(req.param));

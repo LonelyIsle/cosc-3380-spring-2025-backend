@@ -18,7 +18,7 @@ class Route {
 // Router
 class Router {
     REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/g;
-    METHODS = ["GET", "POST", "PUT", "DELETE"];
+    METHODS = ["GET", "HEAD", "PUT", "PATCH" , "POST", "DELETE"];
 
     get(pathname, ...handlers) {
         this.routes.push(new Route("GET", pathname, ...handlers));
@@ -30,6 +30,10 @@ class Router {
 
     put(pathname, ...handlers) {
         this.routes.push(new Route("PUT", pathname, ...handlers));
+    }
+
+    patch(pathname, ...handlers) {
+        this.routes.push(new Route("PATCH", pathname, ...handlers));
     }
 
     delete(pathname, ...handlers) {
