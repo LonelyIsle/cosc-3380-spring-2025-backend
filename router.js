@@ -17,6 +17,7 @@ class Route {
 
 // Router
 class Router {
+    REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/g;
     METHODS = ["GET", "POST", "PUT", "DELETE"];
 
     get(pathname, ...handlers) {
@@ -45,6 +46,31 @@ class Router {
         this.handler.push(handler);
     }
 
+    getReqQuery(req) {
+        let urlObj = req.urlObj;
+        let urlParams = new URLSearchParams(urlObj.search);
+        let result = {}
+        for(let [key, value] of urlParams.entries()) { 
+            result[key] = value;
+        }
+        return result;
+    }
+    
+    getReqParam(req, route) {
+        const reqPathname = req.urlObj.pathname;
+        const reqPaths = reqPathname.slice(1).split("/");
+        const routePathnames = route.pathname.slice(1).split("/");
+        let result = {};
+        for (let [i, pathname] of routePathnames.entries()) {
+            const regex = this.REQ_PARAM_REGEX;
+            const found = pathname.match(regex);
+            if (found !== null) {
+                result[pathname.slice(1)] = decodeURI(reqPaths[i]);
+            }
+        }
+        return result
+    }
+
     match(req, route) {
         if (req.method !== route.method ) {
             return false;
@@ -56,14 +82,13 @@ class Router {
             return true;
         }
         const reqPathname = req.urlObj.pathname;
-        const reqPathnames = reqPathname.split("/");
-        const routePathnamess = route.pathname.split("/");
+        const reqPathnames = reqPathname.slice(1).split("/");
+        const routePathnamess = route.pathname.slice(1).split("/");
         if (reqPathnames.length != routePathnamess.length) {
             return false;
         }
-        for (let [i, path] of routePathnamess.entries()) {
-            const regex = this.REQ_PARAM_REGEX;
-            const found = path.match(regex);
+        for (let [i, pathname] of routePathnamess.entries()) {
+            const found = pathname.match(this.REQ_PARAM_REGEX);
             if (found === null && (routePathnamess[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
                 return false;
             }
@@ -77,11 +102,11 @@ class Router {
 
     handle(req, res) {
         req.urlObj = url.getURLObj(req.url);
-        req.query = url.getReqQuery(req);
+        req.query = this.getReqQuery(req);
         let matchedRoute = null;
         for(let route of this.routes) {
             if (this.match(req, route)) {
-                req.param = url.getReqParam(req, route);
+                req.param = this.getReqParam(req, route);
                 matchedRoute = route;
                 break;
             }
