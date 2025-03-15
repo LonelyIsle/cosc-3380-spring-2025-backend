@@ -1,4 +1,4 @@
-import { URL, URLSearchParams } from "url"
+import url from "./helpers/url.js"
 
 // Route
 class Route {
@@ -17,10 +17,10 @@ class Route {
         composition();
     }
 
-    constructor(method, path, ...handlers) {
+    constructor(method, pathname, ...handlers) {
         this.method = method.toUpperCase();
-        this.path = path;
-        this. urlObj = new URL(`http://fakehost${path}`);
+        this.pathname = pathname;
+        this.pathnameObj = url.getPathnameObj(pathname);
         this.lastHandler = handlers.pop();
         this.midHandlers = handlers;
     }
@@ -28,28 +28,27 @@ class Route {
 
 // Router
 class Router {
-    REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/g;
     METHODS = ["GET", "POST", "PUT", "DELETE"];
 
-    get(path, ...handlers) {
-        this.routes.push(new Route("GET", path, ...handlers));
+    get(pathname, ...handlers) {
+        this.routes.push(new Route("GET", pathname, ...handlers));
     }
 
-    post(path, ...handlers) {
-        this.routes.push(new Route("POST", path, ...handlers));
+    post(pathname, ...handlers) {
+        this.routes.push(new Route("POST", pathname, ...handlers));
     }
 
-    put(path, ...handlers) {
-        this.routes.push(new Route("PUT", path, ...handlers));
+    put(pathname, ...handlers) {
+        this.routes.push(new Route("PUT", pathname, ...handlers));
     }
 
-    delete(path, ...handlers) {
-        this.routes.push(new Route("DELETE", path, ...handlers));
+    delete(pathname, ...handlers) {
+        this.routes.push(new Route("DELETE", pathname, ...handlers));
     }
 
-    all(path, ...handlers) {
+    all(pathname, ...handlers) {
         for (let method of this.METHODS) {
-            this.routes.push(new Route(method, path, ...handlers));
+            this.routes.push(new Route(method, pathname, ...handlers));
         }
     }
 
@@ -57,51 +56,26 @@ class Router {
         this.midHandlers.push(handler);
     }
 
-    getURLQuery(req) {
-        let urlObj = req.urlObj;
-        let urlParams = new URLSearchParams(urlObj.search);
-        let result = {}
-        for(let [key, value] of urlParams.entries()) { 
-            result[key] = value;
-        }
-        return result;
-    }
-
-    getURLParam(req, route) {
-        const reqPathname = req.urlObj.pathname;
-        const reqPaths = reqPathname.split("/");
-        const routePaths = route.path.split("/");
-        let result = {};
-        for (let [i, path] of routePaths.entries()) {
-            const regex = this.REQ_PARAM_REGEX;
-            const found = path.match(regex);
-            if (found !== null) {
-                result[path.slice(1)] = decodeURI(reqPaths[i]);
-            }
-        }
-        return result
-    }
-
     match(req, route) {
         if (req.method !== route.method ) {
             return false;
         }
-        if (route.path === "/*") {
+        if (route.pathname === "/*") {
             return true;
         }
-        if (req.urlObj.pathname === route.path) {
+        if (req.urlObj.pathname === route.pathname) {
             return true;
         }
         const reqPathname = req.urlObj.pathname;
-        const reqPaths = reqPathname.split("/");
-        const routePaths = route.path.split("/");
-        if (reqPaths.length != routePaths.length) {
+        const reqPathnames = reqPathname.split("/");
+        const routePathnamess = route.pathname.split("/");
+        if (reqPathnames.length != routePathnamess.length) {
             return false;
         }
-        for (let [i, path] of routePaths.entries()) {
+        for (let [i, path] of routePathnamess.entries()) {
             const regex = this.REQ_PARAM_REGEX;
             const found = path.match(regex);
-            if (found === null && routePaths[i].toLowerCase() !== decodeURI(reqPaths[i]).toLowerCase()) {
+            if (found === null && (routePathnamess[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
                 return false;
             }
         }
@@ -109,11 +83,11 @@ class Router {
     }
 
     handle(req, res) {
-        req.urlObj = new URL(`http://fakehost${req.url}`);
-        req.query = this.getURLQuery(req);
+        req.urlObj = url.getURLObj(req.url);
+        req.query = url.getReqQuery(req);
         for(let route of this.routes) {
             if (this.match(req, route)) {
-                req.param = this.getURLParam(req, route);
+                req.param = url.getReqParam(req, route);
                 route.dispatch(req, res, this.midHandlers);
                 break;
             }
