@@ -23,16 +23,16 @@ class RequestHandler {
         }
     }
 
+    execute(req, res, composition) {
+        this.compose(req, res, composition)();
+    }
+
     constructor(handlers) {
         this.handlers = handlers == null ? [] : handlers;
     }
 }
 
 class Route {
-    dispatch(req, res, next) {
-        return this.handler.compose(req, res, next);
-    }
-
     constructor(method, pathname, ...handlers) {
         this.method = method.toUpperCase();
         this.pathname = pathname;
@@ -125,10 +125,6 @@ class Router {
         return true;
     }
 
-    dispatch(req, res, next) {
-        return this.handler.compose(req, res, next);
-    }
-
     handle(req, res) {
         req.urlObj = url.getURLObj(req.url);
         req.query = this.getReqQuery(req);
@@ -142,9 +138,9 @@ class Router {
         }
         // Router handler always executes, matched or not
         if (matchedRoute === null) {
-            this.dispatch(req, res)();
+            this.handler.execute(req, res);
         } else {
-            this.dispatch(req, res, matchedRoute.dispatch(req, res))();
+            this.handler.execute(req, res, matchedRoute.handler.compose(req, res));
         }
     }
 

@@ -13,10 +13,10 @@ function json(req, res, next) {
                 body = Buffer.concat(body).toString();
                 try {
                     req.body = JSON.parse(body);
+                    next();
                 } catch (e) {
                     httpResp.Error[400](req, res);
                 }
-                next();
             } catch(e) {
                 httpResp.Error.unhandled(req, res, e);
             }
