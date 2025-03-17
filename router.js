@@ -5,12 +5,6 @@ class RequestHandler {
         this.handlers.push(handler);
     }
 
-    pushMany(handlers) {
-        for (let handler of handlers) {
-            this.push(handler);
-        }
-    }
-
     // combine all handlers into one chaining function
     compose(req, res, next) {
         if (this.handlers.length !== 0) {
@@ -34,7 +28,6 @@ class RequestHandler {
     }
 }
 
-
 class Route {
     dispatch(req, res, next) {
         return this.handler.compose(req, res, next);
@@ -49,8 +42,8 @@ class Route {
 }
 
 class Router {
-    REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/g;
-    METHODS = ["GET", "HEAD", "PUT", "PATCH" , "POST", "DELETE"];
+    REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/;
+    METHODS = ["GET", "PUT", "PATCH" , "POST", "DELETE"];
 
     get(pathname, ...handlers) {
         this.routes.push(new Route("GET", pathname, ...handlers));
@@ -133,7 +126,7 @@ class Router {
     }
 
     dispatch(req, res, next) {
-        return this.handler.compose(req, res, next)();
+        return this.handler.compose(req, res, next);
     }
 
     handle(req, res) {
@@ -147,11 +140,11 @@ class Router {
                 break;
             }
         }
-        // Router handler will always run, matched or not
+        // Router handler always executes, matched or not
         if (matchedRoute === null) {
-            this.dispatch(req, res);
+            this.dispatch(req, res)();
         } else {
-            this.dispatch(req, res, matchedRoute.dispatch(req, res));
+            this.dispatch(req, res, matchedRoute.dispatch(req, res))();
         }
     }
 

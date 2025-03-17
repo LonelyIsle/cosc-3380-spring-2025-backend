@@ -28,7 +28,7 @@ router.post("/upload", upload.single("file"), (req, res) => {
     });
 });
 
-router.all("/*",  httpResp.Error[400]);
+router.all("/*",  httpResp.Error[404]);
 
 server.on("request", (req, res) => {
     try {
