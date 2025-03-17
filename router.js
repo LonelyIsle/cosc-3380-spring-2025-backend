@@ -1,34 +1,40 @@
+import httpResp from "./helpers/httpResp.js";
 import url from "./helpers/url.js"
 
 class RequestHandler {
+    DEFAULT_LAST_HANDLER = (req, res) => {};
+
     push(handler) {
         this.handlers.push(handler);
+        this.compose();
     }
 
-    // combine all handlers into one chaining function
-    compose(req, res, next) {
+    compose() {
         if (this.handlers.length !== 0) {
-            return this.handlers.reduceRight(
+            this.composition = this.handlers.reduceRight(
                 (next, handler) => {
-                    return () => handler(req, res, next);
+                    return (req, res) => handler(req, res, () => next(req, res));
                 }, 
-                typeof next === "function" ? next : () => {} // dummy next() for last handler
+                (req, res) => this.lastHandler(req, res)
             );
         } else {
-            return () => { 
-                if (typeof next === "function") {
-                    next() 
-                }
-            };
+            this.composition = this.lastHandler;
         }
     }
 
     execute(req, res, composition) {
-        this.compose(req, res, composition)();
+        if (typeof composition === "function") {
+            this.lastHandler = composition;
+        } else {
+            this.lastHandler = this.DEFAULT_LAST_HANDLER;
+        }
+        this.composition(req, res);
     }
 
     constructor(handlers) {
         this.handlers = handlers == null ? [] : handlers;
+        this.lastHandler = this.DEFAULT_LAST_HANDLER;
+        this.compose();
     }
 }
 
@@ -136,11 +142,10 @@ class Router {
                 break;
             }
         }
-        // Router handler always executes, matched or not
         if (matchedRoute === null) {
-            this.handler.execute(req, res);
+            this.handler.execute(req, res, httpResp.Error[404]);
         } else {
-            this.handler.execute(req, res, matchedRoute.handler.compose(req, res));
+            this.handler.execute(req, res, matchedRoute.handler.composition);
         }
     }
 
