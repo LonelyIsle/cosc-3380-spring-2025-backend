@@ -39,6 +39,6 @@ server.on("request", (req, res) => {
     }
 });
 
-server.listen(config.APP_PORT, () => {
+server.listen(process.env.PORT || 3000, () => {
     console.log(`server :: listening port ${config.APP_PORT}`);
 })
