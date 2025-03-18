@@ -67,7 +67,6 @@ jobs:
         run: |
           cp config.js.example config.js
           npm install -g pm2
-          pm2 stop app.js
           pm2 start app.js
 
           
