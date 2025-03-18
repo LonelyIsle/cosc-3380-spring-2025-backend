@@ -64,10 +64,12 @@ jobs:
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         # clone config.js to avoid module not found error
+        # pm2 stop app.js
+        # pm2 start app.js
         run: |
+          ls -al
           cp config.js.example config.js
           npm install -g pm2
-          pm2 stop app.js
-          pm2 start app.js
+          
 
           
