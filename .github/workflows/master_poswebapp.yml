@@ -15,7 +15,8 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      contents: read # This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
