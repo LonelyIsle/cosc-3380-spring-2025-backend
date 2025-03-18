@@ -18,4 +18,5 @@ npm install
 cp config.js.example config.js
 npm start
 ```
+You can use environment variables with the same names defined in ```config.js.example``` instead of ```config.js```.
 
