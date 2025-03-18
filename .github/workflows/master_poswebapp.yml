@@ -40,7 +40,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'posupdate'
+          app-name: 'poswebapp'
           slot-name: 'Production'
           package: .
 
