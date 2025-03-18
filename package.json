@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node app.js"
+    "start": "node --env-file-if-exists=$npm_config_env.env app.js"
   },
   "dependencies": {
     "mysql2": "^3.13.0"

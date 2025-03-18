@@ -12,11 +12,18 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 - [Node.js](https://nodejs.org/en)
 - [MySQL](https://www.mysql.com/)
 #### How To Run
-In project directory, execute the following commands
-```
-npm install
-cp config.js.example config.js
-npm start
-```
-You can use environment variables with the same names defined in ```config.js.example``` instead of ```config.js```.
-
+- Import MySQL scripts/db-dump.sql
+- In project directory, execute the following commands
+    ```
+    npm install
+    cp example.env [name].env
+    npm start --env=[name]
+    ```
+- Example
+    ```
+    npm install
+    cp example.env dev.env
+    npm start --env=dev
+    ```
+- When deploying, ```--env=[name]``` option can be omitted, allowing the server to use environment variables set by the user.
+- Note that even when using the ```--env=[name]``` option, the server will prioritize environment variables set by the user and ignore ```[name].env``` file.

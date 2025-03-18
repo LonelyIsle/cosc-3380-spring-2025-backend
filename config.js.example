@@ -1,9 +1,0 @@
-export default {
-    DB_HOST: "127.0.0.1",
-    DB_PORT: "3306",
-    DB_NAME: "db_name",
-    DB_USER: "user_name",
-    DB_PWD: "user_password",
-    DB_SSL: false, // server certificate is not verified
-    APP_PORT: "3000"
-}

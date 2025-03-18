@@ -1,7 +1,7 @@
 # Custom
 package-lock.json
-config.js
-uploads
+*.env 
+!example.env
 
 # Logs
 logs

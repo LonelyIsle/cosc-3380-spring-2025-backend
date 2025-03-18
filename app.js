@@ -1,5 +1,4 @@
 import http from "http";
-import config from "./config.js";
 import Router from "./router.js";
 import httpResp from "./helpers/httpResp.js";
 import corsHandler from "./helpers/cors.js";
@@ -37,6 +36,6 @@ server.on("request", (req, res) => {
     }
 });
 
-server.listen(process.env.PORT || config.PORT || 3000, () => {
-    console.log(`server :: listening port ${config.APP_PORT}`);
+server.listen(process.env.PORT || 3000, () => {
+    console.log(`server :: listening port ${process.env.PORT || 3000}`);
 });
