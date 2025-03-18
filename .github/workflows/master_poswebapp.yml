@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - poswebapp
+name: Build and deploy - poswebapp
 
 on:
   push:
@@ -66,6 +66,7 @@ jobs:
         # clone config.js to avoid module not found error
         run: |
           cp config.js.example config.js
-          npm start
+          pm2 stop app.js
+          pm2 start app.js
 
           

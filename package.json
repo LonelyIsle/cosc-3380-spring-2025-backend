@@ -6,6 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "mysql2": "^3.13.0"
+    "mysql2": "^3.13.0",
+    "pm2": "^6.0.5"
   }
 }
