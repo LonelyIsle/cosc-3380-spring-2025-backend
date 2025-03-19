@@ -1,12 +1,12 @@
 class INT {
-    static validate(val, attr) {
+    validate(val, attr) {
         attr = attr === undefined ? val : attr;
     }
     constructor() {}
 }
 
 class VARCHAR {
-    static validate(val, attr) {
+    validate(val, attr) {
         attr = attr === undefined ? val : attr;
         if (val && val.length > this.maxLength) {
             throw new error(`${attr} violates max length of ${this.maxLength}`);
@@ -19,7 +19,7 @@ class VARCHAR {
 }
 
 class LONGTEXT {
-    static validate(val, attr) {
+    validate(val, attr) {
         attr = attr === undefined ? val : attr;
         if (val && val.length > 4294967295) {
             throw new error(`${attr} violates max length of 4,294,967,295`);
@@ -29,14 +29,14 @@ class LONGTEXT {
 }
 
 class TIMESTAMP {
-    static validate(val, attr) {
+    validate(val, attr) {
         attr = attr === undefined ? val : attr;
     }
     constructor() {}
 }
 
 class TINYINT {
-    static validate(val, attr) {
+    validate(val, attr) {
         attr = attr === undefined ? val : attr;
         if (val && (val < 0 || val > 1)) {
             throw new error (`${attr} must be 0 or 1`);
@@ -48,14 +48,14 @@ class TINYINT {
 }
 
 class NULLABLE {
-    static validate(val, attr) {
+    validate(val, attr) {
         attr = attr === undefined ? val : attr;
     }
     constructor() {}
 }
 
 class NOTNULL {
-    static validate(val, attr) {
+    validate(val, attr) {
         attr = attr === undefined ? val : attr;
         if (val === null) {
             throw new Error(`${attr} cannot be null`);
@@ -70,12 +70,14 @@ class NOTNULL {
     constructor() {}
 }
 
-export default {
-    INT,
-    VARCHAR,
-    LONGTEXT,
-    TIMESTAMP,
-    TINYINT,
-    NULLABLE,
-    NOTNULL
+class DataType {
+    static INT() { return new INT(); }
+    static VARCHAR(opt) { return new VARCHAR(opt); }
+    static LONGTEXT() { return new LONGTEXT(); }
+    static TIMESTAMP() { return new TIMESTAMP(); }
+    static TINYINT() { return new TINYINT(); }
+    static NULLABLE() { return new NULLABLE(); }
+    static NOTNULL() { return new NOTNULL(); }
 }
+
+export default DataType

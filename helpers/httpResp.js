@@ -15,25 +15,25 @@ class Error {
         res.statusCode = 500;
         console.error(`error :: ${error.stack}`);
         res.end(JSON.stringify({
-            message: "Internal Server Error",
-            data: error.stack
-        }));
-    }
-
-    static 404(req, res) {
-        res.setHeader("content-type", "application/json");
-        res.statusCode = 404;
-        res.end(JSON.stringify({
-            message: "Not Found",
+            message: (error && error.message) || "Internal Server Error",
             data: {}
         }));
     }
 
-    static 400(req, res) {
+    static 404(req, res, error) {
+        res.setHeader("content-type", "application/json");
+        res.statusCode = 404;
+        res.end(JSON.stringify({
+            message: (error && error.message) || "Not Found",
+            data: {}
+        }));
+    }
+
+    static 400(req, res, error) {
         res.setHeader("content-type", "application/json");
         res.statusCode = 400;
         res.end(JSON.stringify({
-            message: "Bad Request",
+            message: (error && error.message) || "Bad Request",
             data: {}
         }));
     }

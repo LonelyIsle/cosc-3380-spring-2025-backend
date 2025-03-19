@@ -4,32 +4,32 @@ import utils from "../helpers/utils.js"
 const TABLE_NAME = "category";
 const ATTRIBUTES = {
     "id": {
-        type: dataType.INT,
-        isRequired: dataType.NOTNULL
+        type: dataType.INT(),
+        isRequired: dataType.NOTNULL()
     },
     "name": {
-        type: dataType.LONGTEXT,
-        isRequired: dataType.NOTNULL
+        type: dataType.LONGTEXT(),
+        isRequired: dataType.NOTNULL()
     },
     "description": {
-        type: dataType.LONGTEXT,
-        isRequired: dataType.NULLABLE
+        type: dataType.LONGTEXT(),
+        isRequired: dataType.NULLABLE()
     },
     "created_at": {
-        type: dataType.TIMESTAMP,
-        isRequired: dataType.NULLABLE
+        type: dataType.TIMESTAMP(),
+        isRequired: dataType.NULLABLE()
     },
     "updated_at": {
-        type: dataType.TIMESTAMP,
-        isRequired: dataType.NULLABLE
+        type: dataType.TIMESTAMP(),
+        isRequired: dataType.NULLABLE()
     },
     "deleted_at": {
-        type: dataType.TIMESTAMP,
-        isRequired: dataType.NULLABLE
+        type: dataType.TIMESTAMP(),
+        isRequired: dataType.NULLABLE()
     },
     "is_deleted": {
-        type: dataType.TINYINT,
-        isRequired: dataType.NULLABLE
+        type: dataType.TINYINT(),
+        isRequired: dataType.NULLABLE()
     }
 };
 
