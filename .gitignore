@@ -2,6 +2,7 @@
 package-lock.json
 *.env 
 !example.env
+test
 
 # Logs
 logs

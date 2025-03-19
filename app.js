@@ -4,6 +4,8 @@ import httpResp from "./helpers/httpResp.js";
 import corsHandler from "./helpers/cors.js";
 import bodyParser from "./helpers/bodyParser.js";
 
+import categoryController from "./controllers/category.js";
+
 const server = http.createServer();
 const router = new Router();
 
@@ -24,6 +26,8 @@ router.post("/echo/:message", (req, res) => {
         body: {...req.body}
     });
 });
+
+router.post("/category", categoryController.createOne);
 
 router.all("/*",  httpResp.Error[404]);
 

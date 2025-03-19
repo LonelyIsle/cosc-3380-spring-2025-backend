@@ -274,7 +274,8 @@ CREATE TABLE `product` (
   `threshold` int NOT NULL DEFAULT '-1',
   `name` longtext NOT NULL,
   `description` longtext,
-  `thumbnail_image` longtext,
+  `thumbnail_image` longblob,
+  `thumbnail_image_extension` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -319,7 +320,7 @@ DROP TABLE IF EXISTS `product_image`;
 CREATE TABLE `product_image` (
   `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int DEFAULT NULL,
-  `name` longtext NOT NULL,
+  `image` longblob NOT NULL,
   `extension` varchar(255) NOT NULL,
   `order` int NOT NULL DEFAULT '-1',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -407,4 +408,4 @@ CREATE TABLE `subscription` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-13 18:01:08
+-- Dump completed on 2025-03-19  0:44:36

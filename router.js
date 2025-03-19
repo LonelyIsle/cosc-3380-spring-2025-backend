@@ -34,7 +34,7 @@ class RequestHandler {
     }
 
     constructor(handlers) {
-        this.handlers = handlers == null ? [] : handlers;
+        this.handlers = handlers === undefined ? [] : handlers;
         this.lastHandler = DEFAULT_HANDLER;
         this.compose();
     }
@@ -50,8 +50,6 @@ class Route {
 }
 
 class Router {
-    
-
     get(pathname, ...handlers) {
         this.routes.push(new Route("GET", pathname, ...handlers));
     }

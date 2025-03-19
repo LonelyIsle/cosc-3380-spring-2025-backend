@@ -14,7 +14,8 @@ CREATE TABLE `product` (
     `threshold` INT NOT NULL DEFAULT -1,
     `name` LONGTEXT NOT NULL,
     `description` LONGTEXT,
-    `thumbnail_image` LONGTEXT,
+    `thumbnail_image` LONGBLOB,
+    `thumbnail_image_extension` VARCHAR(255),
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -27,7 +28,7 @@ DROP TABLE IF EXISTS `product_image`;
 CREATE TABLE `product_image` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `product_id` INT,
-    `name` LONGTEXT NOT NULL,
+    `image` LONGBLOB NOT NULL,
     `extension` VARCHAR(255) NOT NULL, 
     `order` INT NOT NULL DEFAULT -1,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
