@@ -1,15 +1,14 @@
+import { HttpError } from "../helpers/error.js";
+
 class INT {
-    validate(val, attr) {
-        attr = attr === undefined ? val : attr;
-    }
+    validate(val, attr = val) {}
     constructor() {}
 }
 
 class VARCHAR {
-    validate(val, attr) {
-        attr = attr === undefined ? val : attr;
+    validate(val, attr = val) {
         if (val && val.length > this.maxLength) {
-            throw new error(`${attr} violates max length of ${this.maxLength}`);
+            throw new HttpError({ statusCode: 400, message: `${attr} violates max length of ${this.maxLength}` });
         }
     }
 
@@ -19,27 +18,23 @@ class VARCHAR {
 }
 
 class LONGTEXT {
-    validate(val, attr) {
-        attr = attr === undefined ? val : attr;
+    validate(val, attr = val) {
         if (val && val.length > 4294967295) {
-            throw new error(`${attr} violates max length of 4,294,967,295`);
+            throw new HttpError({ statusCode: 400, message: `${attr} violates max length of 4,294,967,295` });
         }
     }
     constructor() {}
 }
 
 class TIMESTAMP {
-    validate(val, attr) {
-        attr = attr === undefined ? val : attr;
-    }
+    validate(val, attr = val) {}
     constructor() {}
 }
 
 class TINYINT {
-    validate(val, attr) {
-        attr = attr === undefined ? val : attr;
+    validate(val, attr = val) {
         if (val && (val < 0 || val > 1)) {
-            throw new error (`${attr} must be 0 or 1`);
+            throw new HttpError({ statusCode: 400, message: `${attr} must be 0 or 1` });
         }
     }
     constructor() {
@@ -48,23 +43,20 @@ class TINYINT {
 }
 
 class NULLABLE {
-    validate(val, attr) {
-        attr = attr === undefined ? val : attr;
-    }
+    validate(val, attr = val) {}
     constructor() {}
 }
 
 class NOTNULL {
-    validate(val, attr) {
-        attr = attr === undefined ? val : attr;
+    validate(val, attr = val) {
         if (val === null) {
-            throw new Error(`${attr} cannot be null`);
+            throw new HttpError({ statusCode: 400, message: `${attr} cannot be null` });
         }
         if (val === undefined) {
-            throw new Error(`${attr} cannot be undefined`);
+            throw new HttpError({ statusCode: 400, message: `${attr} cannot be undefined` });
         }
         if (typeof val === "string" && val.trim() === "") {
-            throw new Error(`${attr} cannot be empty`);
+            throw new HttpError({ statusCode: 400, message: `${attr} cannot be empty` });
         }
     }
     constructor() {}

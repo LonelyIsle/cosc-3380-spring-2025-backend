@@ -13,14 +13,14 @@ router.use(corsHandler);
 router.use(bodyParser.json);
 
 router.get("/echo/:message", (req, res) => {
-    httpResp.Success[200](req, res, "success", {
+    httpResp.Success[200](req, res, {
         query: {...req.query},
         param: {... req.param}
     });
 });
 
 router.post("/echo/:message", (req, res) => {
-    httpResp.Success[200](req, res, "success", {
+    httpResp.Success[200](req, res, {
         query: {...req.query},
         param: {... req.param},
         body: {...req.body}
@@ -36,7 +36,7 @@ server.on("request", (req, res) => {
         console.log(`server :: ${req.method} - ${req.url}`);
         router.handle(req, res); 
     } catch(e) {
-        httpResp.Error.unhandled(req, res, e);
+        httpResp.Error.default(req, res, e);
     }
 });
 

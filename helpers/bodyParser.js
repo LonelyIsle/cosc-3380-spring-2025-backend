@@ -1,4 +1,5 @@
 import httpResp from "./httpResp.js";
+import { HttpError } from "./error.js";
 
 function json(req, res, next) {
     let contentType = req.headers["content-type"];
@@ -13,12 +14,12 @@ function json(req, res, next) {
                 body = Buffer.concat(body).toString();
                 try {
                     req.body = JSON.parse(body);
-                    next();
                 } catch (e) {
-                    httpResp.Error[400](req, res);
+                    throw new HttpError({ statusCode: 400 });
                 }
+                next();
             } catch(e) {
-                httpResp.Error.unhandled(req, res, e);
+                httpResp.Error.default(req, res, e);
             }
         });
     } else {

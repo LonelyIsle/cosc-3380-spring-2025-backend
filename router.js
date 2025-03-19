@@ -33,8 +33,8 @@ class RequestHandler {
         this.composition(req, res);
     }
 
-    constructor(handlers) {
-        this.handlers = handlers === undefined ? [] : handlers;
+    constructor(handlers = []) {
+        this.handlers = handlers;
         this.lastHandler = DEFAULT_HANDLER;
         this.compose();
     }
