@@ -29,7 +29,6 @@ async function testDb(req, res) {
             dbConfig: _config
         });
     } catch(e) {
-        console.log(e);
         conn && await conn.rollback();
         httpResp.Success[200](req, res, {
             dbConnection: "error",
