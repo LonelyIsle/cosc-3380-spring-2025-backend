@@ -14,20 +14,21 @@ CREATE TABLE `product` (
     `threshold` INT NOT NULL DEFAULT -1,
     `name` LONGTEXT NOT NULL,
     `description` LONGTEXT,
-    `thumbnail_image` LONGTEXT,
+    `thumbnail_image` LONGBLOB,
+    `thumbnail_image_extension` VARCHAR(255),
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CHECK (`price` >= 0),
-    CHECK (`quantity` >= 0)
+    CONSTRAINT `product-check-price` CHECK ((`price` >= 0)),
+    CONSTRAINT `product-check-quantity` CHECK ((`quantity` >= 0))
 );
 
 DROP TABLE IF EXISTS `product_image`;
 CREATE TABLE `product_image` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `product_id` INT,
-    `name` LONGTEXT NOT NULL,
+    `image` LONGBLOB NOT NULL,
     `extension` VARCHAR(255) NOT NULL, 
     `order` INT NOT NULL DEFAULT -1,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -71,7 +72,7 @@ CREATE TABLE `coupon` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CHECK (`value` >= 0)
+    CONSTRAINT `coupon-check-value` CHECK (`value` >= 0)
 );
 
 DROP TABLE IF EXISTS `sale_event`;
@@ -102,7 +103,7 @@ CREATE TABLE `employee` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CHECK (`email` REGEXP '^.+@.+$')
+    CONSTRAINT `employee-check-email` CHECK (`email` REGEXP '^.+@.+$')
 );
 
 DROP TABLE IF EXISTS `customer`;
@@ -132,7 +133,7 @@ CREATE TABLE `customer` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CHECK (`email` REGEXP '^.+@.+$')
+    CONSTRAINT `customer-check-email` CHECK (`email` REGEXP '^.+@.+$')
 );
 
 DROP TABLE IF EXISTS `subscription`;
@@ -156,7 +157,7 @@ CREATE TABLE `subscription` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CHECK (`price` >= 0)
+    CONSTRAINT `subscription-check-price` CHECK (`price` >= 0)
 );
 
 DROP TABLE IF EXISTS `order`;
@@ -199,7 +200,7 @@ CREATE TABLE `order_coupon` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CHECK (`value` >= 0)
+    CONSTRAINT `order_coupon-check-value` CHECK (`value` >= 0)
 );
 
 DROP TABLE IF EXISTS `order_product`;
@@ -213,8 +214,8 @@ CREATE TABLE `order_product` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CHECK (`price` >= 0),
-    CHECK (`quantity` >= 0)
+    CONSTRAINT `order_product-check-price` CHECK ((`price` >= 0)),
+    CONSTRAINT `order_product-check-quantity` CHECK ((`quantity` >= 0))
 );
 
 DROP TABLE IF EXISTS `notification`;
@@ -244,24 +245,24 @@ CREATE TABLE `config` (
 
 -- Create FOREIGN KEY constraints  
 
-ALTER TABLE `product_image` ADD FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);
+ALTER TABLE `product_image` ADD CONSTRAINT `product_image-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);
 
-ALTER TABLE `product_category` ADD FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);
-ALTER TABLE `product_category` ADD FOREIGN KEY (`category_id`) REFERENCES `category`(`id`);
+ALTER TABLE `product_category` ADD CONSTRAINT `product_category-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);
+ALTER TABLE `product_category` ADD CONSTRAINT `product_category-fk-category_id-category-id` FOREIGN KEY (`category_id`) REFERENCES `category`(`id`);
 
-ALTER TABLE `subscription` ADD FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`);
+ALTER TABLE `subscription` ADD CONSTRAINT `subscription-fk-customer_id-customer-id` FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`);
 
-ALTER TABLE `order` ADD FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`);
+ALTER TABLE `order` ADD CONSTRAINT `order-fk-customer_id-customer-id` FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`);
 
-ALTER TABLE `order_coupon` ADD FOREIGN KEY (`order_id`) REFERENCES `order`(`id`);
-ALTER TABLE `order_coupon` ADD FOREIGN KEY (`coupon_id`) REFERENCES `coupon`(`id`);
+ALTER TABLE `order_coupon` ADD CONSTRAINT `order_coupon-fk-order_id-order-id` FOREIGN KEY (`order_id`) REFERENCES `order`(`id`);
+ALTER TABLE `order_coupon` ADD CONSTRAINT `order_coupon-fk-coupon_id-coupon-id` FOREIGN KEY (`coupon_id`) REFERENCES `coupon`(`id`);
 
-ALTER TABLE `order_product` ADD FOREIGN KEY (`order_id`) REFERENCES `order`(`id`);
-ALTER TABLE `order_product` ADD FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);
+ALTER TABLE `order_product` ADD CONSTRAINT `order_product-fk-order_id-order-id` FOREIGN KEY (`order_id`) REFERENCES `order`(`id`);
+ALTER TABLE `order_product` ADD CONSTRAINT `order_product-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);
 
-ALTER TABLE `notification` ADD FOREIGN KEY (`employee_id`) REFERENCES `employee`(`id`);
+ALTER TABLE `notification` ADD CONSTRAINT `notification-fk-employee_id-employee-id` FOREIGN KEY (`employee_id`) REFERENCES `employee`(`id`);
 
-ALTER TABLE `sale_event` ADD FOREIGN KEY (`coupon_id`) REFERENCES `coupon`(`id`); -- 1:1 relationship
+ALTER TABLE `sale_event` ADD CONSTRAINT `sale_event-fk-coupon_id-coupon-id` FOREIGN KEY (`coupon_id`) REFERENCES `coupon`(`id`); -- 1:1 relationship
 
 -- Enable FOREIGN KEY check
 

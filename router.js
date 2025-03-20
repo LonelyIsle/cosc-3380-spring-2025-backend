@@ -1,9 +1,12 @@
 import httpResp from "./helpers/httpResp.js";
 import url from "./helpers/url.js"
+import utils from "./helpers/utils.js";
+
+const DEFAULT_HANDLER = (req, res) => {};
+const REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/;
+const METHODS = ["GET", "PUT", "PATCH" , "POST", "DELETE"];
 
 class RequestHandler {
-    DEFAULT_LAST_HANDLER = (req, res) => {};
-
     push(handler) {
         this.handlers.push(handler);
         this.compose();
@@ -26,14 +29,14 @@ class RequestHandler {
         if (typeof composition === "function") {
             this.lastHandler = composition;
         } else {
-            this.lastHandler = this.DEFAULT_LAST_HANDLER;
+            this.lastHandler = DEFAULT_HANDLER;
         }
         this.composition(req, res);
     }
 
-    constructor(handlers) {
-        this.handlers = handlers == null ? [] : handlers;
-        this.lastHandler = this.DEFAULT_LAST_HANDLER;
+    constructor(handlers = []) {
+        this.handlers = handlers;
+        this.lastHandler = DEFAULT_HANDLER;
         this.compose();
     }
 }
@@ -48,9 +51,6 @@ class Route {
 }
 
 class Router {
-    REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/;
-    METHODS = ["GET", "PUT", "PATCH" , "POST", "DELETE"];
-
     get(pathname, ...handlers) {
         this.routes.push(new Route("GET", pathname, ...handlers));
     }
@@ -72,7 +72,7 @@ class Router {
     }
 
     all(pathname, ...handlers) {
-        for (let method of this.METHODS) {
+        for (let method of METHODS) {
             this.routes.push(new Route(method, pathname, ...handlers));
         }
     }
@@ -86,7 +86,7 @@ class Router {
         let urlParams = new URLSearchParams(urlObj.search);
         let result = {}
         for(let [key, value] of urlParams.entries()) { 
-            result[key] = value;
+            result[key] = utils.parseToPrimitive(value);
         }
         return result;
     }
@@ -97,10 +97,10 @@ class Router {
         const routePathnames = route.pathname.slice(1).split("/");
         let result = {};
         for (let [i, pathname] of routePathnames.entries()) {
-            const regex = this.REQ_PARAM_REGEX;
+            const regex = REQ_PARAM_REGEX;
             const found = pathname.match(regex);
             if (found !== null) {
-                result[pathname.slice(1)] = decodeURI(reqPaths[i]);
+                result[pathname.slice(1)] = utils.parseToPrimitive(decodeURI(reqPaths[i]));
             }
         }
         return result
@@ -123,7 +123,7 @@ class Router {
             return false;
         }
         for (let [i, pathname] of routePathnamess.entries()) {
-            const found = pathname.match(this.REQ_PARAM_REGEX);
+            const found = pathname.match(REQ_PARAM_REGEX);
             if (found === null && (routePathnamess[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
                 return false;
             }

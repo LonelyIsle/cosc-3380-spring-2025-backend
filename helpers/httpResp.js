@@ -1,40 +1,50 @@
+import { HttpError } from "./error.js";
+
 class Success {
-    static 200(req, res, message, data) {
+    static 200(req, res, data) {
         res.setHeader("content-type", "application/json");
         res.statusCode = 200;
         res.end(JSON.stringify({
-            message,
+            message: "success",
             data
         }));
     }
 }
 
 class Error {
-    static unhandled(req, res, error) {
+    static default(req, res, error) {
+        if (error instanceof HttpError && error.statusCode && Error[error.statusCode]) {
+            Error[error.statusCode](req, res, error);
+        } else {
+            Error[500](req, res, error);
+        }
+    }
+
+    static 500(req, res, error) {
         res.setHeader("content-type", "application/json");
         res.statusCode = 500;
         console.error(`error :: ${error.stack}`);
         res.end(JSON.stringify({
-            message: "Internal Server Error",
-            data: error.stack
+            message: (error && error.message) || "Internal Server Error",
+            data: null
         }));
     }
 
-    static 404(req, res) {
+    static 404(req, res, error) {
         res.setHeader("content-type", "application/json");
         res.statusCode = 404;
         res.end(JSON.stringify({
-            message: "Not Found",
-            data: {}
+            message: (error && error.message) || "Not Found",
+            data: null
         }));
     }
 
-    static 400(req, res) {
+    static 400(req, res, error) {
         res.setHeader("content-type", "application/json");
         res.statusCode = 400;
         res.end(JSON.stringify({
-            message: "Bad Request",
-            data: {}
+            message: (error && error.message) || "Bad Request",
+            data: null
         }));
     }
 }

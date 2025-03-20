@@ -1,4 +1,4 @@
-import { URL, URLSearchParams } from "url"
+import { URL } from "url"
 
 function getURLObj(url) {
     if (!URL.canParse(url)) {

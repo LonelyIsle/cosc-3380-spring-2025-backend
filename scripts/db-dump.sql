@@ -74,7 +74,7 @@ CREATE TABLE `coupon` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
-  CONSTRAINT `coupon_chk_1` CHECK ((`value` >= 0))
+  CONSTRAINT `coupon-check-value` CHECK ((`value` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -113,7 +113,7 @@ CREATE TABLE `customer` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  CONSTRAINT `customer_chk_1` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
+  CONSTRAINT `customer-check-email` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -139,7 +139,7 @@ CREATE TABLE `employee` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  CONSTRAINT `employee_chk_1` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
+  CONSTRAINT `employee-check-email` CHECK (regexp_like(`email`,_utf8mb3'^.+@.+$'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -162,8 +162,8 @@ CREATE TABLE `notification` (
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `employee_id` (`employee_id`),
-  CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`)
+  KEY `notification-fk-employee_id-employee-id` (`employee_id`),
+  CONSTRAINT `notification-fk-employee_id-employee-id` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -201,8 +201,8 @@ CREATE TABLE `order` (
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `customer_id` (`customer_id`),
-  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
+  KEY `order-fk-customer_id-customer-id` (`customer_id`),
+  CONSTRAINT `order-fk-customer_id-customer-id` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -224,11 +224,11 @@ CREATE TABLE `order_coupon` (
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `order_id` (`order_id`),
-  KEY `coupon_id` (`coupon_id`),
-  CONSTRAINT `order_coupon_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
-  CONSTRAINT `order_coupon_ibfk_2` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`),
-  CONSTRAINT `order_coupon_chk_1` CHECK ((`value` >= 0))
+  KEY `order_coupon-fk-order_id-order-id` (`order_id`),
+  KEY `order_coupon-fk-coupon_id-coupon-id` (`coupon_id`),
+  CONSTRAINT `order_coupon-fk-coupon_id-coupon-id` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`),
+  CONSTRAINT `order_coupon-fk-order_id-order-id` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
+  CONSTRAINT `order_coupon-check-value` CHECK ((`value` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -250,12 +250,12 @@ CREATE TABLE `order_product` (
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `order_id` (`order_id`),
-  KEY `product_id` (`product_id`),
-  CONSTRAINT `order_product_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
-  CONSTRAINT `order_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
-  CONSTRAINT `order_product_chk_1` CHECK ((`price` >= 0)),
-  CONSTRAINT `order_product_chk_2` CHECK ((`quantity` >= 0))
+  KEY `order_product-fk-order_id-order-id` (`order_id`),
+  KEY `order_product-fk-product_id-product-id` (`product_id`),
+  CONSTRAINT `order_product-fk-order_id-order-id` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`),
+  CONSTRAINT `order_product-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
+  CONSTRAINT `order_product-check-price` CHECK ((`price` >= 0)),
+  CONSTRAINT `order_product-check-quantity` CHECK ((`quantity` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -274,15 +274,16 @@ CREATE TABLE `product` (
   `threshold` int NOT NULL DEFAULT '-1',
   `name` longtext NOT NULL,
   `description` longtext,
-  `thumbnail_image` longtext,
+  `thumbnail_image` longblob,
+  `thumbnail_image_extension` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `sku` (`sku`),
-  CONSTRAINT `product_chk_1` CHECK ((`price` >= 0)),
-  CONSTRAINT `product_chk_2` CHECK ((`quantity` >= 0))
+  CONSTRAINT `product-check-price` CHECK ((`price` >= 0)),
+  CONSTRAINT `product-check-quantity` CHECK ((`quantity` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -302,10 +303,10 @@ CREATE TABLE `product_category` (
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `product_id` (`product_id`),
-  KEY `category_id` (`category_id`),
-  CONSTRAINT `product_category_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
-  CONSTRAINT `product_category_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`)
+  KEY `product_category-fk-product_id-product-id` (`product_id`),
+  KEY `product_category-fk-category_id-category-id` (`category_id`),
+  CONSTRAINT `product_category-fk-category_id-category-id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`),
+  CONSTRAINT `product_category-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -319,7 +320,7 @@ DROP TABLE IF EXISTS `product_image`;
 CREATE TABLE `product_image` (
   `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int DEFAULT NULL,
-  `name` longtext NOT NULL,
+  `image` longblob NOT NULL,
   `extension` varchar(255) NOT NULL,
   `order` int NOT NULL DEFAULT '-1',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -327,8 +328,8 @@ CREATE TABLE `product_image` (
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `product_id` (`product_id`),
-  CONSTRAINT `product_image_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+  KEY `product_image-fk-product_id-product-id` (`product_id`),
+  CONSTRAINT `product_image-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -352,7 +353,7 @@ CREATE TABLE `sale_event` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `coupon_id` (`coupon_id`),
-  CONSTRAINT `sale_event_ibfk_1` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`)
+  CONSTRAINT `sale_event-fk-coupon_id-coupon-id` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -384,9 +385,9 @@ CREATE TABLE `subscription` (
   `deleted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `customer_id` (`customer_id`),
-  CONSTRAINT `subscription_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
-  CONSTRAINT `subscription_chk_1` CHECK ((`price` >= 0))
+  KEY `subscription-fk-customer_id-customer-id` (`customer_id`),
+  CONSTRAINT `subscription-fk-customer_id-customer-id` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
+  CONSTRAINT `subscription-check-price` CHECK ((`price` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -407,4 +408,4 @@ CREATE TABLE `subscription` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-13 18:01:08
+-- Dump completed on 2025-03-19 18:31:48
