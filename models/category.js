@@ -44,32 +44,73 @@ function validate(category) {
     }
 }
 
-async function count(conn, query) {
-    let {
-        limit = 10,
-        offset = 0
-    } = query;
+function queryBuilder(query) {
+    let queryString = ['WHERE'];
+    let countQueryString = "";
+    let params = [];
+    // WHERE
+    if (query.q) {
+        queryString.push("`name` LIKE ? AND");
+        params.push('%' + query.q.toString().trim() + '%');
+    }
+    queryString.push('`is_deleted` = ?');
+    params.push(false);
+    // ORDER BY
+    queryString.push("ORDER BY");
+    switch(query.sort_by && query.sort_by.toLowerCase()) {
+        case "name-asc":
+            queryString.push('`name`', 'ASC');
+            break;
+        case "name-dsc":
+            queryString.push('`name`', 'DESC');
+            break;
+        case "created_at-asc":
+            queryString.push('`created_at`', 'ASC');
+            break;
+        case "created_at-dsc":
+            queryString.push('`created_at`', 'DESC');
+            break;
+        default:
+            queryString.push('`name`', 'ASC');
+            break
+    }
+    // LIMIT & OFFSET
+    countQueryString = queryString.join(" ");
+    queryString.push("LIMIT ?");
+    params.push(query.limit ? query.limit : 10);
+    queryString.push("OFFSET ?");
+    params.push(query.offset ? query.offset : 0);
+    return {
+        queryString: queryString.join(" "),
+        countQueryString,
+        params: params
+    }
+}
+
+async function count(conn, countQueryString, params) {
     const [rows, fields] = await conn.query(
-        'SELECT COUNT(*) FROM `' + TABLE_NAME + '` WHERE `is_deleted` = ? ORDER BY `name` LIMIT ? OFFSET ?',
-        [false, limit, offset]
+        'SELECT COUNT(*) FROM `' + TABLE_NAME + '` ' + countQueryString,
+        params
     );
-    return rows[0]["COUNT(*)"];
+    return (rows[0] && rows[0]["COUNT(*)"]) || 0;
 }
 
 async function getAll(conn, query) {
-    let {
-        limit = 10,
-        offset = 0
-    } = query;
-    const total = await count(conn, query);
+    query = utils.objectAssign(
+        ["q", "sort_by", "limit", "offset"],
+        { limit: 10, offset: 0 },
+        query
+    );
+    let { queryString, countQueryString, params } = queryBuilder(query);
+    const total = await count(conn, countQueryString, params);
     const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + TABLE_NAME + '` WHERE `is_deleted` = ? ORDER BY `name` LIMIT ? OFFSET ?',
-        [false, limit, offset]
+        'SELECT * FROM `' + TABLE_NAME + '` ' + queryString,
+        params
     );
     return {
         total,
-        limit,
-        offset,
+        limit: query.limit,
+        offset: query.offset,
         rows
     };
 }
