@@ -36,6 +36,7 @@ async function tx(req, res, func) {
 }
 
 export default {
+    config,
     pool,
     tx
 };

@@ -4,6 +4,7 @@ import httpResp from "./helpers/httpResp.js";
 import corsHandler from "./helpers/cors.js";
 import bodyParser from "./helpers/bodyParser.js";
 
+import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 
 const server = http.createServer();
@@ -13,20 +14,9 @@ router.use(corsHandler);
 router.use(bodyParser.json);
 
 // Test
-router.get("/echo/:message", (req, res) => {
-    httpResp.Success[200](req, res, {
-        query: {...req.query},
-        param: {... req.param}
-    });
-});
-
-router.post("/echo/:message", (req, res) => {
-    httpResp.Success[200](req, res, {
-        query: {...req.query},
-        param: {... req.param},
-        body: {...req.body}
-    });
-});
+router.get("/test/db", testController.testDb);
+router.get("/test/echo/:message", testController.echoGet);
+router.post("/test/echo/:message", testController.echoPost);
 
 // Category
 router.get("/category", categoryController.getAll);
