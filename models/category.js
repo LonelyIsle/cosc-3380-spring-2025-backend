@@ -1,5 +1,6 @@
 import dataType from "./dataType.js";
 import utils from "../helpers/utils.js"
+import { HttpError } from "../helpers/error.js";
 
 const TABLE_NAME = "category";
 const ATTRIBUTES = {
@@ -43,30 +44,87 @@ function validate(category) {
     }
 }
 
+async function count(conn, query) {
+    let {
+        limit = 10,
+        offset = 0
+    } = query;
+    const [rows, fields] = await conn.query(
+        'SELECT COUNT(*) FROM `' + TABLE_NAME + '` WHERE `is_deleted` = ? ORDER BY `name` LIMIT ? OFFSET ?',
+        [false, limit, offset]
+    );
+    return rows[0]["COUNT(*)"];
+}
+
+async function getAll(conn, query) {
+    let {
+        limit = 10,
+        offset = 0
+    } = query;
+    const total = await count(conn, query);
+    const [rows, fields] = await conn.query(
+        'SELECT * FROM `' + TABLE_NAME + '` WHERE `is_deleted` = ? ORDER BY `name` LIMIT ? OFFSET ?',
+        [false, limit, offset]
+    );
+    return {
+        total,
+        limit,
+        offset,
+        rows
+    };
+}
+
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     validate(data);
-    const [rows, fields] = await conn.execute(
-        'SELECT * FROM `category` WHERE `id` = ?',
-        [data.id]
+    const [rows, fields] = await conn.query(
+        'SELECT * FROM `' + TABLE_NAME + '` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
     );
-    return { rows, fields };
+    return rows[0] || null;
 }
 
 async function createOne(conn, category) {
     let data = utils.objectAssign(["name", "description"], category);
     validate(data);
-    const [rows, fields] = await conn.execute(
-        'INSERT INTO `category`(`name`, `description`) VALUES (?, ?)',
+    const [rows, fields] = await conn.query(
+        'INSERT INTO `' + TABLE_NAME + '`(`name`, `description`) VALUES (?, ?)',
         [data.name, data.description]
     );
-    return { rows, fields };
+    return rows.insertId;
+}
+
+async function updateOne(conn, newCategory) {
+    let oldCategory = await getOne(conn, newCategory.id);
+    if (!oldCategory) {
+        throw new HttpError({statusCode: 400, message: `category ${newCategory.id} not found`});
+    }
+    let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
+    validate(data);
+    const [rows, fields] = await conn.query(
+        'UPDATE `' + TABLE_NAME + '` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.name, data.description, data.id, false]
+    );
+    return newCategory.id;
+}
+
+async function deleteOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    validate(data);
+    const [rows, fields] = await conn.query(
+        'UPDATE `' + TABLE_NAME + '` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [true, new Date(), id, false]
+    );
+    return rows;
 }
 
 export default {
     TABLE_NAME,
     ATTRIBUTES,
     validate,
+    getAll,
+    getOne,
     createOne,
-    getOne
+    updateOne,
+    deleteOne
 }

@@ -1,5 +1,6 @@
 import httpResp from "./helpers/httpResp.js";
 import url from "./helpers/url.js"
+import utils from "./helpers/utils.js";
 
 const DEFAULT_HANDLER = (req, res) => {};
 const REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/;
@@ -85,7 +86,7 @@ class Router {
         let urlParams = new URLSearchParams(urlObj.search);
         let result = {}
         for(let [key, value] of urlParams.entries()) { 
-            result[key] = value;
+            result[key] = utils.parseToPrimitive(value);
         }
         return result;
     }
@@ -99,7 +100,7 @@ class Router {
             const regex = REQ_PARAM_REGEX;
             const found = pathname.match(regex);
             if (found !== null) {
-                result[pathname.slice(1)] = decodeURI(reqPaths[i]);
+                result[pathname.slice(1)] = utils.parseToPrimitive(decodeURI(reqPaths[i]));
             }
         }
         return result

@@ -16,6 +16,25 @@ function objectAssign(keys, ...objs) {
     return _objectAssign(keys, nullObj, ...objs);
 }
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function parseToPrimitive(val) {
+    let temp = null;
+    if (val.indexOf(".") > -1) {
+        temp = parseFloat(val);
+    } else {
+        temp = parseInt(val);
+    } 
+    if (!isNaN(temp)) {
+        return temp;
+    }
+    return val;
+}
+
 export default {
-    objectAssign
+    objectAssign,
+    timeout,
+    parseToPrimitive
 }

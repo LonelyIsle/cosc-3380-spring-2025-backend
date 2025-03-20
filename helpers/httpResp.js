@@ -26,7 +26,7 @@ class Error {
         console.error(`error :: ${error.stack}`);
         res.end(JSON.stringify({
             message: (error && error.message) || "Internal Server Error",
-            data: {}
+            data: null
         }));
     }
 
@@ -35,7 +35,7 @@ class Error {
         res.statusCode = 404;
         res.end(JSON.stringify({
             message: (error && error.message) || "Not Found",
-            data: {}
+            data: null
         }));
     }
 
@@ -44,7 +44,7 @@ class Error {
         res.statusCode = 400;
         res.end(JSON.stringify({
             message: (error && error.message) || "Bad Request",
-            data: {}
+            data: null
         }));
     }
 }
