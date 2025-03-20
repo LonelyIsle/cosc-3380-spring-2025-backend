@@ -6,6 +6,7 @@
     "start": "node --env-file-if-exists=$npm_config_env.env app.js"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "mysql2": "^3.14.0"
   }
 }
