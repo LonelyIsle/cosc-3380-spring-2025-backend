@@ -1,7 +1,7 @@
 function _objectAssign(keys, ...objs) {
     return objs.reduce((acc, curr) => {
         for (let key of keys) {
-            if (curr[key] !== undefined) {
+            if (curr[key] !== undefined && curr[key] !== "") {
                 acc[key] = curr[key];
             }
         }
