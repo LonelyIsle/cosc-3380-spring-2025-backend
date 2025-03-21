@@ -8,6 +8,7 @@ import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 
 import pool from "./controllers/db.js";
+console.log("=== Azure Web App Startup: app.js running ===");
 
 pool.query("SELECT 1", (err, result) => {
   if (err) {
@@ -41,6 +42,10 @@ router.patch("/category/:id", categoryController.updateOne);
 router.delete("/category/:id", categoryController.deleteOne);
 
 // *
+router.get("/health", (req, res) => {
+  res.statusCode = 200;
+  res.end("Healthy");
+});
 router.all("/*",  httpResp.Error[404]);
 
 server.on("request", (req, res) => {
