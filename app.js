@@ -49,20 +49,18 @@ router.all("/*", httpResp.Error[404]);
 // ✅ Ensure a working DB connection
 (async () => {
   try {
-    const connection = await pool.getConnection(); // Get connection from pool
-    const [rows] = await connection.query("SELECT 1"); // Execute test query
-    connection.release(); // Always release the connection back to the pool
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query("SELECT 1");
+    connection.release();
 
-    console.log("✅ Database connection successful:", rows);
+    console.log("✅ DB connected:", rows);
 
-    // Start the server
     const server = http.createServer(router.handle.bind(router));
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-
   } catch (err) {
-    console.error("❌ Database connection failed:", err);
+    console.error("❌ Startup failed:", err);
     process.exit(1);
   }
 })();
