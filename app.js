@@ -45,23 +45,22 @@ router.delete("/category/:id", categoryController.deleteOne);
 // Catch-all for 404s
 router.all("/*", httpResp.Error[404]);
 
-// ✅ Database Connection & Start Server
-// ✅ Ensure a working DB connection
+// ✅ DB check + Start server
 (async () => {
   try {
-   // const connection = await pool.getConnection();
+    const connection = await pool.getConnection();
     const [rows] = await connection.query("SELECT 1");
     connection.release();
 
-    console.log("✅ DB connected:", rows);
+    console.log("✅ Database connection successful:", rows);
 
     const server = http.createServer(router.handle.bind(router));
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
+
   } catch (err) {
-    console.error("❌ Startup failed:", err);
+    console.error("❌ Database connection failed:", err);
     process.exit(1);
   }
 })();
-
