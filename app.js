@@ -7,6 +7,11 @@ import bodyParser from "./helpers/bodyParser.js";
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 
+console.log("DB_HOST:", process.env.DB_HOST);
+console.log("DB_USER:", process.env.DB_USER);
+console.log("DB_SSL:", process.env.DB_SSL);
+console.log("Server running on PORT:", process.env.PORT || 3000);
+
 const server = http.createServer();
 const router = new Router();
 
