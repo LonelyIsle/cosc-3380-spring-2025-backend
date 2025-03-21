@@ -48,12 +48,13 @@ router.all("/*", httpResp.Error[404]);
 // ✅ DB check + Start server
 (async () => {
   try {
+    console.log("🔌 Attempting DB connection...");
     const connection = await pool.getConnection();
     const [rows] = await connection.query("SELECT 1");
     connection.release();
-
     console.log("✅ Database connection successful:", rows);
 
+    // 🧠 Only create and start the server **after** successful DB connection
     const server = http.createServer(router.handle.bind(router));
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
