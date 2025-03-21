@@ -7,8 +7,8 @@ import bodyParser from "./helpers/bodyParser.js";
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 
-import pool from "./controllers/db.js";
-
+import * as db from "./controllers/db.js";
+const pool = db.default;  // Ensure `default` is accessed
 pool.query("SELECT 1", (err, result) => {
   if (err) {
     console.error("❌ DB connection failed on startup:", err);
