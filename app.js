@@ -7,6 +7,16 @@ import bodyParser from "./helpers/bodyParser.js";
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 
+import pool from "./controllers/db.js";
+
+pool.query("SELECT 1", (err, result) => {
+  if (err) {
+    console.error("❌ DB connection failed on startup:", err);
+  } else {
+    console.log("✅ DB connection verified on Azure Web App startup.");
+  }
+});
+
 console.log("DB_HOST:", process.env.DB_HOST);
 console.log("DB_USER:", process.env.DB_USER);
 console.log("DB_SSL:", process.env.DB_SSL);
