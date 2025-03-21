@@ -10,6 +10,12 @@ import categoryController from "./controllers/category.js";
 import pool from "./controllers/db.js";
 
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error("❌ JWT_SECRET is not defined in environment variables!");
+  process.exit(1);
+}
 
 // ✅ Confirm ENV values
 console.log("DB_HOST:", process.env.DB_HOST);
