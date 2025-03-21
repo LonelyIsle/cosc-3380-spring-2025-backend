@@ -25,6 +25,7 @@ console.log("Using PORT:", PORT);
     console.log("✅ Database connection successful:", rows);
   } catch (err) {
     console.error("❌ Database connection failed:", err);
+    process.exit(1); // only exit if DB fails
   }
 })();
 
@@ -51,13 +52,13 @@ router.delete("/category/:id", categoryController.deleteOne);
 router.all("/*",  httpResp.Error[404]);
 
 // Start server and log
-server.on("request", (req, res) => {
-    try {
-        console.log(`server :: ${req.method} - ${req.url}`);
-        router.handle(req, res); 
-    } catch(e) {
-        httpResp.Error.default(req, res, e);
-    }
+const server = http.createServer((req, res) => {
+  try {
+    console.log(`server :: ${req.method} - ${req.url}`);
+    router.handle(req, res);
+  } catch (e) {
+    httpResp.Error.default(req, res, e);
+  }
 });
 
 server.listen(PORT, "0.0.0.0", () => {
