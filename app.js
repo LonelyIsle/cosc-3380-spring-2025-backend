@@ -56,7 +56,7 @@ server.on("request", (req, res) => {
         httpResp.Error.default(req, res, e);
     }
 });
-
+console.log("Preparing to start server...");
 server.listen(process.env.PORT || 3000, () => {
     console.log(`server :: listening port ${process.env.PORT || 3000}`);
 });
