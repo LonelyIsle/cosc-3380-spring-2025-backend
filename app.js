@@ -3,20 +3,25 @@ import Router from "./router.js";
 import httpResp from "./helpers/httpResp.js";
 import corsHandler from "./helpers/cors.js";
 import bodyParser from "./helpers/bodyParser.js";
-
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 
-import pool from "./controllers/db.js";
 console.log("=== Azure Web App Startup: app.js running ===");
+let pool;
 
-pool.query("SELECT 1", (err, result) => {
-  if (err) {
-    console.error("❌ DB connection failed on startup:", err);
-  } else {
-    console.log("✅ DB connection verified on Azure Web App startup.");
-  }
-});
+try {
+  pool = (await import("./controllers/db.js")).default;
+
+  pool.query("SELECT 1", (err, result) => {
+    if (err) {
+      console.error("❌ DB connection failed on startup:", err);
+    } else {
+      console.log("✅ DB connection verified on Azure Web App startup.");
+    }
+  });
+} catch (err) {
+  console.error("❌ Failed to initialize database pool:", err);
+}
 
 console.log("DB_HOST:", process.env.DB_HOST);
 console.log("DB_USER:", process.env.DB_USER);
