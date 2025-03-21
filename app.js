@@ -53,17 +53,15 @@ router.all("/*", httpResp.Error[404]);
     connection.release(); // Release connection back to pool
 
     console.log("✅ Database connection successful:", rows);
-  } catch (err) {
-    console.error("❌ Database connection failed:", err);
-    process.exit(1);
-  }
-})();
 
+    // Start Server AFTER DB connection is confirmed
+    const server = http.createServer(router.handle.bind(router));
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
+
   } catch (err) {
     console.error("❌ Database connection failed:", err);
     process.exit(1);
   }
-})();
+})(); // <-- ✅ This is the correct closing parenthesis for the async function
