@@ -7,15 +7,16 @@ import bodyParser from "./helpers/bodyParser.js";
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 
-import * as db from "./controllers/db.js";
-const pool = db.default;  // Ensure `default` is accessed
-pool.query("SELECT 1", (err, result) => {
-  if (err) {
-    console.error("❌ DB connection failed on startup:", err);
-  } else {
-    console.log("✅ DB connection verified on Azure Web App startup.");
+import pool from "./controllers/db.js";
+
+(async () => {
+  try {
+    const [rows] = await pool.query("SELECT 1");
+    console.log("✅ Database connection successful:", rows);
+  } catch (err) {
+    console.error("❌ Database connection failed:", err);
   }
-});
+})();
 
 console.log("DB_HOST:", process.env.DB_HOST);
 console.log("DB_USER:", process.env.DB_USER);
