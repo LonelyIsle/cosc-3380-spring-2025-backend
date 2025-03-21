@@ -6,8 +6,10 @@ import corsHandler from "./helpers/cors.js";
 import bodyParser from "./helpers/bodyParser.js";
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
-import pool from "./controllers/db.js";
 import authenticateToken from "./helpers/auth.js";
+
+import db from "./controllers/db.js";
+const pool = db.pool;
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
