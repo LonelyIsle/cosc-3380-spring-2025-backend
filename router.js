@@ -1,10 +1,10 @@
 import httpResp from "./helpers/httpResp.js";
-import url from "./helpers/url.js"
+import url from "./helpers/url.js";
 import utils from "./helpers/utils.js";
 
 const DEFAULT_HANDLER = (req, res) => {};
-const REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/;
-const METHODS = ["GET", "PUT", "PATCH" , "POST", "DELETE"];
+const REQ_PARAM_REGEX = /:[a-zA-Z0-9%]+/;
+const METHODS = ["GET", "PUT", "PATCH", "POST", "DELETE"];
 
 class RequestHandler {
     push(handler) {
@@ -17,7 +17,7 @@ class RequestHandler {
             this.composition = this.handlers.reduceRight(
                 (next, handler) => {
                     return (req, res) => handler(req, res, () => next(req, res));
-                }, 
+                },
                 (req, res) => this.lastHandler(req, res)
             );
         } else {
@@ -78,19 +78,19 @@ class Router {
     }
 
     use(handler) {
-        this.handler.push(handler);
+        this.middlewareHandlers.push(handler);
     }
 
     getReqQuery(req) {
         let urlObj = req.urlObj;
         let urlParams = new URLSearchParams(urlObj.search);
-        let result = {}
-        for(let [key, value] of urlParams.entries()) { 
+        let result = {};
+        for (let [key, value] of urlParams.entries()) {
             result[key] = utils.parseToPrimitive(value);
         }
         return result;
     }
-    
+
     getReqParam(req, route) {
         const reqPathname = req.urlObj.pathname;
         const reqPaths = reqPathname.slice(1).split("/");
@@ -103,11 +103,11 @@ class Router {
                 result[pathname.slice(1)] = utils.parseToPrimitive(decodeURI(reqPaths[i]));
             }
         }
-        return result
+        return result;
     }
 
     match(req, route) {
-        if (req.method !== route.method ) {
+        if (req.method !== route.method) {
             return false;
         }
         if (route.pathname === "/*") {
@@ -118,13 +118,13 @@ class Router {
         }
         const reqPathname = req.urlObj.pathname;
         const reqPathnames = reqPathname.slice(1).split("/");
-        const routePathnamess = route.pathname.slice(1).split("/");
-        if (reqPathnames.length != routePathnamess.length) {
+        const routePathnames = route.pathname.slice(1).split("/");
+        if (reqPathnames.length !== routePathnames.length) {
             return false;
         }
-        for (let [i, pathname] of routePathnamess.entries()) {
+        for (let [i, pathname] of routePathnames.entries()) {
             const found = pathname.match(REQ_PARAM_REGEX);
-            if (found === null && (routePathnamess[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
+            if (found === null && (routePathnames[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
                 return false;
             }
         }
@@ -135,22 +135,39 @@ class Router {
         req.urlObj = url.getURLObj(req.url);
         req.query = this.getReqQuery(req);
         let matchedRoute = null;
-        for(let route of this.routes) {
+
+        for (let route of this.routes) {
             if (this.match(req, route)) {
                 req.param = this.getReqParam(req, route);
                 matchedRoute = route;
                 break;
             }
         }
+
         if (matchedRoute === null) {
             this.handler.execute(req, res, httpResp.Error[404]);
         } else {
-            this.handler.execute(req, res, matchedRoute.handler.composition);
+            // ✅ Run global middleware before route handler
+            const middlewareChain = [...this.middlewareHandlers, () => {
+                matchedRoute.handler.composition(req, res);
+            }];
+
+            // ✅ Compose middleware execution
+            let next = () => {};
+            for (let i = middlewareChain.length - 1; i >= 0; i--) {
+                const current = middlewareChain[i];
+                next = ((nextFunc) => {
+                    return (req, res) => current(req, res, () => nextFunc(req, res));
+                })(next);
+            }
+
+            next(req, res);
         }
     }
 
     constructor() {
         this.routes = [];
+        this.middlewareHandlers = []; // ✅ Store global middleware handlers
         this.handler = new RequestHandler();
     }
 }
