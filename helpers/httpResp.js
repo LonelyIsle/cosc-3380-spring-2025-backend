@@ -39,6 +39,15 @@ class Error {
         }));
     }
 
+    static 401(req, res, error) {
+        res.setHeader("content-type", "application/json");
+        res.statusCode = 401;
+        res.end(JSON.stringify({
+            message: (error && error.message) || "Unauthorized",
+            data: null
+        }));
+    }
+
     static 400(req, res, error) {
         res.setHeader("content-type", "application/json");
         res.statusCode = 400;

@@ -4,15 +4,15 @@ import { Table, DataType } from "../helpers/table.js";
 
 const categoryTable = new Table("category", {
     "id": {
-        type: DataType.INT(),
+        type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
     "name": {
-        type: DataType.LONGTEXT(),
+        type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
     "description": {
-        type: DataType.LONGTEXT(),
+        type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
     },
     "created_at": {
@@ -34,19 +34,9 @@ const categoryTable = new Table("category", {
 }, {
     sort: ["name", "created_at"],
     filter: {
-        "name": DataType.LONGTEXT()
+        "name": DataType.STRING()
     }
 });
-
-function validate(category) {
-    for (let attr in this.attribute) {
-        if (attr in category) {
-            for (let key in this.attribute[attr]) {
-                this.attribute[attr][key].validate(category[attr], attr);
-            }
-        }
-    }
-}
 
 async function count(conn, countQueryStr, params) {
     const [rows, fields] = await conn.query(
@@ -59,8 +49,6 @@ async function count(conn, countQueryStr, params) {
 async function getAll(conn, query) {
     let { parsedQuery, queryStr, countQueryStr, params } = categoryTable.getQueryStr(query);
     const total = await count(conn, countQueryStr, params);
-    console.log('SELECT COUNT(*) FROM `' + categoryTable.name + '` ' + queryStr);
-    console.log(params);
     const [rows, fields] = await conn.query(
         'SELECT * FROM `' + categoryTable.name + '` ' + queryStr,
         params
@@ -75,7 +63,7 @@ async function getAll(conn, query) {
 
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
-    validate(data);
+    categoryTable.validate(data);
     const [rows, fields] = await conn.query(
         'SELECT * FROM `' + categoryTable.name + '` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
@@ -85,7 +73,7 @@ async function getOne(conn, id) {
 
 async function createOne(conn, category) {
     let data = utils.objectAssign(["name", "description"], category);
-    validate(data);
+    categoryTable.validate(data);
     const [rows, fields] = await conn.query(
         'INSERT INTO `' + categoryTable.name + '`(`name`, `description`) VALUES (?, ?)',
         [data.name, data.description]
@@ -99,7 +87,7 @@ async function updateOne(conn, newCategory) {
         throw new HttpError({statusCode: 400, message: `category ${newCategory.id} not found`});
     }
     let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
-    validate(data);
+    categoryTable.validate(data);
     const [rows, fields] = await conn.query(
         'UPDATE `' + categoryTable.name + '` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.name, data.description, data.id, false]
@@ -109,7 +97,7 @@ async function updateOne(conn, newCategory) {
 
 async function deleteOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
-    validate(data);
+    categoryTable.validate(data);
     const [rows, fields] = await conn.query(
         'UPDATE `' + categoryTable.name + '` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
         [true, new Date(), id, false]

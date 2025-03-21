@@ -10,7 +10,7 @@ class ARRAY {
     }
 }
 
-class INT {
+class NUMBER {
     getFilterQuery(key, val) {
         let _val = val.split(":");
         if (_val.length !== 2 || (isNaN(_val[0]) && isNaN(_val[1]))) {
@@ -33,40 +33,7 @@ class INT {
     constructor() {}
 }
 
-class FLOAT {
-    getFilterQuery(key, val) {
-        let _val = val.split(":");
-        if (_val.length !== 2 || (isNaN(_val[0]) && isNaN(_val[1]))) {
-            return { error: new Error("invalid filter") };
-        }
-        let min = utils.parseStr(_val[0]);
-        let max = utils.parseStr(_val[1]);
-        if (isNaN(min)) {
-            return { op: "<", min: null, max, query: '`' + key + '`' + " < ?", params: [max]};
-        } 
-        if (isNaN(max)) {
-            return { op: ">", min, max: null, query: '`' + key + '`' + " > ?", params: [min]};
-        }
-        if (min == max) {
-            return { op: "=", min, max, query: '`' + key + '`' + " = ?", params: [min]};
-        }
-        return { op: "BETWEEN", min, max, query: '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
-    }
-    validate(val, attr = val) {
-        let _val = val.toString();
-        let [left, right] = _val.split(".");
-        if (left.length > (this.size - this.d) || right.length > (this.d)) {
-            throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
-        }
-        throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
-    }
-    constructor(size = 10, d = 0) {
-        this.size = size;
-        this.d = d;
-    }
-}
-
-class VARCHAR {
+class STRING {
     getFilterQuery(key, val) {
         return { 
             op: "LIKE", 
@@ -75,31 +42,7 @@ class VARCHAR {
             params: ['%' + val + '%']
         };
     }
-    validate(val, attr = val) {
-        if (val && val.length > this.maxLength) {
-            throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
-        }
-    }
-
-    constructor({ maxLength }) {
-        this.maxLength = maxLength === undefined ? 65535 : maxLength
-    }
-}
-
-class LONGTEXT {
-    getFilterQuery(key, val) {
-        return { 
-            op: "LIKE", 
-            q: val,
-            query: '`' + key + '`' + " LIKE ?", 
-            params: ['%' + val + '%']
-        };
-    }
-    validate(val, attr = val) {
-        if (val && val.length > 4294967295) {
-            throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
-        }
-    }
+    validate(val, attr = val) {}
     constructor() {}
 }
 
@@ -114,9 +57,7 @@ class TINYINT {
             throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
         }
     }
-    constructor() {
-
-    }
+    constructor() {}
 }
 
 class NULLABLE {
@@ -137,18 +78,6 @@ class NOTNULL {
         }
     }
     constructor() {}
-}
-
-class DataType {
-    static ARRAY(...opt) { return new ARRAY(...opt); }
-    static INT() { return new INT(); }
-    static FLOAT(...opt) { return new FLOAT(...opt); }
-    static VARCHAR(...opt) { return new VARCHAR(...opt); }
-    static LONGTEXT() { return new LONGTEXT(); }
-    static TIMESTAMP() { return new TIMESTAMP(); }
-    static TINYINT() { return new TINYINT(); }
-    static NULLABLE() { return new NULLABLE(); }
-    static NOTNULL() { return new NOTNULL(); }
 }
 
 class Table {
@@ -221,6 +150,16 @@ class Table {
         }
     }
 
+    validate(row) {
+        for (let attr in this.attribute) {
+            if (attr in row) {
+                for (let key in this.attribute[attr]) {
+                    this.attribute[attr][key].validate(row[attr], attr);
+                }
+            }
+        }
+    }
+
     constructor(name, attribute, { sort, filter }) {
         this.name = name;
         this.attribute = attribute;
@@ -229,14 +168,22 @@ class Table {
     }
 }
 
+class DataType {
+    static ARRAY(...opt) { return new ARRAY(...opt); }
+    static NUMBER() { return new NUMBER(); }
+    static STRING(...opt) { return new STRING(...opt); }
+    static TIMESTAMP() { return new TIMESTAMP(); }
+    static TINYINT() { return new TINYINT(); }
+    static NULLABLE() { return new NULLABLE(); }
+    static NOTNULL() { return new NOTNULL(); }
+}
+
 export { 
     Table,
     DataType,
     ARRAY,
-    INT,
-    FLOAT,
-    VARCHAR,
-    LONGTEXT,
+    NUMBER,
+    STRING,
     TIMESTAMP,
     TINYINT,
     NULLABLE,

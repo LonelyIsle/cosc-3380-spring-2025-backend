@@ -40,8 +40,13 @@ async function testDb(req, res) {
     }
 }
 
+function jwt(req, res) {
+    httpResp.Success[200](req, res, req.jwt);
+}
+
 export default {
     echoPost,
     echoGet,
-    testDb
+    testDb,
+    jwt
 }
