@@ -48,10 +48,7 @@ router.all("/*", httpResp.Error[404]);
 // ✅ Database Connection & Start Server
 (async () => {
   try {
-    const connection = await pool.getConnection(); // Get connection
-    const [rows] = await connection.query("SELECT 1"); // Execute query
-    connection.release(); // Release connection back to pool
-
+    const [rows] = await pool.query("SELECT 1"); // Simple check with pool.query
     console.log("✅ Database connection successful:", rows);
 
     // Start Server AFTER DB connection is confirmed
@@ -64,4 +61,5 @@ router.all("/*", httpResp.Error[404]);
     console.error("❌ Database connection failed:", err);
     process.exit(1);
   }
-})(); // <-- ✅ This is the correct closing parenthesis for the async function
+})();
+
