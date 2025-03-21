@@ -9,6 +9,16 @@ import categoryController from "./controllers/category.js";
 
 import pool from "./controllers/db.js";
 
+// Use Azure-assigned port or fallback
+const PORT = process.env.PORT || 3000;
+
+// ✅ Confirm ENV values
+console.log("DB_HOST:", process.env.DB_HOST);
+console.log("DB_USER:", process.env.DB_USER);
+console.log("DB_SSL:", process.env.DB_SSL);
+console.log("Using PORT:", PORT);
+
+// ✅ Test DB connection
 (async () => {
   try {
     const [rows] = await pool.query("SELECT 1");
@@ -18,11 +28,7 @@ import pool from "./controllers/db.js";
   }
 })();
 
-console.log("DB_HOST:", process.env.DB_HOST);
-console.log("DB_USER:", process.env.DB_USER);
-console.log("DB_SSL:", process.env.DB_SSL);
-console.log("Server running on PORT:", process.env.PORT || 3000);
-
+// Set up server and router
 const server = http.createServer();
 const router = new Router();
 
@@ -44,6 +50,7 @@ router.delete("/category/:id", categoryController.deleteOne);
 // *
 router.all("/*",  httpResp.Error[404]);
 
+// Start server and log
 server.on("request", (req, res) => {
     try {
         console.log(`server :: ${req.method} - ${req.url}`);
@@ -53,6 +60,6 @@ server.on("request", (req, res) => {
     }
 });
 
-server.listen(process.env.PORT || 3000, "0.0.0.0", () => {
-    console.log(`server :: listening port ${process.env.PORT || 3000}`);
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 server :: listening on http://0.0.0.0:${PORT}`);
 });
