@@ -3,11 +3,11 @@ import mysql from "mysql2/promise";
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-  database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 3306,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306, // Default MySQL port is 3306
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 10, // Adjust as needed
   queueLimit: 0,
 });
 
