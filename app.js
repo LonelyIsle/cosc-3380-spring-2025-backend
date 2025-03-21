@@ -3,11 +3,10 @@ import Router from "./router.js";
 import httpResp from "./helpers/httpResp.js";
 import corsHandler from "./helpers/cors.js";
 import bodyParser from "./helpers/bodyParser.js";
-
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
-
 import pool from "./controllers/db.js";
+import authenticateToken from "./helpers/auth.js";
 
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -26,6 +25,7 @@ console.log("Using PORT:", PORT);
 // Initialize router
 const router = new Router();
 router.use(corsHandler);
+router.use("/category", authenticateToken);
 router.use(bodyParser.json);
 
 // Test routes
