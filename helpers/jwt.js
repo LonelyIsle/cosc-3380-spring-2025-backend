@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 function sign(data) {
-    console.log(JWT_SECRET);
     return jwt.sign({
         exp: Math.floor(Date.now() / 1000) + (60 * 60),
         data
