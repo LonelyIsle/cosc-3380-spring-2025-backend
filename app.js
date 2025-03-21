@@ -46,12 +46,16 @@ router.delete("/category/:id", categoryController.deleteOne);
 router.all("/*", httpResp.Error[404]);
 
 // ✅ Database Connection & Start Server
+// ✅ Ensure a working DB connection
 (async () => {
   try {
-    const [rows] = await pool.query("SELECT 1"); // Simple check with pool.query
+    const connection = await pool.getConnection(); // Get connection from pool
+    const [rows] = await connection.query("SELECT 1"); // Execute test query
+    connection.release(); // Always release the connection back to the pool
+
     console.log("✅ Database connection successful:", rows);
 
-    // Start Server AFTER DB connection is confirmed
+    // Start the server
     const server = http.createServer(router.handle.bind(router));
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
