@@ -1,3 +1,4 @@
+import "dotenv/config"; // Load .env variables
 import http from "http";
 import Router from "./router.js";
 import httpResp from "./helpers/httpResp.js";
@@ -11,18 +12,19 @@ import authenticateToken from "./helpers/auth.js";
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// Validate environment variables
 if (!JWT_SECRET) {
   console.error("❌ JWT_SECRET is not defined in environment variables!");
   process.exit(1);
 }
 
-// ✅ Confirm ENV values
+console.log("✅ Loaded environment variables:");
 console.log("DB_HOST:", process.env.DB_HOST);
 console.log("DB_USER:", process.env.DB_USER);
 console.log("DB_SSL:", process.env.DB_SSL);
 console.log("Using PORT:", PORT);
 
-// Initialize router
+// Initialize Router
 const router = new Router();
 router.use(corsHandler);
 router.use("/category", authenticateToken);
@@ -43,23 +45,24 @@ router.delete("/category/:id", categoryController.deleteOne);
 // Catch-all for 404s
 router.all("/*", httpResp.Error[404]);
 
-// ✅ DB check and then start server
+// ✅ Database Connection & Start Server
 (async () => {
   try {
     const [rows] = await pool.query("SELECT 1");
-    console.log("✅ Database connection successful:", rows);
+    console.log("✅ Database connection successful");
 
-    const server = http.createServer((req, res) => {
+    const server = http.createServer(async (req, res) => {
       try {
         console.log(`server :: ${req.method} - ${req.url}`);
-        router.handle(req, res);
+        await router.handle(req, res); // Ensure Router properly handles request
       } catch (e) {
+        console.error("❌ Error handling request:", e);
         httpResp.Error.default(req, res, e);
       }
     });
 
     server.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (err) {
     console.error("❌ Database connection failed:", err);
