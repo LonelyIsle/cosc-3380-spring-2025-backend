@@ -1,6 +1,6 @@
-import httpResp from "./helpers/httpResp.js";
-import url from "./helpers/url.js"
-import utils from "./helpers/utils.js";
+import httpResp from "./httpResp.js";
+import url from "./url.js"
+import utils from "./utils.js";
 
 const DEFAULT_HANDLER = (req, res) => {};
 const REQ_PARAM_REGEX = /:[a-zA-z0-9%]+/;
@@ -82,11 +82,10 @@ class Router {
     }
 
     getReqQuery(req) {
-        let urlObj = req.urlObj;
-        let urlParams = new URLSearchParams(urlObj.search);
+        let urlParams = req.urlObj.searchParams;
         let result = {}
         for(let [key, value] of urlParams.entries()) { 
-            result[key] = utils.parseToPrimitive(value);
+            [result[key]] = utils.parseStr(value);
         }
         return result;
     }
@@ -97,10 +96,8 @@ class Router {
         const routePathnames = route.pathname.slice(1).split("/");
         let result = {};
         for (let [i, pathname] of routePathnames.entries()) {
-            const regex = REQ_PARAM_REGEX;
-            const found = pathname.match(regex);
-            if (found !== null) {
-                result[pathname.slice(1)] = utils.parseToPrimitive(decodeURI(reqPaths[i]));
+            if (REQ_PARAM_REGEX.test(pathname)) {
+                [result[pathname.slice(1)]] = utils.parseStr(reqPaths[i]);
             }
         }
         return result
@@ -123,8 +120,7 @@ class Router {
             return false;
         }
         for (let [i, pathname] of routePathnamess.entries()) {
-            const found = pathname.match(REQ_PARAM_REGEX);
-            if (found === null && (routePathnamess[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
+            if (!REQ_PARAM_REGEX.test(pathname) && (routePathnamess[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
                 return false;
             }
         }
