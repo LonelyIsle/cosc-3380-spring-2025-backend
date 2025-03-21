@@ -32,7 +32,7 @@ const categoryTable = new Table("category", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: ["name", "created_at"],
+    sort: ["name", "created_at", "updated_at"],
     filter: {
         "name": DataType.STRING()
     }
