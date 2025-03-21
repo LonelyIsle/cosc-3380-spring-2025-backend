@@ -49,7 +49,7 @@ router.all("/*", httpResp.Error[404]);
 // ✅ Ensure a working DB connection
 (async () => {
   try {
-    const connection = await pool.getConnection();
+   // const connection = await pool.getConnection();
     const [rows] = await connection.query("SELECT 1");
     connection.release();
 
