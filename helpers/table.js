@@ -42,8 +42,16 @@ class STRING {
             params: ['%' + val + '%']
         };
     }
-    validate(val, attr = val) {}
-    constructor() {}
+    validate(val, attr = val) {
+        if (this.regexp) {
+            if(!this.regexp.test(val)) {
+                throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
+            }
+        }
+    }
+    constructor(regexp) {
+        this.regexp = regexp;
+    }
 }
 
 class TIMESTAMP {

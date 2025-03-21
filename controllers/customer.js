@@ -18,8 +18,11 @@ async function login(req, res) {
         let customer = await customerModel.getOneByEmailAndPwd(conn, body.email, body.password);
         if (customer) {
             delete customer.password;
-            customer.role = auth.CUSTOMER;
-            customer.token = jwt.sign(customer);
+            customer.token = jwt.sign({
+                id: customer.id,
+                email: customer.email,
+                role: auth.CUSTOMER
+            });
         } else {
             throw new HttpError({ statusCode: 400, message: "Wrong email or password" })
         }

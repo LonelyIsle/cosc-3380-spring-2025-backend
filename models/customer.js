@@ -21,7 +21,7 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NOTNULL()
     },
     "email": {
-        type: DataType.STRING(),
+        type: DataType.STRING(/^.+@.+$/),
         isRequired: DataType.NOTNULL()
     },
     "password": {
