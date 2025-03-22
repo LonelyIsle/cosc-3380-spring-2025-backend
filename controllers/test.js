@@ -40,20 +40,13 @@ async function testDb(req, res) {
     }
 }
 
-async function listTables(req, res) {
-    try {
-        const [rows] = await db.pool.query("SHOW TABLES");
-        httpResp.Success[200](req, res, {
-            tables: rows
-        });
-    } catch (e) {
-        httpResp.Error.default(req, res, e);
-    }
+function jwt(req, res) {
+    httpResp.Success[200](req, res, req.jwt);
 }
 
 export default {
     echoPost,
     echoGet,
     testDb,
-    listTables
+    jwt
 }

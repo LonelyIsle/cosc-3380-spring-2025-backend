@@ -20,21 +20,20 @@ function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function parseToPrimitive(val) {
-    let temp = null;
-    if (val.indexOf(".") > -1) {
-        temp = parseFloat(val);
-    } else {
-        temp = parseInt(val);
-    } 
-    if (!isNaN(temp)) {
-        return temp;
+function parseStr(val) {
+    try {
+        let temp = JSON.parse(val);
+        if (typeof temp === "string") {
+            temp = decodeURI(temp).trim();
+        }
+        return [temp, null];
+    } catch(e) {
+        return [val, e];
     }
-    return val;
 }
 
 export default {
     objectAssign,
     timeout,
-    parseToPrimitive
+    parseStr
 }

@@ -1,22 +1,69 @@
-// helpers/auth.js
-import jwt from "jsonwebtoken";
+import { HttpError } from "./error.js";
+import jwt from "./jwt.js";
+import httpResp from "./httpResp.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const CUSTOMER = "CUSTOMER";
+const MANAGER = "MANAGER";
+const STAFF= "STAFF";
 
-export default function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Expecting: "Bearer <token>"
+function is(...roles) {
+    return (req, res, next) => {
+        try {
+            let token = req.headers["authorization"] || req.body.authorization;
+            if (!token) {
+                throw new HttpError({ statusCode: 401 });
+            }
+            try {
+                var {exp, iat, data } = jwt.verify(token);
+            } catch (e) {
+                throw new HttpError({ statusCode: 401, message: "invalid token"});
+            }
+            if (roles.indexOf(data.role) > -1) {
+                req.jwt = {
+                    token,
+                    exp,
+                    iat,
+                    user: data
+                }
+            } else {
+                throw new HttpError({ statusCode: 401 });
+            }
+            next();
+        } catch(e) {
+            httpResp.Error.default(req, res, e);
+        }
+    }
+}
 
-  if (!token) {
-    return res.status(401).json({ error: "Token missing" });
-  }
+function isLogin() {
+    return (req, res, next) => {
+        try {
+            let token = req.headers["authorization"] || req.body.authorization;
+            if (!token) {
+                throw new HttpError({ statusCode: 401 });
+            }
+            try {
+                let {exp, iat, data } = jwt.verify(token);
+                req.jwt = {
+                    token,
+                    exp,
+                    iat,
+                    user: data
+                }
+            } catch (e) {
+                throw new HttpError({ statusCode: 401, message: "invalid token"});
+            }
+            next();
+        } catch(e) {
+            httpResp.Error.default(req, res, e);
+        }
+    }
+}
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // Attach user info
-    next();
-  } catch (err) {
-    console.error("JWT verification failed:", err);
-    res.status(403).json({ error: "Invalid or expired token" });
-  }
+export default {
+    CUSTOMER,
+    MANAGER,
+    STAFF,
+    is,
+    isLogin
 }
