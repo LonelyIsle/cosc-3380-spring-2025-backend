@@ -46,7 +46,7 @@ router.delete("/category/:id", categoryController.deleteOne);
 
 router.get("/test-db", async (req, res) => {
     try {
-        const [rows] = await db.query("SELECT 1 AS test");
+        const [rows] = await pool.query("SELECT 1 AS test");
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ connected: true, result: rows }));
     } catch (err) {
