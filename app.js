@@ -44,6 +44,19 @@ router.post("/category", categoryController.createOne);
 router.patch("/category/:id", categoryController.updateOne);
 router.delete("/category/:id", categoryController.deleteOne);
 
+router.get("/test-db", async (req, res) => {
+    try {
+        const [rows] = await db.query("SELECT 1 AS test");
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ connected: true, result: rows }));
+    } catch (err) {
+        console.error("❌ DB error:", err);
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ connected: false, error: err.message }));
+    }
+});
+
 // Catch-all for 404s
 router.all("/*", httpResp.Error[404]);
 
