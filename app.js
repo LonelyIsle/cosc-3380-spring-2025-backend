@@ -35,6 +35,7 @@ router.use(bodyParser.json);
 // Test routes
 router.get("/test/db", testController.testDb);
 router.get("/test/echo/:message", testController.echoGet);
+router.get("/test/tables", testController.listTables);
 router.post("/test/echo/:message", testController.echoPost);
 
 // Category routes
