@@ -20,6 +20,7 @@ router.get("/test/db", testController.testDb);
 router.get("/test/echo/:message", testController.echoGet);
 router.post("/test/echo/:message", testController.echoPost);
 router.post("/test/jwt", auth.isLogin(), testController.jwt);
+router.get("/test/which", testController.which);
 
 // Category
 router.get("/category", categoryController.getAll);

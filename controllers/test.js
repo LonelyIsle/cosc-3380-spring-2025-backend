@@ -44,9 +44,14 @@ function jwt(req, res) {
     httpResp.Success[200](req, res, req.jwt);
 }
 
+function which(req, res) {
+    httpResp.Success[200](req, res, { version: "1" });
+}
+
 export default {
     echoPost,
     echoGet,
     testDb,
-    jwt
+    jwt,
+    which
 }
