@@ -144,7 +144,7 @@ async function getOneByEmailAndPwd(conn, email, password) {
 }
 
 async function createOne(conn, customer) {
-    let data = utils.objectAssign(["first_name", "last_name", "email", "password"], customer);
+    let data = utils.objectAssign(["first_name", "middle_name", "last_name", "email", "password"], customer);
     customerTable.validate(data);
     let existedCustomer = await getOneByEmail(conn, data.email);
     if (existedCustomer) {
@@ -152,8 +152,8 @@ async function createOne(conn, customer) {
     }
     data.password = await pwd.hash(data.password);
     const [rows, fields] = await conn.query(
-        'INSERT INTO `' + customerTable.name + '`(`first_name`, `last_name`, `email`, `password`) VALUES (?, ?, ?, ?)',
-        [data.first_name, data.last_name, data.email, data.password]
+        'INSERT INTO `' + customerTable.name + '`(`first_name`, `middle_name`, `last_name`, `email`, `password`) VALUES (?, ?, ?, ?, ?)',
+        [data.first_name, data.middle_name, data.last_name, data.email, data.password]
     );
     return rows.insertId;
 }
