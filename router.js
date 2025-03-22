@@ -78,6 +78,10 @@ class Router {
     }
 
     use(handler) {
+        if (typeof handler !== "function") {
+            console.warn("⚠️ Warning: Tried to register non-function middleware:", handler);
+            return;
+        }
         this.middlewareHandlers.push(handler);
     }
 
@@ -107,35 +111,31 @@ class Router {
     }
 
     match(req, route) {
-        if (req.method !== route.method) {
-            return false;
-        }
-        if (route.pathname === "/*") {
-            return true;
-        }
-        if (req.urlObj.pathname === route.pathname) {
-            return true;
-        }
+        if (req.method !== route.method) return false;
+        if (route.pathname === "/*") return true;
+        if (req.urlObj.pathname === route.pathname) return true;
+
         const reqPathname = req.urlObj.pathname;
         const reqPathnames = reqPathname.slice(1).split("/");
         const routePathnames = route.pathname.slice(1).split("/");
-        if (reqPathnames.length !== routePathnames.length) {
-            return false;
-        }
+
+        if (reqPathnames.length !== routePathnames.length) return false;
+
         for (let [i, pathname] of routePathnames.entries()) {
             const found = pathname.match(REQ_PARAM_REGEX);
-            if (found === null && (routePathnames[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
+            if (!found && (routePathnames[i].toLowerCase() !== decodeURI(reqPathnames[i]).toLowerCase())) {
                 return false;
             }
         }
+
         return true;
     }
 
     handle(req, res) {
         req.urlObj = url.getURLObj(req.url);
         req.query = this.getReqQuery(req);
-        let matchedRoute = null;
 
+        let matchedRoute = null;
         for (let route of this.routes) {
             if (this.match(req, route)) {
                 req.param = this.getReqParam(req, route);
@@ -144,30 +144,45 @@ class Router {
             }
         }
 
-        if (matchedRoute === null) {
+        if (!matchedRoute) {
             this.handler.execute(req, res, httpResp.Error[404]);
-        } else {
-            // ✅ Run global middleware before route handler
-           const middlewareChain = [...this.middlewareHandlers, (req, res, next) => {
-    matchedRoute.handler.composition(req, res);
-}];
-
-            // ✅ Compose middleware execution
-            let next = () => {};
-            for (let i = middlewareChain.length - 1; i >= 0; i--) {
-                const current = middlewareChain[i];
-                next = ((nextFunc) => {
-                    return (req, res) => current(req, res, () => nextFunc(req, res));
-                })(next);
-            }
-
-            next(req, res);
+            return;
         }
+
+        // ✅ Build middleware chain with safety check
+        const middlewareChain = [
+            ...this.middlewareHandlers,
+            (req, res, next) => {
+                matchedRoute.handler.composition(req, res);
+            },
+        ];
+
+        let next = () => {};
+        for (let i = middlewareChain.length - 1; i >= 0; i--) {
+            const current = middlewareChain[i];
+            next = ((nextFunc) => {
+                return (req, res) => {
+                    if (typeof current === "function") {
+                        try {
+                            current(req, res, () => nextFunc(req, res));
+                        } catch (err) {
+                            console.error("🔥 Middleware error:", err);
+                            httpResp.Error[500](req, res);
+                        }
+                    } else {
+                        console.warn("⛔ Skipping invalid middleware:", current);
+                        nextFunc(req, res);
+                    }
+                };
+            })(next);
+        }
+
+        next(req, res);
     }
 
     constructor() {
         this.routes = [];
-        this.middlewareHandlers = []; // ✅ Store global middleware handlers
+        this.middlewareHandlers = [];
         this.handler = new RequestHandler();
     }
 }
