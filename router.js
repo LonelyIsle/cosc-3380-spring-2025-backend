@@ -148,9 +148,9 @@ class Router {
             this.handler.execute(req, res, httpResp.Error[404]);
         } else {
             // ✅ Run global middleware before route handler
-            const middlewareChain = [...this.middlewareHandlers, () => {
-                matchedRoute.handler.composition(req, res);
-            }];
+           const middlewareChain = [...this.middlewareHandlers, (req, res, next) => {
+    matchedRoute.handler.composition(req, res);
+}];
 
             // ✅ Compose middleware execution
             let next = () => {};
