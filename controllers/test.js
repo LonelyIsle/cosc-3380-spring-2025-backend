@@ -45,7 +45,16 @@ function jwt(req, res) {
 }
 
 function which(req, res) {
-    httpResp.Success[200](req, res, { version: "1" });
+    httpResp.Success[200](req, res, { version: "2" });
+}
+
+function kill(req, res) {
+    if (req.query.confirm === "yes") {
+        httpResp.Success[200](req, res, "good bye");
+        process.exit();
+    } else {
+        httpResp.Success[200](req, res, "please confirm");
+    }
 }
 
 export default {
@@ -53,5 +62,6 @@ export default {
     echoGet,
     testDb,
     jwt,
-    which
+    which,
+    kill
 }

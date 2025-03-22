@@ -21,6 +21,7 @@ router.get("/test/echo/:message", testController.echoGet);
 router.post("/test/echo/:message", testController.echoPost);
 router.post("/test/jwt", auth.isLogin(), testController.jwt);
 router.get("/test/which", testController.which);
+router.get("/test/kill", testController.kill);
 
 // Category
 router.get("/category", categoryController.getAll);
