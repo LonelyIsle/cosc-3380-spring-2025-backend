@@ -20,16 +20,16 @@ router.use(bodyParser.json);
 router.get("/test/db", testController.testDb);
 router.get("/test/echo/:message", testController.echoGet);
 router.post("/test/echo/:message", testController.echoPost);
-router.post("/test/jwt", auth.isLogin(), testController.jwt);
+router.post("/test/jwt", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), testController.jwt);
 router.get("/test/which", testController.which);
 router.get("/test/kill", testController.kill);
 
 // Category
 router.get("/category", categoryController.getAll);
 router.get("/category/:id", categoryController.getOne);
-router.post("/category", categoryController.createOne);
-router.patch("/category/:id", categoryController.updateOne);
-router.delete("/category/:id", categoryController.deleteOne);
+router.post("/category", auth.is(auth.MANAGER), categoryController.createOne);
+router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOne);
+router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
 
 // Customer
 router.post("/register", customerController.register);

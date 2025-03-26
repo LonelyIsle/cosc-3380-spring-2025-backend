@@ -36,31 +36,6 @@ function is(...roles) {
     }
 }
 
-function isLogin() {
-    return (req, res, next) => {
-        try {
-            let token = req.headers["authorization"] || req.body.authorization;
-            if (!token) {
-                throw new HttpError({ statusCode: 401 });
-            }
-            try {
-                let {exp, iat, data } = jwt.verify(token);
-                req.jwt = {
-                    token,
-                    exp,
-                    iat,
-                    user: data
-                }
-            } catch (e) {
-                throw new HttpError({ statusCode: 401, message: "Invalid token."});
-            }
-            next();
-        } catch(e) {
-            httpResp.Error.default(req, res, e);
-        }
-    }
-}
-
 export default {
     CUSTOMER,
     MANAGER,
