@@ -59,15 +59,6 @@ class TIMESTAMP {
     constructor() {}
 }
 
-class TINYINT {
-    validate(val, attr = val) {
-        if (val && (val < 0 || val > 1)) {
-            throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
-        }
-    }
-    constructor() {}
-}
-
 class NULLABLE {
     validate(val, attr = val) {}
     constructor() {}
@@ -181,7 +172,6 @@ class DataType {
     static NUMBER() { return new NUMBER(); }
     static STRING(...opt) { return new STRING(...opt); }
     static TIMESTAMP() { return new TIMESTAMP(); }
-    static TINYINT() { return new TINYINT(); }
     static NULLABLE() { return new NULLABLE(); }
     static NOTNULL() { return new NOTNULL(); }
 }
@@ -193,7 +183,6 @@ export {
     NUMBER,
     STRING,
     TIMESTAMP,
-    TINYINT,
     NULLABLE,
     NOTNULL
 };

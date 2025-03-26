@@ -5,6 +5,7 @@ import httpResp from "./httpResp.js";
 const CUSTOMER = "CUSTOMER";
 const MANAGER = "MANAGER";
 const STAFF= "STAFF";
+const EMPLOYEE = [STAFF, MANAGER];
 
 function is(...roles) {
     return (req, res, next) => {
@@ -64,6 +65,7 @@ export default {
     CUSTOMER,
     MANAGER,
     STAFF,
+    EMPLOYEE,
     is,
     isLogin
 }

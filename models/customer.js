@@ -116,7 +116,7 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.TINYINT(),
+        type: DataType.NUMBER(),
         isRequired: DataType.NULLABLE()
     }
 }, {

@@ -8,6 +8,7 @@ import auth from "./helpers/auth.js";
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 import customerController from "./controllers/customer.js";
+import employeeController from "./controllers/employee.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -33,6 +34,9 @@ router.delete("/category/:id", categoryController.deleteOne);
 // Customer
 router.post("/register", customerController.register);
 router.post("/login", customerController.login);
+
+// Employee
+router.post("/employee/login", employeeController.login);
 
 // *
 router.all("/*",  httpResp.Error[404]);
