@@ -16,7 +16,7 @@ function is(...roles) {
             try {
                 var {exp, iat, data } = jwt.verify(token);
             } catch (e) {
-                throw new HttpError({ statusCode: 401, message: "invalid token"});
+                throw new HttpError({ statusCode: 401, message: "Invalid token."});
             }
             if (roles.indexOf(data.role) > -1) {
                 req.jwt = {
@@ -51,7 +51,7 @@ function isLogin() {
                     user: data
                 }
             } catch (e) {
-                throw new HttpError({ statusCode: 401, message: "invalid token"});
+                throw new HttpError({ statusCode: 401, message: "Invalid token."});
             }
             next();
         } catch(e) {

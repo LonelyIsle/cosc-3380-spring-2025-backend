@@ -1,6 +1,5 @@
 function cors(req, res, next) {
     try {
-        console.log("CORS");
         let method = req.method.toUpperCase();
         if (method === 'OPTIONS') {
             res.setHeader("Access-Control-Allow-Origin", "*");

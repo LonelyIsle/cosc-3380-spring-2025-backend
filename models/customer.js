@@ -148,7 +148,7 @@ async function createOne(conn, customer) {
     customerTable.validate(data);
     let existedCustomer = await getOneByEmail(conn, data.email);
     if (existedCustomer) {
-        throw new HttpError({statusCode: 400, message: `This email is registered`});
+        throw new HttpError({statusCode: 400, message: `This email is registered.`});
     }
     data.password = await pwd.hash(data.password);
     const [rows, fields] = await conn.query(

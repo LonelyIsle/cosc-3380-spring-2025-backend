@@ -14,7 +14,7 @@ class NUMBER {
     getFilterQuery(key, val) {
         let _val = val.split(":");
         if (_val.length !== 2 || (isNaN(_val[0]) && isNaN(_val[1]))) {
-            return { error: new Error("invalid filter") };
+            return { error: new Error("Invalid filter.") };
         }
         let min = utils.parseStr(_val[0]);
         let max = utils.parseStr(_val[1]);
@@ -45,7 +45,7 @@ class STRING {
     validate(val, attr = val) {
         if (this.regexp) {
             if(!this.regexp.test(val)) {
-                throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
+                throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
             }
         }
     }
@@ -62,7 +62,7 @@ class TIMESTAMP {
 class TINYINT {
     validate(val, attr = val) {
         if (val && (val < 0 || val > 1)) {
-            throw new HttpError({ statusCode: 400, message: `${attr} is invalid` });
+            throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
         }
     }
     constructor() {}
@@ -76,13 +76,13 @@ class NULLABLE {
 class NOTNULL {
     validate(val, attr = val) {
         if (val === null) {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be null` });
+            throw new HttpError({ statusCode: 400, message: `${attr} cannot be null.` });
         }
         if (val === undefined) {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be undefined` });
+            throw new HttpError({ statusCode: 400, message: `${attr} cannot be undefined.` });
         }
         if (typeof val === "string" && val.trim() === "") {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be empty` });
+            throw new HttpError({ statusCode: 400, message: `${attr} cannot be empty.` });
         }
     }
     constructor() {}
