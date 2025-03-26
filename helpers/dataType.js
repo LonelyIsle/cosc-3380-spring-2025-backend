@@ -12,11 +12,16 @@ class ARRAY {
 
 class NUMBER {
     getFilterQuery(key, val) {
+        if (!utils.isNaN(val)) {
+            let min = val;
+            let max = val;
+            return { op: "=", min, max, query: '`' + key + '`' + " = ?", params: [min]};
+        }
         let _val = val.split(":");
         if (_val.length !== 2) {
             return { error: new Error("Invalid filter.") };
         }
-        let [min, e] = utils.parseStr(_val[0]);
+        let [min] = utils.parseStr(_val[0]);
         let [max] = utils.parseStr(_val[1]);
         if (utils.isNaN(min)) {
             return { op: "<", min: null, max, query: '`' + key + '`' + " < ?", params: [max]};
