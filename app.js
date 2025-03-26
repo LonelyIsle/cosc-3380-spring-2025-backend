@@ -24,19 +24,19 @@ router.post("/test/jwt", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), testC
 router.get("/test/which", testController.which);
 router.get("/test/kill", testController.kill);
 
+// Customer
+router.post("/customer/register", customerController.register);
+router.post("/customer/login", customerController.login);
+
+// Employee
+router.post("/employee/login", employeeController.login);
+
 // Category
 router.get("/category", categoryController.getAll);
 router.get("/category/:id", categoryController.getOne);
 router.post("/category", auth.is(auth.MANAGER), categoryController.createOne);
 router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOne);
 router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
-
-// Customer
-router.post("/register", customerController.register);
-router.post("/login", customerController.login);
-
-// Employee
-router.post("/employee/login", employeeController.login);
 
 // *
 router.all("/*",  httpResp.Error[404]);
