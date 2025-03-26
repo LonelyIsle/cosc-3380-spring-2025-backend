@@ -9,6 +9,7 @@ import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 import customerController from "./controllers/customer.js";
 import employeeController from "./controllers/employee.js";
+import productController from "./controllers/product.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -30,6 +31,10 @@ router.post("/customer/login", customerController.login);
 
 // Employee
 router.post("/employee/login", employeeController.login);
+
+// Product
+router.get("/product", productController.getAll);
+router.get("/product/:id", productController.getOne);
 
 // Category
 router.get("/category", categoryController.getAll);

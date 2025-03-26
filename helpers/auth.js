@@ -41,6 +41,5 @@ export default {
     MANAGER,
     STAFF,
     EMPLOYEE,
-    is,
-    isLogin
+    is
 }

@@ -1,6 +1,7 @@
 import utils from "../helpers/utils.js"
 import { HttpError } from "../helpers/error.js";
-import { Table, DataType } from "../helpers/table.js";
+import Table from "../helpers/table.js";
+import DataType from "../helpers/dataType.js";
 
 const categoryTable = new Table("category", {
     "id": {
