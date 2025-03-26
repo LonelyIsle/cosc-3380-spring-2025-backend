@@ -1,6 +1,7 @@
 import utils from "../helpers/utils.js"
 import { HttpError } from "../helpers/error.js";
-import { Table, DataType } from "../helpers/table.js";
+import Table from "../helpers/table.js";
+import DataType from "../helpers/dataType.js";
 
 const categoryTable = new Table("category", {
     "id": {
@@ -28,7 +29,7 @@ const categoryTable = new Table("category", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.TINYINT(),
+        type: DataType.NUMBER(),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -84,7 +85,7 @@ async function createOne(conn, category) {
 async function updateOne(conn, newCategory) {
     let oldCategory = await getOne(conn, newCategory.id);
     if (!oldCategory) {
-        throw new HttpError({statusCode: 400, message: `category ${newCategory.id} not found`});
+        throw new HttpError({statusCode: 400, message: `category ${newCategory.id} not found.`});
     }
     let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
     categoryTable.validate(data);

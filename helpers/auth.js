@@ -5,6 +5,7 @@ import httpResp from "./httpResp.js";
 const CUSTOMER = "CUSTOMER";
 const MANAGER = "MANAGER";
 const STAFF= "STAFF";
+const EMPLOYEE = [STAFF, MANAGER];
 
 function is(...roles) {
     return (req, res, next) => {
@@ -16,7 +17,7 @@ function is(...roles) {
             try {
                 var {exp, iat, data } = jwt.verify(token);
             } catch (e) {
-                throw new HttpError({ statusCode: 401, message: "invalid token"});
+                throw new HttpError({ statusCode: 401, message: "Invalid token."});
             }
             if (roles.indexOf(data.role) > -1) {
                 req.jwt = {
@@ -35,35 +36,10 @@ function is(...roles) {
     }
 }
 
-function isLogin() {
-    return (req, res, next) => {
-        try {
-            let token = req.headers["authorization"] || req.body.authorization;
-            if (!token) {
-                throw new HttpError({ statusCode: 401 });
-            }
-            try {
-                let {exp, iat, data } = jwt.verify(token);
-                req.jwt = {
-                    token,
-                    exp,
-                    iat,
-                    user: data
-                }
-            } catch (e) {
-                throw new HttpError({ statusCode: 401, message: "invalid token"});
-            }
-            next();
-        } catch(e) {
-            httpResp.Error.default(req, res, e);
-        }
-    }
-}
-
 export default {
     CUSTOMER,
     MANAGER,
     STAFF,
-    is,
-    isLogin
+    EMPLOYEE,
+    is
 }

@@ -1,6 +1,7 @@
 import utils from "../helpers/utils.js"
 import { HttpError } from "../helpers/error.js";
-import { Table, DataType } from "../helpers/table.js";
+import Table from "../helpers/table.js";
+import DataType from "../helpers/dataType.js";
 import pwd from "../helpers/pwd.js";
 
 const customerTable = new Table("customer", {
@@ -116,7 +117,7 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.TINYINT(),
+        type: DataType.NUMBER(),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -148,7 +149,7 @@ async function createOne(conn, customer) {
     customerTable.validate(data);
     let existedCustomer = await getOneByEmail(conn, data.email);
     if (existedCustomer) {
-        throw new HttpError({statusCode: 400, message: `This email is registered`});
+        throw new HttpError({statusCode: 400, message: `This email is registered.`});
     }
     data.password = await pwd.hash(data.password);
     const [rows, fields] = await conn.query(

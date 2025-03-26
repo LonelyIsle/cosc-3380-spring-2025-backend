@@ -8,6 +8,8 @@ import auth from "./helpers/auth.js";
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
 import customerController from "./controllers/customer.js";
+import employeeController from "./controllers/employee.js";
+import productController from "./controllers/product.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -19,20 +21,27 @@ router.use(bodyParser.json);
 router.get("/test/db", testController.testDb);
 router.get("/test/echo/:message", testController.echoGet);
 router.post("/test/echo/:message", testController.echoPost);
-router.post("/test/jwt", auth.isLogin(), testController.jwt);
+router.post("/test/jwt", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), testController.jwt);
 router.get("/test/which", testController.which);
 router.get("/test/kill", testController.kill);
+
+// Customer
+router.post("/customer/register", customerController.register);
+router.post("/customer/login", customerController.login);
+
+// Employee
+router.post("/employee/login", employeeController.login);
+
+// Product
+router.get("/product", productController.getAll);
+router.get("/product/:id", productController.getOne);
 
 // Category
 router.get("/category", categoryController.getAll);
 router.get("/category/:id", categoryController.getOne);
-router.post("/category", categoryController.createOne);
-router.patch("/category/:id", categoryController.updateOne);
-router.delete("/category/:id", categoryController.deleteOne);
-
-// Customer
-router.post("/register", customerController.register);
-router.post("/login", customerController.login);
+router.post("/category", auth.is(auth.MANAGER), categoryController.createOne);
+router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOne);
+router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
 
 // *
 router.all("/*",  httpResp.Error[404]);

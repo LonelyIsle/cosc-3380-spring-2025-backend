@@ -24,7 +24,7 @@ async function login(req, res) {
                 role: auth.CUSTOMER
             });
         } else {
-            throw new HttpError({ statusCode: 400, message: "Wrong email or password" })
+            throw new HttpError({ statusCode: 400, message: "Wrong email or password." })
         }
         return customer;
     });

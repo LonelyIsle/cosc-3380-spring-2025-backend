@@ -28,12 +28,23 @@ function parseStr(val) {
         }
         return [temp, null];
     } catch(e) {
+        if (typeof val === "string") {
+            val = decodeURI(val).trim();
+        }
         return [val, e];
     }
+}
+
+function isNaN(val) {
+    if (typeof val === "string") {
+        return true;
+    }
+    return Number.isNaN(val);
 }
 
 export default {
     objectAssign,
     timeout,
-    parseStr
+    parseStr,
+    isNaN
 }
