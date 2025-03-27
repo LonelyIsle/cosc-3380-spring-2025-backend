@@ -45,7 +45,7 @@ function jwt(req, res) {
 }
 
 function which(req, res) {
-    httpResp.Success[200](req, res, { version: "2" });
+    httpResp.Success[200](req, res, { version: "3" });
 }
 
 function kill(req, res) {

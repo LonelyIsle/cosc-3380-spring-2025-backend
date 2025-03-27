@@ -15,7 +15,7 @@ function is(...roles) {
                 throw new HttpError({ statusCode: 401 });
             }
             try {
-                var {exp, iat, data } = jwt.verify(token);
+                var { exp, iat, data } = jwt.verify(token);
             } catch (e) {
                 throw new HttpError({ statusCode: 401, message: "Invalid token."});
             }
@@ -36,10 +36,37 @@ function is(...roles) {
     }
 }
 
+function attach() {
+    return (req, res, next) => {
+        try {
+            let token = req.headers["authorization"] || req.body.authorization;
+            if (!token) {
+                req.jwt = null;
+            } else {
+                try {
+                    var { exp, iat, data } = jwt.verify(token);
+                    req.jwt = {
+                        token,
+                        exp,
+                        iat,
+                        user: data
+                    }
+                } catch (e) {
+                    req.jwt = null;
+                }
+            }
+            next();
+        } catch(e) {
+            httpResp.Error.default(req, res, e);
+        }
+    }
+}
+
 export default {
     CUSTOMER,
     MANAGER,
     STAFF,
     EMPLOYEE,
-    is
+    is,
+    attach
 }
