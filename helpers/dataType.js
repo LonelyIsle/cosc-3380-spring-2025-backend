@@ -11,11 +11,11 @@ class ARRAY {
 }
 
 class NUMBER {
-    getFilterQuery(key, val) {
+    getFilterQuery(tableName, key, val) {
         if (!utils.isNaN(val)) {
             let min = val;
             let max = val;
-            return { op: "=", min, max, query: '`' + key + '`' + " = ?", params: [min]};
+            return { op: "=", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " = ?", params: [min]};
         }
         let _val = val.split(":");
         if (_val.length !== 2) {
@@ -24,26 +24,26 @@ class NUMBER {
         let [min] = utils.parseStr(_val[0]);
         let [max] = utils.parseStr(_val[1]);
         if (utils.isNaN(min)) {
-            return { op: "<", min: null, max, query: '`' + key + '`' + " < ?", params: [max]};
+            return { op: "<", min: null, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " < ?", params: [max]};
         } 
         if (utils.isNaN(max)) {
-            return { op: ">", min, max: null, query: '`' + key + '`' + " > ?", params: [min]};
+            return { op: ">", min, max: null, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " > ?", params: [min]};
         }
         if (min == max) {
-            return { op: "=", min, max, query: '`' + key + '`' + " = ?", params: [min]};
+            return { op: "=", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " = ?", params: [min]};
         }
-        return { op: "BETWEEN", min, max, query: '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
+        return { op: "BETWEEN", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
     }
     validate(val, attr = val) {}
     constructor() {}
 }
 
 class STRING {
-    getFilterQuery(key, val) {
+    getFilterQuery(tableName, key, val) {
         return { 
             op: "LIKE", 
             q: val,
-            query: '`' + key + '`' + " LIKE ?", 
+            query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " LIKE ?", 
             params: ['%' + val + '%']
         };
     }

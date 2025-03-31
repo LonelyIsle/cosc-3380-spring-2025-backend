@@ -16,7 +16,7 @@ class Table {
             if (this.sortAttribute.indexOf(attr) < 0 || (op !== "ASC" && op !== "DESC")) {
                 return { error: new Error("invalid sort value")};
             }
-            return { query: '`' + attr + '`' + ' ' + op }
+            return { query: '`' + this.name + '`' + '.' + '`' + attr + '`' + ' ' + op }
         } else {
             return { error: new Error("invalid sort value")};
         }
@@ -34,7 +34,7 @@ class Table {
         queryStr.push("WHERE");
         for (let attr in filterAttrs) {
             if (query[attr]) {
-                temp = filterAttrs[attr].getFilterQuery(attr, query[attr]);
+                temp = filterAttrs[attr].getFilterQuery(this.name, attr, query[attr]);
                 if (!temp.error) {
                     queryStr.push(...['(' + temp.query + ')', "AND"]);
                     params.push(...temp.params);
