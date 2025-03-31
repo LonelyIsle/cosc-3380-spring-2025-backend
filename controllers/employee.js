@@ -13,7 +13,7 @@ async function login(req, res) {
             employee.token = jwt.sign({
                 id: employee.id,
                 email: employee.email,
-                role: auth.EMPLOYEE[employee.role]
+                role: employee.role
             });
         } else {
             throw new HttpError({ statusCode: 400, message: "Wrong email or password." })

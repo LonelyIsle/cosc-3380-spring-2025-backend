@@ -28,8 +28,8 @@ const employeeTable = new Table("employee", {
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "roles": {
-        type: DataType.NUMBER(),
+    "role": {
+        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NOTNULL()
     },
     "hourly_rate": {
