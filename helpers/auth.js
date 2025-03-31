@@ -2,10 +2,9 @@ import { HttpError } from "./error.js";
 import jwt from "./jwt.js";
 import httpResp from "./httpResp.js";
 
-const CUSTOMER = "CUSTOMER";
-const MANAGER = "MANAGER";
-const STAFF= "STAFF";
-const EMPLOYEE = [STAFF, MANAGER];
+const CUSTOMER = -1;
+const STAFF= 0;
+const MANAGER = 1;
 
 function is(...roles) {
     return (req, res, next) => {
@@ -64,9 +63,8 @@ function attach() {
 
 export default {
     CUSTOMER,
-    MANAGER,
     STAFF,
-    EMPLOYEE,
+    MANAGER,
     is,
     attach
 }

@@ -16,7 +16,7 @@ class Table {
             if (this.sortAttribute.indexOf(attr) < 0 || (op !== "ASC" && op !== "DESC")) {
                 return { error: new Error("invalid sort value")};
             }
-            return { query: '`' + attr + '`' + ' ' + op }
+            return { query: '`' + this.name + '`' + '.' + '`' + attr + '`' + ' ' + op }
         } else {
             return { error: new Error("invalid sort value")};
         }
@@ -27,22 +27,23 @@ class Table {
         let filterAttrs= this.filterAttribute;
         let sortAttrs = this.sortAttribute;
         let temp = null;
-        let queryStr = [];
-        let countQueryStr = null;
-        let params = [];
+        let whereQuery = [];
+        let sortQuery = [];
+        let pagingQuery = []
+        let whereParams = [];
+        let pagingParams = [];
         // WHERE
-        queryStr.push("WHERE");
         for (let attr in filterAttrs) {
             if (query[attr]) {
-                temp = filterAttrs[attr].getFilterQuery(attr, query[attr]);
+                temp = filterAttrs[attr].getFilterQuery(this.name, attr, query[attr]);
                 if (!temp.error) {
-                    queryStr.push(...['(' + temp.query + ')', "AND"]);
-                    params.push(...temp.params);
+                    whereQuery.push(...['(' + temp.query + ')', "AND"]);
+                    whereParams.push(...temp.params);
                 }
             }
         }
-        queryStr.push('(`is_deleted` = ?)');
-        params.push(false);
+        whereQuery.push('(`' + this.name + '`' + '.' + '`is_deleted` = ?)');
+        whereParams.push(false);
         // ORDER BY
         temp = this.getSortQueryStr(query.sort_by);
         if (temp.error) {
@@ -50,23 +51,24 @@ class Table {
             if (sortAttrs[0]) {
                 temp = this.getSortQueryStr(sortAttrs[0] + "-asc");
                 if (!temp.error) {
-                    queryStr.push(...["ORDER BY", temp.query]);
+                    sortQuery.push(...[temp.query]);
                 }
             }
         } else {
-            queryStr.push(...["ORDER BY", temp.query]);
+            sortQuery.push(...[temp.query]);
         }
         // LIMIT & OFFSET
-        countQueryStr = queryStr.join(" ");
-        queryStr.push("LIMIT ?");
-        params.push(query.limit);
-        queryStr.push("OFFSET ?");
-        params.push(query.offset);
+        pagingQuery.push("LIMIT ?");
+        pagingParams.push(query.limit);
+        pagingQuery.push("OFFSET ?");
+        pagingParams.push(query.offset);
         return {
             parsedQuery: query,
-            queryStr: queryStr.join(" "),
-            countQueryStr,
-            params: params
+            whereQueryStr: whereQuery.join(" "),
+            sortQueryStr: sortQuery.join(" "),
+            pagingQueryStr: pagingQuery.join(" "),
+            whereParams,
+            pagingParams
         }
     }
 
@@ -74,7 +76,9 @@ class Table {
         for (let attr in this.attribute) {
             if (attr in row) {
                 for (let key in this.attribute[attr]) {
-                    this.attribute[attr][key].validate(row[attr], attr);
+                    if(!this.attribute[attr][key].validate(row[attr])) {
+                        throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
+                    }
                 }
             }
         }

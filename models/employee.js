@@ -21,15 +21,15 @@ const employeeTable = new Table("employee", {
         isRequired: DataType.NOTNULL()
     },
     "email": {
-        type: DataType.STRING(/^.+@.+$/),
+        type: DataType.STRING({ check: (val) => /^.+@.+$/.test(val)}),
         isRequired: DataType.NOTNULL()
     },
     "password": {
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "roles": {
-        type: DataType.NUMBER(),
+    "role": {
+        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NOTNULL()
     },
     "hourly_rate": {
@@ -59,8 +59,8 @@ const employeeTable = new Table("employee", {
 async function getOneByEmail(conn, email) {
     let data = utils.objectAssign(["email"], { email });
     employeeTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + employeeTable.name + '` WHERE `email` = ? AND `is_deleted` = ?',
+    const [rows] = await conn.query(
+        'SELECT * FROM `employee` WHERE `email` = ? AND `is_deleted` = ?',
         [data.email, false]
     );
     return rows[0] || null;

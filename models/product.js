@@ -1,6 +1,7 @@
 import utils from "../helpers/utils.js"
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
+import categoryModel from "./category.js";
 
 const productTable = new Table("product", {
     "id": {
@@ -54,6 +55,10 @@ const productTable = new Table("product", {
     "is_deleted": {
         type: DataType.NUMBER(),
         isRequired: DataType.NULLABLE()
+    },
+    "category_id": {
+        type: DataType.ARRAY(DataType.NUMBER()),
+        isRequired: DataType.NULLABLE()
     }
 }, {
     sort: ["name", "price", "created_at", "updated_at"],
@@ -64,21 +69,31 @@ const productTable = new Table("product", {
     }
 });
 
-async function count(conn, countQueryStr, params) {
-    const [rows, fields] = await conn.query(
-        'SELECT COUNT(*) FROM `' + productTable.name + '` ' + countQueryStr,
-        params
-    );
-    return (rows[0] && rows[0]["COUNT(*)"]) || 0;
-}
-
 async function getAll(conn, query) {
-    let { parsedQuery, queryStr, countQueryStr, params } = productTable.getQueryStr(query);
-    const total = await count(conn, countQueryStr, params);
-    const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + productTable.name + '` ' + queryStr,
-        params
+    let categoryIdsQuery = query.category_id;
+    let validator = DataType.ARRAY(DataType.NUMBER());
+    if (!validator.validate(categoryIdsQuery)) {
+        categoryIdsQuery = [];
+    }
+    let joinQuery = "WHERE";
+    if (categoryIdsQuery.length !== 0) {
+        joinQuery = 'INNER JOIN `product_category` ON `product`.`id` = `product_category`.`product_id`'
+            + ' WHERE `product_category`.`category_id` IN (' + categoryIdsQuery.join(",") + ')' 
+            + ' AND';
+    }
+    let { parsedQuery, whereQueryStr, sortQueryStr, pagingQueryStr, whereParams, pagingParams } = productTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `product`.`id`) FROM `product` ' + joinQuery + ' ' + whereQueryStr + ' ORDER BY ' + sortQueryStr,
+        whereParams
     );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `product`.`id`)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT DISTINCT `product`.* FROM `product` ' + joinQuery + ' ' + whereQueryStr + ' ORDER BY ' + sortQueryStr + ' ' + pagingQueryStr,
+        whereParams.concat(pagingParams)
+    );
+    for (let row of rows) {
+        row.category = await categoryModel.getAllByProductId(conn, row.id);
+    }
     return {
         total,
         limit: parsedQuery.limit,
@@ -90,10 +105,13 @@ async function getAll(conn, query) {
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     productTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + productTable.name + '` WHERE `id` = ? AND `is_deleted` = ?',
+    const [rows] = await conn.query(
+        'SELECT * FROM `product` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
+    if (rows[0]) {
+        rows[0].category = await categoryModel.getAllByProductId(conn, rows[0].id);
+    }
     return rows[0] || null;
 }
 

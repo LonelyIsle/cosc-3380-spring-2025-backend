@@ -22,7 +22,7 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NOTNULL()
     },
     "email": {
-        type: DataType.STRING(/^.+@.+$/),
+        type: DataType.STRING({ check: (val) => /^.+@.+$/.test(val)}),
         isRequired: DataType.NOTNULL()
     },
     "password": {
@@ -127,8 +127,8 @@ const customerTable = new Table("customer", {
 async function getOneByEmail(conn, email) {
     let data = utils.objectAssign(["email"], { email });
     customerTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + customerTable.name + '` WHERE `email` = ? AND `is_deleted` = ?',
+    const [rows] = await conn.query(
+        'SELECT * FROM `customer` WHERE `email` = ? AND `is_deleted` = ?',
         [data.email, false]
     );
     return rows[0] || null;
@@ -152,8 +152,8 @@ async function createOne(conn, customer) {
         throw new HttpError({statusCode: 400, message: `This email is registered.`});
     }
     data.password = await pwd.hash(data.password);
-    const [rows, fields] = await conn.query(
-        'INSERT INTO `' + customerTable.name + '`(`first_name`, `middle_name`, `last_name`, `email`, `password`) VALUES (?, ?, ?, ?, ?)',
+    const [rows] = await conn.query(
+        'INSERT INTO `customer`(`first_name`, `middle_name`, `last_name`, `email`, `password`) VALUES (?, ?, ?, ?, ?)',
         [data.first_name, data.middle_name, data.last_name, data.email, data.password]
     );
     return rows.insertId;

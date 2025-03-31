@@ -39,20 +39,16 @@ const categoryTable = new Table("category", {
     }
 });
 
-async function count(conn, countQueryStr, params) {
-    const [rows, fields] = await conn.query(
-        'SELECT COUNT(*) FROM `' + categoryTable.name + '` ' + countQueryStr,
-        params
-    );
-    return (rows[0] && rows[0]["COUNT(*)"]) || 0;
-}
-
 async function getAll(conn, query) {
-    let { parsedQuery, queryStr, countQueryStr, params } = categoryTable.getQueryStr(query);
-    const total = await count(conn, countQueryStr, params);
-    const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + categoryTable.name + '` ' + queryStr,
-        params
+    let { parsedQuery, whereQueryStr, sortQueryStr, pagingQueryStr, whereParams, pagingParams } = categoryTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(*) FROM `category` WHERE ' + whereQueryStr + ' ORDER BY ' + sortQueryStr,
+        whereParams
+    );
+    const total = (countRows[0] && countRows[0]["COUNT(*)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT * FROM `category` WHERE ' + whereQueryStr + ' ORDER BY ' + sortQueryStr + ' ' + pagingQueryStr,
+        whereParams.concat(pagingParams)
     );
     return {
         total,
@@ -62,11 +58,24 @@ async function getAll(conn, query) {
     };
 }
 
+async function getAllByProductId(conn, productId) {
+    let data = utils.objectAssign(["productId"], { productId });
+    let validator = DataType.NUMBER();
+    if (!data.productId || !validator.validate(data.productId)) {
+        throw new HttpError({ statusCode: 400, message: `productId is invalid.` });
+    }
+    const [rows] = await conn.query(
+        'SELECT DISTINCT `category`.* FROM `category` INNER JOIN `product_category` ON `product_category`.`category_id` = `category`.`id` WHERE `product_category`.`product_id` = ? AND `category`.`is_deleted` = ?',
+        [data.productId, false]
+    );
+    return rows;
+}
+
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     categoryTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + categoryTable.name + '` WHERE `id` = ? AND `is_deleted` = ?',
+    const [rows] = await conn.query(
+        'SELECT * FROM `category` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
     return rows[0] || null;
@@ -75,8 +84,8 @@ async function getOne(conn, id) {
 async function createOne(conn, category) {
     let data = utils.objectAssign(["name", "description"], category);
     categoryTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'INSERT INTO `' + categoryTable.name + '`(`name`, `description`) VALUES (?, ?)',
+    const [rows] = await conn.query(
+        'INSERT INTO `category`(`name`, `description`) VALUES (?, ?)',
         [data.name, data.description]
     );
     return rows.insertId;
@@ -89,8 +98,8 @@ async function updateOne(conn, newCategory) {
     }
     let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
     categoryTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'UPDATE `' + categoryTable.name + '` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
+    const [rows] = await conn.query(
+        'UPDATE `category` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.name, data.description, data.id, false]
     );
     return newCategory.id;
@@ -99,8 +108,8 @@ async function updateOne(conn, newCategory) {
 async function deleteOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     categoryTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'UPDATE `' + categoryTable.name + '` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+    const [rows] = await conn.query(
+        'UPDATE `category` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
         [true, new Date(), id, false]
     );
     return rows;
@@ -109,6 +118,7 @@ async function deleteOne(conn, id) {
 export default {
     categoryTable,
     getAll,
+    getAllByProductId,
     getOne,
     createOne,
     updateOne,

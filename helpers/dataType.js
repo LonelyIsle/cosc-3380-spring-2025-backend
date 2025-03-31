@@ -2,8 +2,16 @@ import { HttpError } from "../helpers/error.js";
 import utils from "./utils.js";
 
 class ARRAY {
-    validate(val, attr = val) {
-        return this.elementType.validate(val, attr);
+    validate(val) {
+        if (!Array.isArray(val)) {
+            return false; 
+        }
+        for (let item of val) {
+            if(!this.elementType.validate(item)) {
+                return false;
+            }
+        }
+        return true;
     }
     constructor(elementType) {
         this.elementType = elementType;
@@ -11,11 +19,11 @@ class ARRAY {
 }
 
 class NUMBER {
-    getFilterQuery(key, val) {
+    getFilterQuery(tableName, key, val) {
         if (!utils.isNaN(val)) {
             let min = val;
             let max = val;
-            return { op: "=", min, max, query: '`' + key + '`' + " = ?", params: [min]};
+            return { op: "=", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " = ?", params: [min]};
         }
         let _val = val.split(":");
         if (_val.length !== 2) {
@@ -24,79 +32,103 @@ class NUMBER {
         let [min] = utils.parseStr(_val[0]);
         let [max] = utils.parseStr(_val[1]);
         if (utils.isNaN(min)) {
-            return { op: "<", min: null, max, query: '`' + key + '`' + " < ?", params: [max]};
+            return { op: "<", min: null, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " < ?", params: [max]};
         } 
         if (utils.isNaN(max)) {
-            return { op: ">", min, max: null, query: '`' + key + '`' + " > ?", params: [min]};
+            return { op: ">", min, max: null, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " > ?", params: [min]};
         }
         if (min == max) {
-            return { op: "=", min, max, query: '`' + key + '`' + " = ?", params: [min]};
+            return { op: "=", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " = ?", params: [min]};
         }
-        return { op: "BETWEEN", min, max, query: '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
+        return { op: "BETWEEN", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
     }
-    validate(val, attr = val) {}
-    constructor() {}
+    validate(val) {
+        if (utils.isNaN(val)) {
+            return false;
+        }
+        if (!this.check(val)) {
+            return false;
+        }
+        return true;
+    }
+    constructor(opt = {}) {
+        let { check } = Object.assign({ check: () => true }, opt);
+        this.check = check;
+    }
 }
 
 class STRING {
-    getFilterQuery(key, val) {
+    getFilterQuery(tableName, key, val) {
         return { 
             op: "LIKE", 
             q: val,
-            query: '`' + key + '`' + " LIKE ?", 
+            query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " LIKE ?", 
             params: ['%' + val + '%']
         };
     }
-    validate(val, attr = val) {
-        if (this.regexp) {
-            if(!this.regexp.test(val)) {
-                throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
-            }
+    validate(val) {
+        if (typeof val !== "string") {
+            return false;
         }
+        if (!this.check(val)) {
+            return false;
+        }
+        return true;
     }
-    constructor(regexp) {
-        this.regexp = regexp;
+    constructor(opt = {}) {
+        let { check } = Object.assign({ check: () => true }, opt);
+        this.check = check;
     }
 }
 
 class TIMESTAMP {
-    validate(val, attr = val) {}
+    validate(val) {
+        return true;
+    }
     constructor() {}
 }
 
 class NULLABLE {
-    validate(val, attr = val) {}
+    validate(val) {
+        return true;
+    }
     constructor() {}
 }
 
 class NOTNULL {
-    validate(val, attr = val) {
+    validate(val) {
         if (val === null) {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be null.` });
+            return false;
         }
         if (val === undefined) {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be undefined.` });
+            return false;
         }
         if (typeof val === "string" && val.trim() === "") {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be empty.` });
+            return false;
         }
+        if (Array.isArray(val) && val.length === 0) {
+            return false;
+        }
+        return true;
     }
     constructor() {}
 }
 
 class BLOB {
-    validate() {}
+    validate() {
+        return true;
+    }
     constructor() {}
 }
 
 class DataType {
-    static ARRAY(...opt) { return new ARRAY(...opt); }
-    static NUMBER(...opt) { return new NUMBER(...opt); }
-    static STRING(...opt) { return new STRING(...opt); }
-    static TIMESTAMP(...opt) { return new TIMESTAMP(...opt); }
-    static NULLABLE(...opt) { return new NULLABLE(...opt); }
-    static NOTNULL(...opt) { return new NOTNULL(...opt); }
-    static BLOB(...opt) { return new BLOB(...opt); }
+    static ARRAY(opt) { return new ARRAY(opt); }
+    static NUMBER(opt) { return new NUMBER(opt); }
+    static STRING(opt) { return new STRING(opt); }
+    static TIMESTAMP(opt) { return new TIMESTAMP(opt); }
+    static NULLABLE(opt) { return new NULLABLE(opt); }
+    static NOTNULL(opt) { return new NOTNULL(opt); }
+    static BLOB(opt) { return new BLOB(opt); }
 }
 
 export default DataType;
