@@ -2,8 +2,16 @@ import { HttpError } from "../helpers/error.js";
 import utils from "./utils.js";
 
 class ARRAY {
-    validate(val, attr = val) {
-        return this.elementType.validate(val, attr);
+    validate(val) {
+        if (!Array.isArray(val)) {
+            return false; 
+        }
+        for (let item of val) {
+            if(!this.elementType.validate(item)) {
+                return false;
+            }
+        }
+        return true;
     }
     constructor(elementType) {
         this.elementType = elementType;
@@ -34,10 +42,14 @@ class NUMBER {
         }
         return { op: "BETWEEN", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
     }
-    validate(val, attr = val) {
-        if (!this.check(val)) {
-            throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
+    validate(val) {
+        if (utils.isNaN(val)) {
+            return false;
         }
+        if (!this.check(val)) {
+            return false;
+        }
+        return true;
     }
     constructor(opt = {}) {
         let { check } = Object.assign({ check: () => true }, opt);
@@ -54,10 +66,14 @@ class STRING {
             params: ['%' + val + '%']
         };
     }
-    validate(val, attr = val) {
-        if (!this.check(val)) {
-            throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
+    validate(val) {
+        if (typeof val !== "string") {
+            return false;
         }
+        if (!this.check(val)) {
+            return false;
+        }
+        return true;
     }
     constructor(opt = {}) {
         let { check } = Object.assign({ check: () => true }, opt);
@@ -66,32 +82,42 @@ class STRING {
 }
 
 class TIMESTAMP {
-    validate(val, attr = val) {}
+    validate(val) {
+        return true;
+    }
     constructor() {}
 }
 
 class NULLABLE {
-    validate(val, attr = val) {}
+    validate(val) {
+        return true;
+    }
     constructor() {}
 }
 
 class NOTNULL {
-    validate(val, attr = val) {
+    validate(val) {
         if (val === null) {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be null.` });
+            return false;
         }
         if (val === undefined) {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be undefined.` });
+            return false;
         }
         if (typeof val === "string" && val.trim() === "") {
-            throw new HttpError({ statusCode: 400, message: `${attr} cannot be empty.` });
+            return false;
         }
+        if (Array.isArray(val) && val.length === 0) {
+            return false;
+        }
+        return true;
     }
     constructor() {}
 }
 
 class BLOB {
-    validate() {}
+    validate() {
+        return true;
+    }
     constructor() {}
 }
 

@@ -59,8 +59,8 @@ const employeeTable = new Table("employee", {
 async function getOneByEmail(conn, email) {
     let data = utils.objectAssign(["email"], { email });
     employeeTable.validate(data);
-    const [rows, fields] = await conn.query(
-        'SELECT * FROM `' + employeeTable.name + '` WHERE `email` = ? AND `is_deleted` = ?',
+    const [rows] = await conn.query(
+        'SELECT * FROM `employee` WHERE `email` = ? AND `is_deleted` = ?',
         [data.email, false]
     );
     return rows[0] || null;
