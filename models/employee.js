@@ -21,7 +21,7 @@ const employeeTable = new Table("employee", {
         isRequired: DataType.NOTNULL()
     },
     "email": {
-        type: DataType.STRING(/^.+@.+$/),
+        type: DataType.STRING({ check: (val) => /^.+@.+$/.test(val)}),
         isRequired: DataType.NOTNULL()
     },
     "password": {

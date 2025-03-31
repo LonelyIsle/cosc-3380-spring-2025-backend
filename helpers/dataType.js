@@ -34,8 +34,15 @@ class NUMBER {
         }
         return { op: "BETWEEN", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
     }
-    validate(val, attr = val) {}
-    constructor() {}
+    validate(val, attr = val) {
+        if (!this.check(val)) {
+            throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
+        }
+    }
+    constructor(opt = {}) {
+        let { check } = Object.assign({ check: () => true }, opt);
+        this.check = check;
+    }
 }
 
 class STRING {
@@ -48,14 +55,13 @@ class STRING {
         };
     }
     validate(val, attr = val) {
-        if (this.regexp) {
-            if(!this.regexp.test(val)) {
-                throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
-            }
+        if (!this.check(val)) {
+            throw new HttpError({ statusCode: 400, message: `${attr} is invalid.` });
         }
     }
-    constructor(regexp) {
-        this.regexp = regexp;
+    constructor(opt = {}) {
+        let { check } = Object.assign({ check: () => true }, opt);
+        this.check = check;
     }
 }
 
@@ -90,13 +96,13 @@ class BLOB {
 }
 
 class DataType {
-    static ARRAY(...opt) { return new ARRAY(...opt); }
-    static NUMBER(...opt) { return new NUMBER(...opt); }
-    static STRING(...opt) { return new STRING(...opt); }
-    static TIMESTAMP(...opt) { return new TIMESTAMP(...opt); }
-    static NULLABLE(...opt) { return new NULLABLE(...opt); }
-    static NOTNULL(...opt) { return new NOTNULL(...opt); }
-    static BLOB(...opt) { return new BLOB(...opt); }
+    static ARRAY(opt) { return new ARRAY(opt); }
+    static NUMBER(opt) { return new NUMBER(opt); }
+    static STRING(opt) { return new STRING(opt); }
+    static TIMESTAMP(opt) { return new TIMESTAMP(opt); }
+    static NULLABLE(opt) { return new NULLABLE(opt); }
+    static NOTNULL(opt) { return new NOTNULL(opt); }
+    static BLOB(opt) { return new BLOB(opt); }
 }
 
 export default DataType;
