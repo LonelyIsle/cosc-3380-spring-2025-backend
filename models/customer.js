@@ -162,7 +162,7 @@ async function getOneByEmailAndPwd(conn, email, password) {
     return null;
 }
 
-async function getOneByEmailAndResetPasswordAnswer(conn, email, answer) {
+async function getOneByEmailAndAnswer(conn, email, answer) {
     let data = utils.objectAssign(["email", "answer"], { email, answer });
     customerTable.validate(data);
     let customer = await getOneByEmail(conn, data.email);
@@ -170,17 +170,6 @@ async function getOneByEmailAndResetPasswordAnswer(conn, email, answer) {
         return customer;
     }
     return null;
-}
-
-async function resetPassword(conn, id, password) {
-    let data = utils.objectAssign(["id", "password"], { id, password });
-    customerTable.validate(data);
-    data.password = await pwd.hash(data.password);
-    const [rows] = await conn.query(
-        'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
-        [data.password, data.id, false]
-    );
-    return rows;
 }
 
 async function createOne(conn, customer) {
@@ -273,6 +262,41 @@ async function updateOne(conn, newCustomer) {
     return newCustomer.id;
 }
 
+async function updatePassword(conn, id, password) {
+    let data = utils.objectAssign(["id", "password"], { id, password });
+    customerTable.validate(data);
+    data.password = await pwd.hash(data.password);
+    const [rows] = await conn.query(
+        'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.password, data.id, false]
+    );
+    return rows;
+}
+
+async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_password_answer) {
+    let data = utils.objectAssign([
+        "id", 
+        "reset_password_question", 
+        "reset_password_answer"
+    ], { 
+        id, 
+        reset_password_question, 
+        reset_password_answer 
+    });
+    customerTable.validate(data);
+    data.reset_password_answer = await pwd.hash(data.reset_password_answer);
+    const [rows] = await conn.query(
+        'UPDATE `customer` SET reset_password_question = ?, reset_password_answer = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [
+            data.reset_password_question, 
+            data.reset_password_answer, 
+            data.id, 
+            false
+        ]
+    );
+    return rows;
+}
+
 export default {
     customerTable,
     createOne,
@@ -280,6 +304,7 @@ export default {
     getOne,
     getOneByEmail,
     getOneByEmailAndPwd,
-    getOneByEmailAndResetPasswordAnswer,
-    resetPassword
+    getOneByEmailAndAnswer,
+    updatePassword,
+    updateQuestionAndAnswer
 }

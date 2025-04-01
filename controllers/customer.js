@@ -31,7 +31,7 @@ async function login(req, res) {
     });
 }
 
-async function getForgetQuestion(req, res) {
+async function getQuestion(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
         let customer = await customerModel.getOneByEmail(conn, body.email);
@@ -47,11 +47,11 @@ async function getForgetQuestion(req, res) {
 async function forget(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
-        let customer = await customerModel.getOneByEmailAndResetPasswordAnswer(conn, body.email, body.reset_password_answer);
+        let customer = await customerModel.getOneByEmailAndAnswer(conn, body.email, body.reset_password_answer);
         if (!customer) {
             throw new HttpError({ statusCode: 400, message: "Wrong email or answer." })
         }
-        let data = await customerModel.resetPassword(conn, customer.id, body.password);
+        let data = await customerModel.updatePassword(conn, customer.id, body.password);
         return null;
     });
 }
@@ -90,11 +90,40 @@ async function updateOne(req, res) {
     });
 }
 
+
+async function updatePassword(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        if (req.jwt.user.id !== param.id) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let data = await customerModel.updatePassword(conn, body.id, body.password);
+        return null;
+    });
+}
+
+async function updateQuestionAndAnswer(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        if (req.jwt.user.id !== param.id) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let data = await customerModel.updateQuestionAndAnswer(conn, body.id, body.reset_password_question, body.reset_password_answer);
+        return null;
+    });
+}
+
 export default {
     register,
     login,
     getOne,
-    getForgetQuestion,
+    getQuestion,
     forget,
-    updateOne
+    updateOne,
+    updatePassword,
+    updateQuestionAndAnswer
 }
