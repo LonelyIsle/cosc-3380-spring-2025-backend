@@ -199,9 +199,84 @@ async function createOne(conn, customer) {
     return rows.insertId;
 }
 
+async function updateOne(conn, newCustomer) {
+    let oldCustomer = await getOne(conn, newCustomer.id);
+    if (!oldCustomer) {
+        throw new HttpError({statusCode: 400, message: `customer ${newCustomer.id} not found.`});
+    }
+    let data = utils.objectAssign([
+        "id", 
+        "first_name",
+        "middle_name",
+        "last_name",
+        "shipping_address_1",
+        "shipping_address_2",
+        "shipping_address_city",
+        "shipping_address_state",
+        "shipping_address_zip",
+        "billing_address_1",
+        "billing_address_2",
+        "billing_address_city",
+        "billing_address_state",
+        "billing_address_zip",
+        "card_name",
+        "card_number",
+        "card_expire_month",
+        "card_expire_year",
+        "card_code"
+    ], oldCustomer, newCustomer);
+    customerTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `customer` SET '
+        + '`first_name` = ?, '
+        + '`middle_name` = ?, '
+        + '`last_name` = ?, '
+        + '`shipping_address_1` = ?, '
+        + '`shipping_address_2` = ?, '
+        + '`shipping_address_city` = ?, '
+        + '`shipping_address_state` = ?, '
+        + '`shipping_address_zip` = ?, '
+        + '`billing_address_1` = ?, '
+        + '`billing_address_2` = ?, '
+        + '`billing_address_city` = ?, '
+        + '`billing_address_state` = ?, '
+        + '`billing_address_zip` = ?, '
+        + '`card_name` = ?, '
+        + '`card_number` = ?, '
+        + '`card_expire_month` = ?, '
+        + '`card_expire_year` = ?, '
+        + '`card_code` = ? '
+        + 'WHERE `id` = ? AND `is_deleted` = ?',
+        [
+            data.first_name,
+            data.middle_name,
+            data.last_name,
+            data.shipping_address_1,
+            data.shipping_address_2,
+            data.shipping_address_city,
+            data.shipping_address_state,
+            data.shipping_address_zip,
+            data.billing_address_1,
+            data.billing_address_2,
+            data.billing_address_city,
+            data.billing_address_state,
+            data.billing_address_zip,
+            data.card_name,
+            data.card_number,
+            data.card_expire_month,
+            data.card_expire_year,
+            data.card_code,
+            data.id,
+            false
+        ]
+    );
+    return newCustomer.id;
+}
+
 export default {
     customerTable,
     createOne,
+    updateOne,
     getOne,
     getOneByEmail,
     getOneByEmailAndPwd,

@@ -72,11 +72,29 @@ async function getOne(req, res) {
     });
 }
 
+async function updateOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        if (req.jwt.user.id !== param.id) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let  customerId = await customerModel.updateOne(conn, body);
+        let customer = await customerModel.getOne(conn, customerId)
+        if (customer) {
+            delete customer.password;
+            delete customer.reset_password_answer;
+        }
+        return customer;
+    });
+}
 
 export default {
     register,
     login,
     getOne,
     getForgetQuestion,
-    forget
+    forget,
+    updateOne
 }

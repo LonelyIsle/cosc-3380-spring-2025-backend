@@ -31,6 +31,7 @@ router.post("/customer/forget/question", customerController.getForgetQuestion);
 router.post("/customer/forget", customerController.forget);
 router.post("/customer/register", customerController.register);
 router.post("/customer/login", customerController.login);
+router.patch("/customer/:id", auth.is(auth.CUSTOMER), customerController.updateOne);
 
 // Employee
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
