@@ -78,7 +78,7 @@ async function getAll(conn, query) {
     let joinQuery = "WHERE";
     if (categoryIdsQuery.length !== 0) {
         joinQuery = 'INNER JOIN `product_category` ON `product`.`id` = `product_category`.`product_id`'
-            + ' WHERE `product_category`.`category_id` IN (' + categoryIdsQuery.join(",") + ')' 
+            + ' WHERE `product_category`.`category_id` IN (' + categoryIdsQuery.join(",") + ') AND `product_category`.`is_deleted`=false' 
             + ' AND';
     }
     let { parsedQuery, whereQueryStr, sortQueryStr, pagingQueryStr, whereParams, pagingParams } = productTable.getQueryStr(query);
