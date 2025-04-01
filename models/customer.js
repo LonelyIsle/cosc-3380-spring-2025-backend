@@ -29,6 +29,14 @@ const customerTable = new Table("customer", {
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
+    "reset_password_question": {
+        type: DataType.STRING(),
+        isRequired: DataType.NOTNULL()
+    },
+    "reset_password_answer": {
+        type: DataType.STRING(),
+        isRequired: DataType.NOTNULL()
+    },
     "shipping_address_1":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
@@ -154,17 +162,39 @@ async function getOneByEmailAndPwd(conn, email, password) {
     return null;
 }
 
+async function getOneByEmailAndResetPasswordAnswer(conn, email, answer) {
+    let data = utils.objectAssign(["email", "answer"], { email, answer });
+    customerTable.validate(data);
+    let customer = await getOneByEmail(conn, data.email);
+    if (customer && await pwd.compare(answer, customer.reset_password_answer)) {
+        return customer;
+    }
+    return null;
+}
+
+async function resetPassword(conn, id, password) {
+    let data = utils.objectAssign(["id", "password"], { id, password });
+    customerTable.validate(data);
+    data.password = await pwd.hash(data.password);
+    const [rows] = await conn.query(
+        'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.password, data.id, false]
+    );
+    return rows;
+}
+
 async function createOne(conn, customer) {
-    let data = utils.objectAssign(["first_name", "middle_name", "last_name", "email", "password"], customer);
+    let data = utils.objectAssign(["first_name", "middle_name", "last_name", "email", "password", "reset_password_question", "reset_password_answer"], customer);
     customerTable.validate(data);
     let existedCustomer = await getOneByEmail(conn, data.email);
     if (existedCustomer) {
         throw new HttpError({statusCode: 400, message: `This email is registered.`});
     }
     data.password = await pwd.hash(data.password);
+    data.reset_password_answer = await pwd.hash(data.reset_password_answer)
     const [rows] = await conn.query(
-        'INSERT INTO `customer`(`first_name`, `middle_name`, `last_name`, `email`, `password`) VALUES (?, ?, ?, ?, ?)',
-        [data.first_name, data.middle_name, data.last_name, data.email, data.password]
+        'INSERT INTO `customer`(`first_name`, `middle_name`, `last_name`, `email`, `password`, `reset_password_question`, `reset_password_answer`) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [data.first_name, data.middle_name, data.last_name, data.email, data.password, data.reset_password_question, data.reset_password_answer]
     );
     return rows.insertId;
 }
@@ -174,5 +204,7 @@ export default {
     createOne,
     getOne,
     getOneByEmail,
-    getOneByEmailAndPwd
+    getOneByEmailAndPwd,
+    getOneByEmailAndResetPasswordAnswer,
+    resetPassword
 }
