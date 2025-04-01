@@ -22,6 +22,21 @@ async function login(req, res) {
     });
 }
 
+async function getOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let param = req.param;
+        if (req.jwt.user.role === auth.STAFF && req.jwt.user.id !== param.id) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let employee = await employeeModel.getOne(conn, param.id);
+        if (employee) {
+            delete employee.password;
+        }
+        return employee;
+    });
+}
+
 export default {
-    login
+    login,
+    getOne
 }

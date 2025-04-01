@@ -30,7 +30,24 @@ async function login(req, res) {
     });
 }
 
+async function getOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let param = req.param;
+        if (req.jwt.user.role === auth.CUSTOMER && req.jwt.user.id !== param.id) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let customer = await customerModel.getOne(conn, param.id);
+        if (customer) {
+            delete customer.password;
+            customer.role = auth.CUSTOMER;
+        }
+        return customer;
+    });
+}
+
+
 export default {
     register,
-    login
+    login,
+    getOne
 }

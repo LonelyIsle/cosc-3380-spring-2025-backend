@@ -124,6 +124,16 @@ const customerTable = new Table("customer", {
     sort: ["last_name", "first_name", "middle_name", "created_at", "updated_at"],
 });
 
+async function getOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    customerTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `customer` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    return rows[0] || null;
+}
+
 async function getOneByEmail(conn, email) {
     let data = utils.objectAssign(["email"], { email });
     customerTable.validate(data);
@@ -162,6 +172,7 @@ async function createOne(conn, customer) {
 export default {
     customerTable,
     createOne,
+    getOne,
     getOneByEmail,
     getOneByEmailAndPwd
 }

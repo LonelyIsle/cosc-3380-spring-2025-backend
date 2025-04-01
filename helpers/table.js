@@ -1,4 +1,5 @@
 import utils from "./utils.js";
+import { HttpError } from "./error.js";
 
 class Table {
     parseReqQuery(query) {

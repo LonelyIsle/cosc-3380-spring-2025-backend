@@ -26,10 +26,12 @@ router.get("/test/which", testController.which);
 router.get("/test/kill", testController.kill);
 
 // Customer
+router.get("/customer/:id", auth.is(auth.CUSTOMER, auth.MANAGER), customerController.getOne);
 router.post("/customer/register", customerController.register);
 router.post("/customer/login", customerController.login);
 
 // Employee
+router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
 
 // Product
