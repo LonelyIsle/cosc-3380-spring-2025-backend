@@ -9,7 +9,7 @@ const MANAGER = 1;
 function is(...roles) {
     return (req, res, next) => {
         try {
-            let token = req.headers["authorization"] || req.body.authorization;
+            let token = req.headers["authorization"] || (req.body && req.body.authorization);
             if (!token) {
                 throw new HttpError({ statusCode: 401 });
             }

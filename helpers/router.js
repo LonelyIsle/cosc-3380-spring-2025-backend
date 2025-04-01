@@ -130,6 +130,7 @@ class Router {
     handle(req, res) {
         req.urlObj = url.getURLObj(req.url);
         req.query = this.getReqQuery(req);
+        req.body = req.body ? req.body : {};
         let matchedRoute = null;
         for(let route of this.routes) {
             if (this.match(req, route)) {

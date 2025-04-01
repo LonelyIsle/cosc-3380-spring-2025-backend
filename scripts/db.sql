@@ -114,6 +114,8 @@ CREATE TABLE `customer` (
     `last_name` VARCHAR(255) NOT NULL,
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `password` LONGTEXT NOT NULL,
+    `reset_password_question` LONGTEXT NOT NULL,
+    `reset_password_answer` LONGTEXT NOT NULL,
     `shipping_address_1` VARCHAR(255),
     `shipping_address_2` VARCHAR(255),
     `shipping_address_city` VARCHAR(255),

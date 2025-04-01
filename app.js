@@ -26,10 +26,17 @@ router.get("/test/which", testController.which);
 router.get("/test/kill", testController.kill);
 
 // Customer
+router.get("/customer/:id", auth.is(auth.CUSTOMER, auth.MANAGER), customerController.getOne);
+router.post("/customer/forget/question", customerController.getQuestion);
+router.post("/customer/forget", customerController.forget);
 router.post("/customer/register", customerController.register);
 router.post("/customer/login", customerController.login);
+router.patch("/customer/:id", auth.is(auth.CUSTOMER), customerController.updateOne);
+router.patch("/customer/:id/password", auth.is(auth.CUSTOMER), customerController.updatePassword);
+router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.updateQuestionAndAnswer);
 
 // Employee
+router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
 
 // Product

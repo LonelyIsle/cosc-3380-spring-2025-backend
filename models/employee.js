@@ -56,6 +56,16 @@ const employeeTable = new Table("employee", {
     sort: ["last_name", "first_name", "middle_name", "created_at", "updated_at"],
 });
 
+async function getOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    employeeTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `employee` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    return rows[0] || null;
+}
+
 async function getOneByEmail(conn, email) {
     let data = utils.objectAssign(["email"], { email });
     employeeTable.validate(data);
@@ -78,6 +88,7 @@ async function getOneByEmailAndPwd(conn, email, password) {
 
 export default {
     employeeTable,
+    getOne,
     getOneByEmail,
     getOneByEmailAndPwd
 }

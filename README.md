@@ -12,7 +12,8 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 - [Node.js](https://nodejs.org/en)
 - [MySQL](https://www.mysql.com/)
 #### How To Run
-- Import MySQL scripts/db-dump.sql
+- Import /scripts/db.sql
+- Import /scripts/data.sql
 - In project directory, execute the following commands
     ```
     npm install
