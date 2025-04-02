@@ -32,11 +32,11 @@ const productTable = new Table("product", {
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
     },
-    "thumbnail_image": {
+    "image": {
         type: DataType.BLOB(),
         isRequired: DataType.NULLABLE()
     },
-    "thumbnail_image_extension": {
+    "image_extension": {
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
     },

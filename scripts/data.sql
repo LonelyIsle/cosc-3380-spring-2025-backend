@@ -9,7 +9,7 @@ INSERT INTO `customer` (`first_name`, `last_name`, `email`, `password`, `reset_p
 
 -- CONFIG --
 INSERT INTO `config` (`key`, `value`) VALUES ('SUBSCRIPTION_VALUE', 0.2);
-INSERT INTO `config` (`key`, `value`) VALUES ('SHIPPING_FEE', 10.00);
+INSERT INTO `config` (`key`, `value`) VALUES ('SHIPPING_FEE', 9.99);
 INSERT INTO `config` (`key`, `value`) VALUES ('SALE_TAX', 0.08);
 
 -- PRODUCT --
