@@ -11,7 +11,7 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 #### Tech Stack
 - [Node.js](https://nodejs.org/en)
 - [MySQL](https://www.mysql.com/)
-#### How To Run (Linux)
+#### How To Run (Linux/MacOS)
 - Import the following SQL files into MySQL in the specified order:
     - Drop and Create database (recommend):
         ```
@@ -36,7 +36,7 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 - When deploying, ```--env=[name]``` option can be omitted, allowing the server to use environment variables set by the user.
 - Note that even when using the ```--env=[name]``` option, the server will prioritize environment variables set by the user and ignore ```[name].env``` file.
 #### How To Run (Windows)
-- Run the below commands one by one in Command Prompt (PoweShell not tested) from the same directory as /app.js:
+- Similar to Linux/MacOS. However, to start the server, run below commands one by one in Command Prompt (PoweShell not tested) from the same directory as /app.js:
     ```
     SET DB_HOST=127.0.0.1
     SET DB_PORT=3306
