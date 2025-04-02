@@ -93,6 +93,9 @@ async function getAll(conn, query) {
     );
     for (let row of rows) {
         row.category = await categoryModel.getAllByProductId(conn, row.id);
+        if (row.image) {
+            row.image = Buffer.from(row.image).toString('base64');
+        }
     }
     return {
         total,
@@ -111,6 +114,9 @@ async function getOne(conn, id) {
     );
     if (rows[0]) {
         rows[0].category = await categoryModel.getAllByProductId(conn, rows[0].id);
+        if (rows[0].image) {
+            rows[0].image = Buffer.from(rows[0].image).toString('base64');
+        }
     }
     return rows[0] || null;
 }
