@@ -48,7 +48,10 @@ class Table {
         // ORDER BY
         temp = this.getSortQueryStr(query.sort_by);
         if (temp.error) {
-            // sort by this.sortAttribute[0] by default
+            // sort by id or this.sortAttribute[0] by default
+            if (!sortAttrs || sortAttrs.length === 0) {
+                sortAttrs[0] = "id";
+            }
             if (sortAttrs[0]) {
                 temp = this.getSortQueryStr(sortAttrs[0] + "-asc");
                 if (!temp.error) {

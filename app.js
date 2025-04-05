@@ -10,6 +10,10 @@ import categoryController from "./controllers/category.js";
 import customerController from "./controllers/customer.js";
 import employeeController from "./controllers/employee.js";
 import productController from "./controllers/product.js";
+import couponController from "./controllers/coupon.js";
+import configController from "./controllers/config.js";
+import saleEventController from "./controllers/saleEvent.js";
+import subscriptionController from "./controllers/subscription.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -31,9 +35,11 @@ router.post("/customer/forget/question", customerController.getQuestion);
 router.post("/customer/forget", customerController.forget);
 router.post("/customer/register", customerController.register);
 router.post("/customer/login", customerController.login);
+router.post("/customer/subscription", auth.is(auth.CUSTOMER), subscriptionController.createOne);
 router.patch("/customer/:id", auth.is(auth.CUSTOMER), customerController.updateOne);
 router.patch("/customer/:id/password", auth.is(auth.CUSTOMER), customerController.updatePassword);
 router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.updateQuestionAndAnswer);
+
 
 // Employee
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
@@ -49,6 +55,15 @@ router.get("/category/:id", categoryController.getOne);
 router.post("/category", auth.is(auth.MANAGER), categoryController.createOne);
 router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOne);
 router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
+
+// Coupon
+router.get("/coupon/:code", couponController.getOneByCode);
+
+// Sale Event
+router.get("/sale-event", saleEventController.getAll);
+
+// Config
+router.get("/config", configController.getAll);
 
 // *
 router.all("/*",  httpResp.Error[404]);

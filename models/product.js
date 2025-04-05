@@ -69,27 +69,10 @@ const productTable = new Table("product", {
     }
 });
 
-async function getAll(conn, query) {
-    let categoryIdsQuery = query.category_id;
-    let validator = DataType.ARRAY(DataType.NUMBER());
-    if (!validator.validate(categoryIdsQuery)) {
-        categoryIdsQuery = [];
-    }
-    let joinQuery = "WHERE";
-    if (categoryIdsQuery.length !== 0) {
-        joinQuery = 'INNER JOIN `product_category` ON `product`.`id` = `product_category`.`product_id`'
-            + ' WHERE `product_category`.`category_id` IN (' + categoryIdsQuery.join(",") + ') AND `product_category`.`is_deleted`=false' 
-            + ' AND';
-    }
-    let { parsedQuery, whereQueryStr, sortQueryStr, pagingQueryStr, whereParams, pagingParams } = productTable.getQueryStr(query);
-    const [countRows] = await conn.query(
-        'SELECT COUNT(DISTINCT `product`.`id`) FROM `product` ' + joinQuery + ' ' + whereQueryStr + ' ORDER BY ' + sortQueryStr,
-        whereParams
-    );
-    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `product`.`id`)"]) || 0;
+async function getAll(conn) {
     const [rows] = await conn.query(
-        'SELECT DISTINCT `product`.* FROM `product` ' + joinQuery + ' ' + whereQueryStr + ' ORDER BY ' + sortQueryStr + ' ' + pagingQueryStr,
-        whereParams.concat(pagingParams)
+        'SELECT * FROM `product` WHERE `is_deleted` = ?',
+        [false]
     );
     for (let row of rows) {
         row.category = await categoryModel.getAllByProductId(conn, row.id);
@@ -97,12 +80,7 @@ async function getAll(conn, query) {
             row.image = Buffer.from(row.image).toString('base64');
         }
     }
-    return {
-        total,
-        limit: parsedQuery.limit,
-        offset: parsedQuery.offset,
-        rows
-    };
+    return rows;
 }
 
 async function getOne(conn, id) {

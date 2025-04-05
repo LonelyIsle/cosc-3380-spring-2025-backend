@@ -33,29 +33,16 @@ const categoryTable = new Table("category", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: ["name", "created_at", "updated_at"],
-    filter: {
-        "name": DataType.STRING()
-    }
+    sort: [],
+    filter: {}
 });
 
-async function getAll(conn, query) {
-    let { parsedQuery, whereQueryStr, sortQueryStr, pagingQueryStr, whereParams, pagingParams } = categoryTable.getQueryStr(query);
-    const [countRows] = await conn.query(
-        'SELECT COUNT(*) FROM `category` WHERE ' + whereQueryStr + ' ORDER BY ' + sortQueryStr,
-        whereParams
-    );
-    const total = (countRows[0] && countRows[0]["COUNT(*)"]) || 0;
+async function getAll(conn) {
     const [rows] = await conn.query(
-        'SELECT * FROM `category` WHERE ' + whereQueryStr + ' ORDER BY ' + sortQueryStr + ' ' + pagingQueryStr,
-        whereParams.concat(pagingParams)
+        'SELECT * FROM `category` WHERE `is_deleted` = false',
+        [false]
     );
-    return {
-        total,
-        limit: parsedQuery.limit,
-        offset: parsedQuery.offset,
-        rows
-    };
+    return rows;
 }
 
 async function getAllByProductId(conn, productId) {
@@ -108,9 +95,10 @@ async function updateOne(conn, newCategory) {
 async function deleteOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     categoryTable.validate(data);
+    let now = new Date();
     const [rows] = await conn.query(
         'UPDATE `category` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
-        [true, new Date(), id, false]
+        [true, now, id, false]
     );
     return rows;
 }

@@ -4,7 +4,7 @@ import db from "./db.js";
 async function getAll(req, res) {
     await db.tx(req, res, async (conn) => {
         let query = req.query;
-        let data = await productModel.getAll(conn, query);
+        let data = await productModel.getAll(conn);
         return data;
     });
 }
