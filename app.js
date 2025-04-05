@@ -13,6 +13,7 @@ import productController from "./controllers/product.js";
 import couponController from "./controllers/coupon.js";
 import configController from "./controllers/config.js";
 import saleEventController from "./controllers/saleEvent.js";
+import subscriptionController from "./controllers/subscription.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -34,9 +35,11 @@ router.post("/customer/forget/question", customerController.getQuestion);
 router.post("/customer/forget", customerController.forget);
 router.post("/customer/register", customerController.register);
 router.post("/customer/login", customerController.login);
+router.post("/customer/subscription", auth.is(auth.CUSTOMER), subscriptionController.createOne);
 router.patch("/customer/:id", auth.is(auth.CUSTOMER), customerController.updateOne);
 router.patch("/customer/:id/password", auth.is(auth.CUSTOMER), customerController.updatePassword);
 router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.updateQuestionAndAnswer);
+
 
 // Employee
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);

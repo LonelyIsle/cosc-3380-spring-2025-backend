@@ -95,9 +95,10 @@ async function updateOne(conn, newCategory) {
 async function deleteOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     categoryTable.validate(data);
+    let now = new Date();
     const [rows] = await conn.query(
         'UPDATE `category` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
-        [true, new Date(), id, false]
+        [true, now, id, false]
     );
     return rows;
 }

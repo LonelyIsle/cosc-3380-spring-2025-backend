@@ -37,6 +37,11 @@ const configTable = new Table("config", {
     filter: {}
 });
 
+const SUBSCRIPTION_DISCOUNT_PERCENTAGE = "SUBSCRIPTION_DISCOUNT_PERCENTAGE";
+const SHIPPING_FEE = "SHIPPING_FEE";
+const SALE_TAX = "SALE_TAX";
+const SUBSCRIPTION_PRICE = "SUBSCRIPTION_PRICE";
+
 async function getAll(conn) {
     const [rows] = await conn.query(
         'SELECT * FROM `config` WHERE `is_deleted` = ?',
@@ -51,6 +56,10 @@ async function getAll(conn) {
 }
 
 export default {
+    SUBSCRIPTION_DISCOUNT_PERCENTAGE,
+    SHIPPING_FEE,
+    SALE_TAX,
+    SUBSCRIPTION_PRICE,
     configTable,
     getAll
 }

@@ -3,11 +3,11 @@ import utils from "./utils.js";
 
 class ARRAY {
     validate(val) {
-        if (!Array.isArray(val)) {
+        if (val && !Array.isArray(val)) {
             return false; 
         }
-        for (let item of val) {
-            if(!this.elementType.validate(item)) {
+        for (let v of val) {
+            if(!this.elementType.validate(v)) {
                 return false;
             }
         }
@@ -43,10 +43,10 @@ class NUMBER {
         return { op: "BETWEEN", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " BETWEEN ? AND ?", params: [min, max]};
     }
     validate(val) {
-        if (utils.isNaN(val)) {
+        if (val && utils.isNaN(val)) {
             return false;
         }
-        if (!this.check(val)) {
+        if (val && !this.check(val)) {
             return false;
         }
         return true;
@@ -67,10 +67,10 @@ class STRING {
         };
     }
     validate(val) {
-        if (typeof val !== "string") {
+        if (val && typeof val !== "string") {
             return false;
         }
-        if (!this.check(val)) {
+        if (val && !this.check(val)) {
             return false;
         }
         return true;
@@ -83,6 +83,10 @@ class STRING {
 
 class TIMESTAMP {
     validate(val) {
+        // val must be in milliseconds
+        if(val && utils.isNaN(val)) {
+            return false;
+        }
         return true;
     }
     constructor() {}

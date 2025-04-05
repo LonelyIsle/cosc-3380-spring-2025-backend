@@ -15,7 +15,7 @@ VALUES
 -- SUBSCRIPTION --
 INSERT INTO `subscription` (`id`, `customer_id`, `price`, `start_at`, `end_at`, `billing_address_1`, `billing_address_city`, `billing_address_state`, `billing_address_zip`, `card_name`, `card_number`, `card_expire_month`, `card_expire_year`, `card_code`)
 VALUES
-(1, 2, 10.00, NOW(), DATE_ADD(NOW(), INTERVAL 31 DAY), '123 street dr', 'Houston', 'TX', '70001', 'John Cena', '4242424242424242', '02', '2030', '456');
+(1, 2, 10.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), '123 street dr', 'Houston', 'TX', '70001', 'John Cena', '4242424242424242', '02', '2030', '456');
 
 -- CONFIG --
 INSERT INTO `config` (`id`, `key`, `value`) 
@@ -28,14 +28,14 @@ VALUES
 -- COUPON --
 INSERT INTO `coupon` (`id`, `code`, `value`, `start_at`, `end_at`, `type`, `description`)
 VALUES
-(1, '20PERCENT', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 31 DAY), 0, '20%'),
-(2, '20BUCKS', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 31 DAY), 1, '20.00$');
+(1, '20PERCENT', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 0, '20%'),
+(2, '20BUCKS', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 1, '20.00$');
 
 -- SALE_EVENT --
 INSERT INTO `sale_event` (`id`, `coupon_id`, `start_at`, `end_at`, `title`, `description`)
 VALUES
-(1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 31 DAY), 'Save 20% on Your Next Purchase!', 'Save 20% on Your Next Purchase!'),
-(2, 2, NOW(), DATE_ADD(NOW(), INTERVAL 31 DAY), 'Save 20$ on Your Next Purchase!', 'Save 20$ on Your Next Purchase!');
+(1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'Save 20% on Your Next Purchase!', 'Save 20% on Your Next Purchase!'),
+(2, 2, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'Save 20$ on Your Next Purchase!', 'Save 20$ on Your Next Purchase!');
 
 -- CATEGORY --
 INSERT INTO `category` (`id`, `name`, `description`)

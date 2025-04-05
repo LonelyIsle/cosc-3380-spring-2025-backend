@@ -2,6 +2,8 @@ import utils from "../helpers/utils.js"
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
+import customerModel from "./customer.js";
+import configModel from "./config.js";
 
 const subscriptionTable = new Table("subscription", {
     "id": {
@@ -95,7 +97,74 @@ async function getOneByCustomerID(conn, customer_id) {
     return rows[0] || null;
 }
 
+async function createOne(conn, subscription) {
+    let data = utils.objectAssign([
+            "customer_id",
+            "billing_address_1",
+            "billing_address_2",
+            "billing_address_city",
+            "billing_address_state",
+            "billing_address_zip",
+            "card_name",
+            "card_number",
+            "card_expire_month",
+            "card_expire_year",
+            "card_code"
+        ], 
+        subscription);
+    subscriptionTable.validate(data);
+    let customer = await customerModel.getOne(conn, data.customer_id);
+    if (!customer) {
+        throw new HttpError({statusCode: 401 });
+    }
+    let existedSubscription = await getOneByCustomerID(conn, data.customer_id);
+    if (existedSubscription) {
+        throw new HttpError({statusCode: 400, message: `You are already subscribed.`});
+    }
+    let now = new Date();
+    let config = await configModel.getAll(conn);
+    data.price = config[configModel.SUBSCRIPTION_PRICE];
+    data.start_at = now;
+    data.end_at = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 1 month
+    const [rows] = await conn.query(
+        'INSERT INTO `subscription`('
+        + '`customer_id`, '
+        + '`price`, '
+        + '`start_at`, '
+        + '`end_at`, '
+        + '`billing_address_1`, '
+        + '`billing_address_2`, '
+        + '`billing_address_city`, '
+        + '`billing_address_state`, '
+        + '`billing_address_zip`, '
+        + '`card_name`, '
+        + '`card_number`, '
+        + '`card_expire_month`, '
+        + '`card_expire_year`, '
+        + '`card_code`'
+        + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+            data.customer_id, 
+            data.price, 
+            data.start_at, 
+            data.end_at, 
+            data.billing_address_1, 
+            data.billing_address_2, 
+            data.billing_address_city, 
+            data.billing_address_state, 
+            data.billing_address_zip, 
+            data.card_name, 
+            data.card_number, 
+            data.card_expire_month, 
+            data.card_expire_year, 
+            data.card_code
+        ]
+    );
+    return rows.insertId;
+}
+
 export default {
     subscriptionTable,
     getOneByCustomerID,
+    createOne
 }
