@@ -42,7 +42,12 @@ async function getAll(conn) {
         'SELECT * FROM `config` WHERE `is_deleted` = ?',
         [false]
     );
-    return rows;
+    let configObj = {};
+    for (let row of rows) {
+        let [val] = utils.parseStr(row.value)
+        configObj[row.key] = val;
+    }
+    return configObj;
 }
 
 export default {

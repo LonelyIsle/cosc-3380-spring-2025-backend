@@ -12,6 +12,7 @@ import employeeController from "./controllers/employee.js";
 import productController from "./controllers/product.js";
 import couponController from "./controllers/coupon.js";
 import configController from "./controllers/config.js";
+import saleEventController from "./controllers/saleEvent.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -54,6 +55,9 @@ router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteO
 
 // Coupon
 router.get("/coupon/:code", couponController.getOneByCode);
+
+// Sale Event
+router.get("/sale-event", saleEventController.getAll);
 
 // Config
 router.get("/config", configController.getAll);

@@ -5,13 +5,8 @@ import { HttpError } from "../helpers/error.js";
 
 async function getAll(req, res) {
     await db.tx(req, res, async (conn) => {
-        let rows = await configModel.getAll(conn);
-        let configObj = {};
-        for (let row of rows) {
-            let [val] = utils.parseStr(row.value)
-            configObj[row.key] = val;
-        }
-        return configObj;
+        let config = await configModel.getAll(conn);
+        return config;
     });
 }
 

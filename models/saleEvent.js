@@ -3,16 +3,12 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 
-const couponTable = new Table("coupon", {
+const saleEventTable = new Table("sale_event", {
     "id": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
-    "code": {
-        type: DataType.STRING(),
-        isRequired: DataType.NOTNULL()
-    },
-    "value": {
+    "coupon_id": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
@@ -24,9 +20,8 @@ const couponTable = new Table("coupon", {
         type: DataType.TIMESTAMP(),
         isRequired: DataType.NOTNULL()
     },
-    "type": {
-        // 0: percentage, 1: fixed amount
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+    "title": {
+        type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
     "description": {
@@ -54,17 +49,15 @@ const couponTable = new Table("coupon", {
     filter: {}
 });
 
-async function getOneByCode(conn, code) {
-    let data = utils.objectAssign(["code"], { code });
-    couponTable.validate(data);
+async function getAll(conn, query) {
     const [rows] = await conn.query(
-        'SELECT * FROM `coupon` WHERE `code` = ? AND (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
-        [data.code, false]
+        'SELECT * FROM `sale_event` WHERE (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
+        [false]
     );
-    return rows[0] || null;
+    return rows;
 }
 
 export default {
-    couponTable,
-    getOneByCode
+    saleEventTable,
+    getAll
 }

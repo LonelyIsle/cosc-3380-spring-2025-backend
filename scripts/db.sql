@@ -32,7 +32,8 @@ CREATE TABLE `product_category` (
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `is_deleted` BOOLEAN NOT NULL DEFAULT false
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    CONSTRAINT `product_category-unique-product_id-category_id` UNIQUE (`product_id`, `category_id`)
 );
 
 DROP TABLE IF EXISTS `category`;
@@ -59,7 +60,8 @@ CREATE TABLE `coupon` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CONSTRAINT `coupon-check-value` CHECK (`value` >= 0)
+    CONSTRAINT `coupon-check-value` CHECK (`value` >= 0),
+    CONSTRAINT `coupon-check-start_at-end_at` CHECK (`end_at` >= `start_at`)
 );
 
 DROP TABLE IF EXISTS `sale_event`;
@@ -73,7 +75,8 @@ CREATE TABLE `sale_event` (
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `is_deleted` BOOLEAN NOT NULL DEFAULT false
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    CONSTRAINT `sale_event-check-start_at-end_at` CHECK (`end_at` >= `start_at`)
 );
 
 DROP TABLE IF EXISTS `employee`;
@@ -146,15 +149,19 @@ CREATE TABLE `subscription` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CONSTRAINT `subscription-check-price` CHECK (`price` >= 0)
+    CONSTRAINT `subscription-check-price` CHECK (`price` >= 0),
+    CONSTRAINT `subscription-check-start_at-end_at` CHECK (`end_at` >= `start_at`)
 );
 
 DROP TABLE IF EXISTS `order`;
 CREATE TABLE `order` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `customer_id` INT,
-    `email` VARCHAR(255) NOT NULL,
-    `is_subscription` BOOLEAN NOT NULL DEFAULT false,
+    `customer_email` VARCHAR(255) NOT NULL,
+    `customer_is_subscription` BOOLEAN NOT NULL,
+    `coupon_id` INT,
+    `coupon_value` DECIMAL(12, 2) NOT NULL,
+    `coupon_type` INT NOT NULL DEFAULT 0,
     `tracking_info` LONGTEXT,
     `status` INT NOT NULL DEFAULT 0,
     `shipping_address_1` VARCHAR(255) NOT NULL,
@@ -178,20 +185,6 @@ CREATE TABLE `order` (
     `is_deleted` BOOLEAN NOT NULL DEFAULT false
 );
 
-DROP TABLE IF EXISTS `order_coupon`;
-CREATE TABLE `order_coupon` (
-    `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `order_id` INT NOT NULL,
-    `coupon_id` INT NOT NULL,
-    `value` DECIMAL(12, 2) NOT NULL,
-    `type` INT NOT NULL DEFAULT 0,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CONSTRAINT `order_coupon-check-value` CHECK (`value` >= 0)
-);
-
 DROP TABLE IF EXISTS `order_product`;
 CREATE TABLE `order_product` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -204,7 +197,8 @@ CREATE TABLE `order_product` (
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT `order_product-check-price` CHECK ((`price` >= 0)),
-    CONSTRAINT `order_product-check-quantity` CHECK ((`quantity` >= 0))
+    CONSTRAINT `order_product-check-quantity` CHECK ((`quantity` >= 0)),
+    CONSTRAINT `order_product-unique-order_id-product_id` UNIQUE (`order_id`, `product_id`)
 );
 
 DROP TABLE IF EXISTS `notification`;
@@ -240,9 +234,7 @@ ALTER TABLE `product_category` ADD CONSTRAINT `product_category-fk-category_id-c
 ALTER TABLE `subscription` ADD CONSTRAINT `subscription-fk-customer_id-customer-id` FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`);
 
 ALTER TABLE `order` ADD CONSTRAINT `order-fk-customer_id-customer-id` FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`);
-
-ALTER TABLE `order_coupon` ADD CONSTRAINT `order_coupon-fk-order_id-order-id` FOREIGN KEY (`order_id`) REFERENCES `order`(`id`);
-ALTER TABLE `order_coupon` ADD CONSTRAINT `order_coupon-fk-coupon_id-coupon-id` FOREIGN KEY (`coupon_id`) REFERENCES `coupon`(`id`);
+ALTER TABLE `order` ADD CONSTRAINT `order-fk-coupon_id-coupon-id` FOREIGN KEY (`coupon_id`) REFERENCES `coupon`(`id`);
 
 ALTER TABLE `order_product` ADD CONSTRAINT `order_product-fk-order_id-order-id` FOREIGN KEY (`order_id`) REFERENCES `order`(`id`);
 ALTER TABLE `order_product` ADD CONSTRAINT `order_product-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);

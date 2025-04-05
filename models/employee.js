@@ -54,7 +54,8 @@ const employeeTable = new Table("employee", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: ["last_name", "first_name", "middle_name", "created_at", "updated_at"],
+    sort: [],
+    filter: {}
 });
 
 async function getOne(conn, id) {

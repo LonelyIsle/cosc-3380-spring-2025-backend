@@ -81,10 +81,8 @@ const subscriptionTable = new Table("subscription", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: ["name", "created_at", "updated_at"],
-    filter: {
-        "name": DataType.STRING()
-    }
+    sort: [],
+    filter: {}
 });
 
 async function getOneByCustomerID(conn, customer_id) {

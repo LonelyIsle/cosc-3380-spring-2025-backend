@@ -115,7 +115,8 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: ["last_name", "first_name", "middle_name", "created_at", "updated_at"],
+    sort: [],
+    filter: {}
 });
 
 async function getOne(conn, id) {
