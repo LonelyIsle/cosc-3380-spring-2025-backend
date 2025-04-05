@@ -3,7 +3,7 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 
-const categoryTable = new Table("category", {
+const couponTable = new Table("coupon", {
     "id": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
@@ -50,22 +50,24 @@ const categoryTable = new Table("category", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: ["name", "created_at", "updated_at"],
+    sort: ["code", "value", "created_at", "updated_at"],
     filter: {
-        "name": DataType.STRING()
+        "code": DataType.STRING(),
+        "value": DataType.NUMBER()
     }
 });
 
 async function getOneByCode(conn, code) {
     let data = utils.objectAssign(["code"], { code });
-    categoryTable.validate(data);
+    couponTable.validate(data);
     const [rows] = await conn.query(
-        'SELECT * FROM `coupon` WHERE `code` = ? AND `is_deleted` = ?',
+        'SELECT * FROM `coupon` WHERE `code` = ? AND (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
         [data.code, false]
     );
     return rows[0] || null;
 }
 
 export default {
+    couponTable,
     getOneByCode
 }

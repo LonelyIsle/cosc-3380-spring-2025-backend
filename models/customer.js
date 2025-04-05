@@ -3,6 +3,7 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 import pwd from "../helpers/pwd.js";
+import subscriptionModel from "./subscription.js";
 
 const customerTable = new Table("customer", {
     "id": {
@@ -40,77 +41,62 @@ const customerTable = new Table("customer", {
     "shipping_address_1":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "shipping_address_2":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "shipping_address_city":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "shipping_address_state":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "shipping_address_zip":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "billing_address_1":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "billing_address_2":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "billing_address_city":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "billing_address_state":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "billing_address_zip":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "card_name":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "card_number":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "card_expire_month":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "card_expire_year":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "card_code":{ 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
-
     },
     "created_at": {
         type: DataType.TIMESTAMP(),
@@ -139,6 +125,9 @@ async function getOne(conn, id) {
         'SELECT * FROM `customer` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
+    if (rows[0]) {
+        rows[0].subscription = await subscriptionModel.getOneByCustomerID(conn, rows[0].id);
+    }
     return rows[0] || null;
 }
 
@@ -149,6 +138,9 @@ async function getOneByEmail(conn, email) {
         'SELECT * FROM `customer` WHERE `email` = ? AND `is_deleted` = ?',
         [data.email, false]
     );
+    if (rows[0]) {
+        rows[0].subscription = await subscriptionModel.getOneByCustomerID(conn, rows[0].id);
+    }
     return rows[0] || null;
 }
 
@@ -157,6 +149,7 @@ async function getOneByEmailAndPwd(conn, email, password) {
     customerTable.validate(data);
     let customer = await getOneByEmail(conn, data.email);
     if (customer && await pwd.compare(password, customer.password)) {
+        customer.subscription = await subscriptionModel.getOneByCustomerID(conn, customer.id);
         return customer;
     }
     return null;
@@ -167,6 +160,7 @@ async function getOneByEmailAndAnswer(conn, email, answer) {
     customerTable.validate(data);
     let customer = await getOneByEmail(conn, data.email);
     if (customer && await pwd.compare(answer, customer.reset_password_answer)) {
+        customer.subscription = await subscriptionModel.getOneByCustomerID(conn, customer.id);
         return customer;
     }
     return null;

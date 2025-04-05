@@ -3,7 +3,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 function sign(data) {
     return jwt.sign({
-        exp: Math.floor(Date.now() / 1000) + (60 * 60),
+        exp: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60),
         data
     }, JWT_SECRET);
 }
