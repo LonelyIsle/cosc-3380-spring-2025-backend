@@ -10,6 +10,7 @@ import categoryController from "./controllers/category.js";
 import customerController from "./controllers/customer.js";
 import employeeController from "./controllers/employee.js";
 import productController from "./controllers/product.js";
+import couponController from "./controllers/coupon.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -49,6 +50,9 @@ router.get("/category/:id", categoryController.getOne);
 router.post("/category", auth.is(auth.MANAGER), categoryController.createOne);
 router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOne);
 router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
+
+// Coupon
+router.get("/coupon/:code", couponController.getOneByCode);
 
 // *
 router.all("/*",  httpResp.Error[404]);

@@ -29,6 +29,7 @@ const employeeTable = new Table("employee", {
         isRequired: DataType.NOTNULL()
     },
     "role": {
+        // 0: staff, 1: manager
         type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NOTNULL()
     },
