@@ -12,6 +12,12 @@ INSERT INTO `config` (`key`, `value`) VALUES ('SUBSCRIPTION_VALUE', 0.2);
 INSERT INTO `config` (`key`, `value`) VALUES ('SHIPPING_FEE', 9.99);
 INSERT INTO `config` (`key`, `value`) VALUES ('SALE_TAX', 0.08);
 
+-- COUPON --
+INSERT INTO `coupon` (`code`, `value`, `start_at`, `end_at`, `type`, `description`)
+VALUES
+('20PERCENT', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 31 DAY), 0, '20%'),
+('20BUCKS', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 31 DAY), 1, '20.00$');
+
 -- CATEGORY --
 INSERT INTO `category` (`id`, `name`, `description`)
 VALUES
