@@ -2,6 +2,7 @@ import utils from "../helpers/utils.js"
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
+import couponModel from "./coupon.js";
 
 const saleEventTable = new Table("sale_event", {
     "id": {
@@ -49,11 +50,14 @@ const saleEventTable = new Table("sale_event", {
     filter: {}
 });
 
-async function getAll(conn, query) {
+async function getAll(conn) {
     const [rows] = await conn.query(
         'SELECT * FROM `sale_event` WHERE (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
         [false]
     );
+    for (let row of rows) {
+        row.coupon = await couponModel.getOne(conn, row.coupon_id);
+    }
     return rows;
 }
 

@@ -54,6 +54,16 @@ const couponTable = new Table("coupon", {
     filter: {}
 });
 
+async function getOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    couponTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `coupon` WHERE `id` = ? AND (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    return rows[0] || null;
+}
+
 async function getOneByCode(conn, code) {
     let data = utils.objectAssign(["code"], { code });
     couponTable.validate(data);
@@ -66,5 +76,6 @@ async function getOneByCode(conn, code) {
 
 export default {
     couponTable,
-    getOneByCode
+    getOneByCode,
+    getOne
 }
