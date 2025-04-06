@@ -26,7 +26,7 @@ const couponTable = new Table("coupon", {
     },
     "type": {
         // 0: percentage, 1: fixed amount
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "description": {
@@ -46,7 +46,7 @@ const couponTable = new Table("coupon", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -75,7 +75,7 @@ async function getOneByCode(conn, code) {
 }
 
 export default {
-    couponTable,
+    table: couponTable,
     getOneByCode,
     getOne
 }

@@ -79,7 +79,7 @@ const subscriptionTable = new Table("subscription", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -111,7 +111,8 @@ async function createOne(conn, subscription) {
             "card_expire_year",
             "card_code"
         ], 
-        subscription);
+        subscription
+    );
     subscriptionTable.validate(data);
     let customer = await customerModel.getOne(conn, data.customer_id);
     if (!customer) {
@@ -126,6 +127,7 @@ async function createOne(conn, subscription) {
     data.price = config[configModel.SUBSCRIPTION_PRICE];
     data.start_at = now;
     data.end_at = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 1 month
+    // charge successfully
     const [rows] = await conn.query(
         'INSERT INTO `subscription`('
         + '`customer_id`, '
@@ -164,7 +166,7 @@ async function createOne(conn, subscription) {
 }
 
 export default {
-    subscriptionTable,
+    table: subscriptionTable,
     getOneByCustomerID,
     createOne
 }

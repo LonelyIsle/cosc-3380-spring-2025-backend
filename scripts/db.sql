@@ -167,8 +167,8 @@ CREATE TABLE `order` (
     `coupon_type` INT DEFAULT 0,
     `shipping_fee` DECIMAL(12, 2) NOT NULL,
     `sale_tax` DECIMAL(5, 4) NOT NULL,
-    `tracking_info` LONGTEXT,
-    `status` INT NOT NULL DEFAULT 0, -- 0: placed, 1: shipped
+    `tracking` LONGTEXT,
+    `status` INT NOT NULL DEFAULT 0, -- -1: cancelled, 0: placed, 1: shipped
     `shipping_address_1` VARCHAR(255) NOT NULL,
     `shipping_address_2` VARCHAR(255),
     `shipping_address_city` VARCHAR(255) NOT NULL,

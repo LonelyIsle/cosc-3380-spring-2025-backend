@@ -1,4 +1,3 @@
-import { HttpError } from "../helpers/error.js";
 import utils from "./utils.js";
 
 class ARRAY {
@@ -92,6 +91,13 @@ class TIMESTAMP {
     constructor() {}
 }
 
+class ANY {
+    validate(val) {
+        return true;
+    }
+    constructor() {}
+}
+
 class NULLABLE {
     validate(val) {
         return true;
@@ -130,6 +136,7 @@ class DataType {
     static NUMBER(opt) { return new NUMBER(opt); }
     static STRING(opt) { return new STRING(opt); }
     static TIMESTAMP(opt) { return new TIMESTAMP(opt); }
+    static ANY(opt) { return new ANY(opt); }
     static NULLABLE(opt) { return new NULLABLE(opt); }
     static NOTNULL(opt) { return new NOTNULL(opt); }
     static BLOB(opt) { return new BLOB(opt); }

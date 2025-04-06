@@ -42,7 +42,7 @@ const saleEventTable = new Table("sale_event", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -62,6 +62,6 @@ async function getAll(conn) {
 }
 
 export default {
-    saleEventTable,
+    table: saleEventTable,
     getAll
 }

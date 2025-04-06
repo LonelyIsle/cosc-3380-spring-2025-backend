@@ -111,7 +111,7 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -189,26 +189,29 @@ async function updateOne(conn, newCustomer) {
         throw new HttpError({statusCode: 400, message: `customer ${newCustomer.id} not found.`});
     }
     let data = utils.objectAssign([
-        "id", 
-        "first_name",
-        "middle_name",
-        "last_name",
-        "shipping_address_1",
-        "shipping_address_2",
-        "shipping_address_city",
-        "shipping_address_state",
-        "shipping_address_zip",
-        "billing_address_1",
-        "billing_address_2",
-        "billing_address_city",
-        "billing_address_state",
-        "billing_address_zip",
-        "card_name",
-        "card_number",
-        "card_expire_month",
-        "card_expire_year",
-        "card_code"
-    ], oldCustomer, newCustomer);
+            "id", 
+            "first_name",
+            "middle_name",
+            "last_name",
+            "shipping_address_1",
+            "shipping_address_2",
+            "shipping_address_city",
+            "shipping_address_state",
+            "shipping_address_zip",
+            "billing_address_1",
+            "billing_address_2",
+            "billing_address_city",
+            "billing_address_state",
+            "billing_address_zip",
+            "card_name",
+            "card_number",
+            "card_expire_month",
+            "card_expire_year",
+            "card_code"
+        ], 
+        oldCustomer, 
+        newCustomer
+    );
     customerTable.validate(data);
     const [rows] = await conn.query(
         'UPDATE `customer` SET '
@@ -265,7 +268,7 @@ async function updatePassword(conn, id, password) {
         'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.password, data.id, false]
     );
-    return rows;
+    return id;
 }
 
 async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_password_answer) {
@@ -289,11 +292,11 @@ async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_
             false
         ]
     );
-    return rows;
+    return id;
 }
 
 export default {
-    customerTable,
+    table: customerTable,
     createOne,
     updateOne,
     getOne,

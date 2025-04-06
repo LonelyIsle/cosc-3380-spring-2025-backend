@@ -30,7 +30,7 @@ const employeeTable = new Table("employee", {
     },
     "role": {
         // 0: staff, 1: manager
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "hourly_rate": {
@@ -50,7 +50,7 @@ const employeeTable = new Table("employee", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -89,7 +89,7 @@ async function getOneByEmailAndPwd(conn, email, password) {
 }
 
 export default {
-    employeeTable,
+    table: employeeTable,
     getOne,
     getOneByEmail,
     getOneByEmailAndPwd

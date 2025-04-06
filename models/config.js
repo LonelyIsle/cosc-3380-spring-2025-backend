@@ -29,7 +29,7 @@ const configTable = new Table("config", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -60,6 +60,6 @@ export default {
     SHIPPING_FEE,
     SALE_TAX,
     SUBSCRIPTION_PRICE,
-    configTable,
+    table: configTable,
     getAll
 }
