@@ -213,21 +213,21 @@ async function createOne(conn, order) {
     order.status = 0;
     order.tracking = null;
     let data = utils.objectAssign([
-            "customer_id", //
-            "customer_first_name", //
-            "customer_middle_name", //
-            "customer_last_name", //
-            "customer_email", //
+            "customer_id",
+            "customer_first_name",
+            "customer_middle_name",
+            "customer_last_name",
+            "customer_email",
             "subscription_id",
             "subscription_discount_percentage",
-            "coupon_id", //
+            "coupon_id",
             "coupon_value",
             "coupon_type",
             "shipping_fee",
             "sale_tax",
             "tracking",
             "status",
-            "shipping_address_1", //
+            "shipping_address_1",
             "shipping_address_2",
             "shipping_address_city",
             "shipping_address_state",
@@ -271,7 +271,7 @@ async function createOne(conn, order) {
             throw new HttpError({statusCode: 400, message: "Invalid items." });
         }
     }
-    // charge successfully
+    // payment successfully processed
     const [rows] = await conn.query(
         'INSERT INTO `order`('
         + '`customer_id`, '

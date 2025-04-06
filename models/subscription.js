@@ -127,7 +127,7 @@ async function createOne(conn, subscription) {
     data.price = config[configModel.SUBSCRIPTION_PRICE];
     data.start_at = now;
     data.end_at = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 1 month
-    // charge successfully
+    // payment successfully processed
     const [rows] = await conn.query(
         'INSERT INTO `subscription`('
         + '`customer_id`, '
