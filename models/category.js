@@ -29,7 +29,7 @@ const categoryTable = new Table("category", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -52,7 +52,7 @@ async function getAllByProductId(conn, productId) {
         throw new HttpError({ statusCode: 400, message: `productId is invalid.` });
     }
     const [rows] = await conn.query(
-        'SELECT DISTINCT `category`.* FROM `category` INNER JOIN `product_category` ON `product_category`.`category_id` = `category`.`id` WHERE `product_category`.`product_id` = ? AND `category`.`is_deleted` = ?',
+        'SELECT `category`.* FROM `category` INNER JOIN `product_category` ON `product_category`.`category_id` = `category`.`id` WHERE `product_category`.`product_id` = ? AND `category`.`is_deleted` = ?',
         [data.productId, false]
     );
     return rows;

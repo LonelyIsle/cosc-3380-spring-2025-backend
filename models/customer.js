@@ -111,7 +111,7 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NULLABLE()
     }
 }, {

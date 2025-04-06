@@ -29,7 +29,7 @@ const configTable = new Table("config", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NULLABLE()
     }
 }, {

@@ -22,7 +22,7 @@ INSERT INTO `config` (`id`, `key`, `value`)
 VALUES 
 (1, 'SUBSCRIPTION_DISCOUNT_PERCENTAGE', 0.2),
 (2, 'SHIPPING_FEE', 9.99),
-(3, 'SALE_TAX', 0.08),
+(3, 'SALE_TAX', 0.0825),
 (4, 'SUBSCRIPTION_PRICE', 10.00);
 
 -- COUPON --

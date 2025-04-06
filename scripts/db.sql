@@ -1,5 +1,4 @@
 -- Disable FOREIGN KEY check
--- An unsafe way to prevent errors when dropping tables that have existing data. 
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -54,7 +53,7 @@ CREATE TABLE `coupon` (
     `value` DECIMAL(12, 2) NOT NULL,
     `start_at` TIMESTAMP NOT NULL,
     `end_at` TIMESTAMP NOT NULL,
-    `type` INT NOT NULL DEFAULT 0,
+    `type` INT NOT NULL DEFAULT 0, -- 0: percentage, 1: fixed amount
     `description` LONGTEXT,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -87,7 +86,7 @@ CREATE TABLE `employee` (
     `last_name` VARCHAR(255) NOT NULL,
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `password` LONGTEXT NOT NULL,
-    `role` INT NOT NULL DEFAULT 0,
+    `role` INT NOT NULL DEFAULT 0, -- 0: staff, 1: manager
     `hourly_rate` DECIMAL(12, 2) NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -157,13 +156,19 @@ DROP TABLE IF EXISTS `order`;
 CREATE TABLE `order` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `customer_id` INT,
+    `customer_first_name` VARCHAR(255) NOT NULL,
+    `customer_middle_name` VARCHAR(255),
+    `customer_last_name` VARCHAR(255) NOT NULL,
     `customer_email` VARCHAR(255) NOT NULL,
-    `customer_is_subscription` BOOLEAN NOT NULL,
+    `subscription_id` INT,
+    `subscription_discount_percentage` DECIMAL(5, 4),
     `coupon_id` INT,
-    `coupon_value` DECIMAL(12, 2) NOT NULL,
-    `coupon_type` INT NOT NULL DEFAULT 0,
+    `coupon_value` DECIMAL(12, 2),
+    `coupon_type` INT DEFAULT 0,
+    `shipping_fee` DECIMAL(12, 2) NOT NULL,
+    `sale_tax` DECIMAL(5, 4) NOT NULL,
     `tracking_info` LONGTEXT,
-    `status` INT NOT NULL DEFAULT 0,
+    `status` INT NOT NULL DEFAULT 0, -- 0: placed, 1: shipped
     `shipping_address_1` VARCHAR(255) NOT NULL,
     `shipping_address_2` VARCHAR(255),
     `shipping_address_city` VARCHAR(255) NOT NULL,
@@ -207,8 +212,7 @@ CREATE TABLE `notification` (
     `employee_id` INT NOT NULL,
     `title` LONGTEXT NOT NULL,
     `description` LONGTEXT,
-    `type` INT NOT NULL DEFAULT 0,
-    `status` INT NOT NULL DEFAULT 0,
+    `status` INT NOT NULL DEFAULT 0, -- 0: unread, 1: read
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -235,6 +239,7 @@ ALTER TABLE `subscription` ADD CONSTRAINT `subscription-fk-customer_id-customer-
 
 ALTER TABLE `order` ADD CONSTRAINT `order-fk-customer_id-customer-id` FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`);
 ALTER TABLE `order` ADD CONSTRAINT `order-fk-coupon_id-coupon-id` FOREIGN KEY (`coupon_id`) REFERENCES `coupon`(`id`);
+ALTER TABLE `order` ADD CONSTRAINT `order-fk-subscription_id-subscription-id` FOREIGN KEY (`subscription_id`) REFERENCES `subscription`(`id`);
 
 ALTER TABLE `order_product` ADD CONSTRAINT `order_product-fk-order_id-order-id` FOREIGN KEY (`order_id`) REFERENCES `order`(`id`);
 ALTER TABLE `order_product` ADD CONSTRAINT `order_product-fk-product_id-product-id` FOREIGN KEY (`product_id`) REFERENCES `product`(`id`);

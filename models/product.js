@@ -8,6 +8,10 @@ const productTable = new Table("product", {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
+    "category_id": {
+        type: DataType.ARRAY(DataType.NUMBER()),
+        isRequired: DataType.NULLABLE()
+    },
     "sku": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
@@ -53,11 +57,7 @@ const productTable = new Table("product", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
-        isRequired: DataType.NULLABLE()
-    },
-    "category_id": {
-        type: DataType.ARRAY(DataType.NUMBER()),
+        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NULLABLE()
     }
 }, {

@@ -2,6 +2,7 @@ import { HttpError } from "./error.js";
 import jwt from "./jwt.js";
 import httpResp from "./httpResp.js";
 
+const GUEST = -2;
 const CUSTOMER = -1;
 const STAFF= 0;
 const MANAGER = 1;
@@ -10,6 +11,10 @@ function is(...roles) {
     return (req, res, next) => {
         try {
             let token =  (req.body && req.body.authorization) || req.headers["authorization"];
+            if (!token && roles.indexOf(GUEST) > -1) {
+                next();
+                return;
+            }
             if (!token) {
                 throw new HttpError({ statusCode: 401 });
             }
@@ -62,6 +67,7 @@ function attach() {
 }
 
 export default {
+    GUEST,
     CUSTOMER,
     STAFF,
     MANAGER,

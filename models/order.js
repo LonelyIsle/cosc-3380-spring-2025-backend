@@ -3,35 +3,30 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 
-const couponTable = new Table("coupon", {
+const orderTable = new Table("order", {
     "id": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
-    "code": {
+    "customer_id": {
+        type: DataType.NUMBER(),
+        isRequired: DataType.NULLABLE()
+    },
+    "customer_email": {
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "value": {
-        type: DataType.NUMBER(),
-        isRequired: DataType.NOTNULL()
-    },
-    "start_at": {
-        type: DataType.TIMESTAMP(),
-        isRequired: DataType.NOTNULL()
-    },
-    "end_at": {
-        type: DataType.TIMESTAMP(),
-        isRequired: DataType.NOTNULL()
-    },
-    "type": {
-        // 0: percentage, 1: fixed amount
+    "customer_is_subscription": {
         type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
         isRequired: DataType.NOTNULL()
     },
-    "description": {
-        type: DataType.STRING(),
+    "coupon_id": {
+        type: DataType.NUMBER(),
         isRequired: DataType.NULLABLE()
+    },
+    "product_id": {
+        type: DataType.ARRAY(DataType.NUMBER()),
+        isRequired: DataType.NOTNULL()
     },
     "created_at": {
         type: DataType.TIMESTAMP(),
@@ -54,28 +49,30 @@ const couponTable = new Table("coupon", {
     filter: {}
 });
 
+async function getAll(conn) {
+    const [rows] = [[]];
+    return rows;
+}
+
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
-    couponTable.validate(data);
+    orderTable.validate(data);
     const [rows] = await conn.query(
-        'SELECT * FROM `coupon` WHERE `id` = ? AND (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
+        'SELECT * FROM `order` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
     return rows[0] || null;
 }
 
-async function getOneByCode(conn, code) {
-    let data = utils.objectAssign(["code"], { code });
-    couponTable.validate(data);
-    const [rows] = await conn.query(
-        'SELECT * FROM `coupon` WHERE `code` = ? AND (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
-        [data.code, false]
-    );
-    return rows[0] || null;
+async function createOne(conn, order) {
+    let data = utils.objectAssign(["name", "description"], order);
+    orderTable.validate(data);
+    const [rows] = [[]];
+    return rows.insertId;
 }
 
 export default {
-    couponTable,
-    getOneByCode,
-    getOne
+    getAll,
+    getOne,
+    createOne
 }
