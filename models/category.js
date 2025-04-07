@@ -34,16 +34,40 @@ const categoryTable = new Table("category", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["name", "created_at", "updated_at"],
+    filter: {
+        "name": DataType.STRING(),
+    }
 });
 
-async function getAll(conn) {
-    const [rows] = await conn.query(
-        'SELECT * FROM `category` WHERE `is_deleted` = false',
-        [false]
+async function getAll(conn, query) {
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = categoryTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `category`.`id`) FROM `category` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
+        whereParams
     );
-    return rows;
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `category`.`id`)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT `category`.* FROM `category` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
+    );
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
 }
 
 async function getOne(conn, id) {

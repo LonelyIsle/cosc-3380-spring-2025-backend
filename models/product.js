@@ -113,7 +113,14 @@ async function getAll(conn, query, opt = {}) {
             + ' AND';
         joinParam = [categoryIdsQuery, false];
     }
-    let { parsedQuery, whereQueryStr, sortQueryStr, pagingQueryStr, whereParams, pagingParams } = productTable.getQueryStr(query);
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = productTable.getQueryStr(query);
     const [countRows] = await conn.query(
         'SELECT COUNT(DISTINCT `product`.`id`) FROM `product` ' 
         + joinQuery + ' ' + whereQueryStr,
