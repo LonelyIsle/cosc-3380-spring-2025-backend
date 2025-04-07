@@ -17,12 +17,11 @@ async function login(req, res) {
         let body = req.body;
         let customer = await customerModel.getOneByEmailAndPwd(conn, body.email, body.password);
         if (customer) {
-            delete customer.password;
-            delete customer.reset_password_answer;
+            customerModel.prepareResp(customer);
             customer.token = jwt.sign({
                 id: customer.id,
                 email: customer.email,
-                role: auth.CUSTOMER
+                role: customer.role
             });
         } else {
             throw new HttpError({ statusCode: 400, message: "Wrong email or password." })
@@ -63,11 +62,7 @@ async function getOne(req, res) {
             throw new HttpError({ statusCode: 401 });
         }
         let customer = await customerModel.getOne(conn, param.id);
-        if (customer) {
-            delete customer.password;
-            delete customer.reset_password_answer;
-            customer.role = auth.CUSTOMER;
-        }
+        customerModel.prepareResp(customer);
         return customer;
     });
 }
@@ -82,10 +77,7 @@ async function updateOne(req, res) {
         }
         let  customerId = await customerModel.updateOne(conn, body);
         let customer = await customerModel.getOne(conn, customerId)
-        if (customer) {
-            delete customer.password;
-            delete customer.reset_password_answer;
-        }
+        customerModel.prepareResp(customer);
         return customer;
     });
 }

@@ -1,4 +1,5 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
+import auth from "../helpers/auth.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -118,6 +119,24 @@ const customerTable = new Table("customer", {
     sort: [],
     filter: {}
 });
+
+function prepareResp(rows) {
+    const prepare = (obj) => {
+        if (obj) {
+            delete obj.password;
+            delete obj.reset_password_answer;
+            obj.role = auth.CUSTOMER;
+        }
+    }
+    if (!Array.isArray(rows)) {
+        prepare(rows);
+    } else {
+        for (let row of rows) {
+            prepare(row);
+        }
+    }
+    
+}
 
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
@@ -297,6 +316,7 @@ async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_
 
 export default {
     table: customerTable,
+    prepareResp,
     createOne,
     updateOne,
     getOne,
