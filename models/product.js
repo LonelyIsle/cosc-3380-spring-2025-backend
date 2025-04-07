@@ -65,23 +65,7 @@ const productTable = new Table("product", {
     }
 });
 
-const COLS_STR_INCL_IMG = [
-    "`id`",
-    "`sku`",
-    "`price`",
-    "`quantity`",
-    "`threshold`",
-    "`name`",
-    "`description`",
-    "`image`",
-    "`image_extension`",
-    "`created_at`",
-    "`updated_at`",
-    "`deleted_at`",
-    "`is_deleted`",
-].join(",");
-
-const COLS_STR = [
+const COLS_LITE_STR = [
     "`id`",
     "`sku`",
     "`price`",
@@ -95,9 +79,9 @@ const COLS_STR = [
     "`is_deleted`",
 ].join(",");
 
-async function getAll(conn, inclImg = true) {
+async function getAll(conn, inclImg = false) {
     const [rows] = await conn.query(
-        'SELECT ' + (inclImg ? COLS_STR_INCL_IMG : COLS_STR) + ' FROM `product` WHERE `is_deleted` = ?',
+        'SELECT ' + (inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `is_deleted` = ?',
         [false]
     );
     for (let row of rows) {
@@ -109,9 +93,9 @@ async function getAll(conn, inclImg = true) {
     return rows;
 }
 
-async function getManyByIds(conn, ids, inclImg = true) {
+async function getManyByIds(conn, ids, inclImg = false) {
     const [rows] = await conn.query(
-        'SELECT ' + (inclImg ? COLS_STR_INCL_IMG : COLS_STR) + ' FROM `product` WHERE `id` IN (?) AND `is_deleted` = ?',
+        'SELECT ' + (inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `id` IN (?) AND `is_deleted` = ?',
         [ids, false]
     );
     for (let row of rows) {
@@ -123,11 +107,11 @@ async function getManyByIds(conn, ids, inclImg = true) {
     return rows;
 }
 
-async function getOne(conn, id, inclImg = true) {
+async function getOne(conn, id, inclImg = false) {
     let data = utils.objectAssign(["id"], { id });
     productTable.validate(data);
     const [rows] = await conn.query(
-        'SELECT ' + (inclImg ? COLS_STR_INCL_IMG : COLS_STR) + ' FROM `product` WHERE `id` = ? AND `is_deleted` = ?',
+        'SELECT ' + (inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
     if (rows[0]) {

@@ -263,7 +263,7 @@ async function createOne(conn, order) {
         }
     }
     let itemsHashKeys = Object.keys(itemsHash);
-    let products = await productModel.getManyByIds(conn, itemsHashKeys, false);
+    let products = await productModel.getManyByIds(conn, itemsHashKeys);
     if (products.length != itemsHashKeys.length) {
         throw new HttpError({statusCode: 400, message: "Invalid items." });
     }
