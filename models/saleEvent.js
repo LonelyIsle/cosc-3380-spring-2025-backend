@@ -50,13 +50,29 @@ const saleEventTable = new Table("sale_event", {
     filter: {}
 });
 
-async function getAll(conn) {
+async function include(conn, rows) {
+    const _include = async (obj) => {
+        if (obj) {
+            obj.coupon = await couponModel.getOne(conn, obj.coupon_id);
+        }
+    }
+    if (!Array.isArray(rows)) {
+        await _include(rows);
+    } else {
+        for (let row of rows) {
+            await _include(row);
+        }
+    }
+}
+
+async function getAll(conn, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     const [rows] = await conn.query(
         'SELECT * FROM `sale_event` WHERE (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
         [false]
     );
-    for (let row of rows) {
-        row.coupon = await couponModel.getOne(conn, row.coupon_id);
+    if (opt.include) {
+        await include(conn, rows);
     }
     return rows;
 }

@@ -1,4 +1,5 @@
 import customerModel from "../models/customer.js";
+import subscriptionModel from "../models/subscription.js";
 import db from "./db.js";
 import jwt from "../helpers/jwt.js";
 import { HttpError } from "../helpers/error.js";
@@ -15,9 +16,14 @@ async function register(req, res) {
 async function login(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
-        let customer = await customerModel.getOneByEmailAndPwd(conn, body.email, body.password);
+        let customer = await customerModel.getOneByEmailAndPwd(
+            conn, 
+            body.email, 
+            body.password, 
+            { include: true }
+        );
         if (customer) {
-            customerModel.prepareResp(customer);
+            customerModel.prepare(customer);
             customer.token = jwt.sign({
                 id: customer.id,
                 email: customer.email,
@@ -61,8 +67,8 @@ async function getOne(req, res) {
         if (req.jwt.user.role === auth.CUSTOMER && req.jwt.user.id !== param.id) {
             throw new HttpError({ statusCode: 401 });
         }
-        let customer = await customerModel.getOne(conn, param.id);
-        customerModel.prepareResp(customer);
+        let customer = await customerModel.getOne(conn, param.id, { include: true });
+        customerModel.prepare(customer);
         return customer;
     });
 }
@@ -76,8 +82,8 @@ async function updateOne(req, res) {
             throw new HttpError({ statusCode: 401 });
         }
         let  customerId = await customerModel.updateOne(conn, body);
-        let customer = await customerModel.getOne(conn, customerId)
-        customerModel.prepareResp(customer);
+        let customer = await customerModel.getOne(conn, customerId, { include: true });
+        customerModel.prepare(customer);
         return customer;
     });
 }

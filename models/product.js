@@ -1,7 +1,7 @@
 import utils from "../helpers/utils.js"
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
-import categoryModel from "./category.js";
+import productCategoryTableModel from "./productCategory.js";
 
 const productTable = new Table("product", {
     "id": {
@@ -79,13 +79,31 @@ const COLS_LITE_STR = [
     "`is_deleted`",
 ].join(",");
 
-async function getAll(conn, inclImg = false) {
+async function include(conn, rows) {
+    const _include = async (obj) => {
+        if (obj) {
+            obj.category = await productCategoryTableModel.getCategoryByProductId(conn, obj.id);
+        }
+    }
+    if (!Array.isArray(rows)) {
+        await _include(rows);
+    } else {
+        for (let row of rows) {
+            await _include(row);
+        }
+    }
+}
+
+async function getAll(conn, opt = {}) {
+    opt = utils.objectAssign(["include", "inclImg"], { include: false, inclImg: true }, opt);
     const [rows] = await conn.query(
-        'SELECT ' + (inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `is_deleted` = ?',
+        'SELECT ' + (opt.inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `is_deleted` = ?',
         [false]
     );
+    if (opt.include) {
+        await include(conn, rows);
+    }
     for (let row of rows) {
-        row.category = await categoryModel.getAllByProductId(conn, row.id);
         if (row.image) {
             row.image = Buffer.from(row.image).toString('base64');
         }
@@ -93,13 +111,16 @@ async function getAll(conn, inclImg = false) {
     return rows;
 }
 
-async function getManyByIds(conn, ids, inclImg = false) {
+async function getManyByIds(conn, ids, opt = {}) {
+    opt = utils.objectAssign(["include", "inclImg"], { include: false, inclImg: true }, opt);
     const [rows] = await conn.query(
-        'SELECT ' + (inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `id` IN (?) AND `is_deleted` = ?',
+        'SELECT ' + (opt.inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `id` IN (?) AND `is_deleted` = ?',
         [ids, false]
     );
+    if (opt.include) {
+        await include(conn, rows);
+    }
     for (let row of rows) {
-        row.category = await categoryModel.getAllByProductId(conn, row.id);
         if (row.image) {
             row.image = Buffer.from(row.image).toString('base64');
         }
@@ -107,15 +128,18 @@ async function getManyByIds(conn, ids, inclImg = false) {
     return rows;
 }
 
-async function getOne(conn, id, inclImg = false) {
+async function getOne(conn, id, opt = {}) {
+    opt = utils.objectAssign(["include", "inclImg"], { include: false, inclImg: true }, opt);
     let data = utils.objectAssign(["id"], { id });
     productTable.validate(data);
     const [rows] = await conn.query(
-        'SELECT ' + (inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `id` = ? AND `is_deleted` = ?',
+        'SELECT ' + (opt.inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
     if (rows[0]) {
-        rows[0].category = await categoryModel.getAllByProductId(conn, rows[0].id);
         if (rows[0].image) {
             rows[0].image = Buffer.from(rows[0].image).toString('base64');
         }

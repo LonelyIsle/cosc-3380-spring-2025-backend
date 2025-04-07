@@ -120,8 +120,8 @@ const customerTable = new Table("customer", {
     filter: {}
 });
 
-function prepareResp(rows) {
-    const prepare = (obj) => {
+function prepare(rows) {
+    const _prepare = (obj) => {
         if (obj) {
             delete obj.password;
             delete obj.reset_password_answer;
@@ -129,57 +129,80 @@ function prepareResp(rows) {
         }
     }
     if (!Array.isArray(rows)) {
-        prepare(rows);
+        _prepare(rows);
     } else {
         for (let row of rows) {
-            prepare(row);
+            _prepare(row);
         }
     }
 }
 
-async function getOne(conn, id) {
+async function include(conn, rows) {
+    const _include = async (obj) => {
+        if (obj) {
+            obj.subscription = await subscriptionModel.getOneByCustomerID(conn, obj.id);
+        }
+    }
+    if (!Array.isArray(rows)) {
+        await _include(rows);
+    } else {
+        for (let row of rows) {
+            await _include(row);
+        }
+    }
+}
+
+async function getOne(conn, id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["id"], { id });
     customerTable.validate(data);
     const [rows] = await conn.query(
         'SELECT * FROM `customer` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
-    if (rows[0]) {
-        rows[0].subscription = await subscriptionModel.getOneByCustomerID(conn, rows[0].id);
+    if (opt.include) {
+        await include(conn, rows[0]);
     }
     return rows[0] || null;
 }
 
-async function getOneByEmail(conn, email) {
+async function getOneByEmail(conn, email, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["email"], { email });
     customerTable.validate(data);
     const [rows] = await conn.query(
         'SELECT * FROM `customer` WHERE `email` = ? AND `is_deleted` = ?',
         [data.email, false]
     );
-    if (rows[0]) {
-        rows[0].subscription = await subscriptionModel.getOneByCustomerID(conn, rows[0].id);
+    if (opt.include) {
+        await include(conn, rows[0]);
     }
     return rows[0] || null;
 }
 
-async function getOneByEmailAndPwd(conn, email, password) {
+async function getOneByEmailAndPwd(conn, email, password, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["email", "password"], { email, password });
     customerTable.validate(data);
     let customer = await getOneByEmail(conn, data.email);
     if (customer && await pwd.compare(password, customer.password)) {
-        customer.subscription = await subscriptionModel.getOneByCustomerID(conn, customer.id);
+        if (opt.include) {
+            await include(conn, customer);
+        }
         return customer;
     }
     return null;
 }
 
-async function getOneByEmailAndAnswer(conn, email, answer) {
+async function getOneByEmailAndAnswer(conn, email, answer, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["email", "answer"], { email, answer });
     customerTable.validate(data);
     let customer = await getOneByEmail(conn, data.email);
     if (customer && await pwd.compare(answer, customer.reset_password_answer)) {
-        customer.subscription = await subscriptionModel.getOneByCustomerID(conn, customer.id);
+        if (opt.include) {
+            await include(conn, customer);
+        }
         return customer;
     }
     return null;
@@ -315,7 +338,7 @@ async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_
 
 export default {
     table: customerTable,
-    prepareResp,
+    prepare,
     createOne,
     updateOne,
     getOne,

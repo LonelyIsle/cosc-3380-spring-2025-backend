@@ -8,6 +8,7 @@ import couponModel from "./coupon.js";
 import orderProductModel from "./orderProduct.js";
 import productModel from "./product.js";
 import Validator from "../helpers/validator.js";
+import subscriptionModel from "./subscription.js";
 
 const CANCELLED_STATUS = -1;
 const PLACED_STATUS = 0;
@@ -161,20 +162,62 @@ const itemsValidator = new Validator({
         types: DataType.ARRAY(DataType.ANY()),
         isRequired: DataType.NOTNULL()
     }
-})
+});
 
-async function getAll(conn) {
-    const [rows] = [[]];
+async function include(conn, rows, opt = {}) {
+    opt = utils.objectAssign(["inclImg"], { inclImg: true }, opt);
+    const _include = async (obj) => {
+        if (obj) {
+            obj.items = await orderProductModel.getProductByOrderId(conn, obj.id, { include: true, inclImg: opt.inclImg });
+            if (obj.customer_id) {
+                obj.customer = await customerModel.getOne(conn, obj.customer_id);
+                customerModel.prepare(obj.customer);
+            }
+            if (obj.subscription_id) {
+                obj.subscription = await subscriptionModel.getOne(conn, obj.subscription_id);
+            }
+            if (obj.coupon_id) {
+                obj.coupon = await couponModel.getOne(conn, obj.coupon_id);
+            }
+        }
+    }
+    if (!Array.isArray(rows)) {
+        await _include(rows);
+    } else {
+        for (let row of rows) {
+            await _include(row);
+        }
+    }
+}
+
+async function getAll(conn, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    const [rows] = await conn.query(
+        'SELECT * FROM `order` WHERE `is_deleted` = ?',
+        [false]
+    );
+    if (opt.include) {
+        await include(conn, rows, { inclImg: false });
+    }
+    for (let row of rows) {
+        if (row.image) {
+            row.image = Buffer.from(row.image).toString('base64');
+        }
+    }
     return rows;
 }
 
-async function getOne(conn, id) {
+async function getOne(conn, id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["id"], { id });
     orderTable.validate(data);
     const [rows] = await conn.query(
         'SELECT * FROM `order` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
     return rows[0] || null;
 }
 
@@ -189,8 +232,8 @@ async function createOne(conn, order) {
             throw new HttpError({statusCode: 401 });
         }
         order.customer_email = customer.email;
-        if (customer.subscription) {
-            let subscription = customer.subscription;
+        let subscription = await subscriptionModel.getOneByCustomerID(conn, order.customer_id);
+        if (subscription) {
             order.subscription_id = subscription.id;
             order.subscription_discount_percentage = config[configModel.SUBSCRIPTION_DISCOUNT_PERCENTAGE];
         }
@@ -263,7 +306,7 @@ async function createOne(conn, order) {
         }
     }
     let itemsHashKeys = Object.keys(itemsHash);
-    let products = await productModel.getManyByIds(conn, itemsHashKeys);
+    let products = await productModel.getManyByIds(conn, itemsHashKeys, { inclImg: false });
     if (products.length != itemsHashKeys.length) {
         throw new HttpError({statusCode: 400, message: "Invalid items." });
     }

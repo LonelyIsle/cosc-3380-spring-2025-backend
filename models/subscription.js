@@ -87,6 +87,17 @@ const subscriptionTable = new Table("subscription", {
     filter: {}
 });
 
+async function getOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    subscriptionTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `subscription` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    return rows[0] || null;
+}
+
+
 async function getOneByCustomerID(conn, customer_id) {
     let data = utils.objectAssign(["customer_id"], { customer_id });
     subscriptionTable.validate(data);
@@ -167,6 +178,7 @@ async function createOne(conn, subscription) {
 
 export default {
     table: subscriptionTable,
+    getOne,
     getOneByCustomerID,
     createOne
 }

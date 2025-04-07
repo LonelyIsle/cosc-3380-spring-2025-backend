@@ -3,7 +3,7 @@ import db from "./db.js";
 
 async function getAll(req, res) {
     await db.tx(req, res, async (conn) => {
-        let rows = await orderModel.getAll(conn);
+        let rows = await orderModel.getAll(conn, { include: true });
         return rows;
     });
 }
@@ -11,7 +11,7 @@ async function getAll(req, res) {
 async function getOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let orderId = req.param.id;
-        let order = await orderModel.getOne(conn, orderId);
+        let order = await orderModel.getOne(conn, orderId, { include: true });
         return order;
     });
 }
@@ -23,7 +23,7 @@ async function createOne(req, res) {
             body.customer_id  = req.jwt.user.id;
         }
         let orderId = await orderModel.createOne(conn, body);
-        let order = await orderModel.getOne(conn, orderId);
+        let order = await orderModel.getOne(conn, orderId, { include: true });
         return order;
     });
 }
