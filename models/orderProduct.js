@@ -46,19 +46,13 @@ const orderProductTable = new Table("order_product", {
     filter: {}
 });
 
-async function getProductByOrderId(conn, orderId, opt = {}) {
+async function getProductByOrderId(conn, order_id, opt = {}) {
     opt = utils.objectAssign(["include", "inclImg"], { include: false, inclImg: true }, opt);
-    let data = utils.objectAssign(["orderId"], { orderId });
-    let validator = new Validator({
-        orderId: {
-            type: DataType.NUMBER(),
-            isRequired: DataType.NOTNULL()
-        }
-    });
-    validator.validate(data);
+    let data = utils.objectAssign(["order_id"], { order_id });
+    orderProductTable.validate(data);
     const [rows] = await conn.query(
         'SELECT `order_product`.* FROM `product` INNER JOIN `order_product` ON `order_product`.`product_id` = `product`.`id` WHERE `order_product`.`order_id` = ? AND `product`.`is_deleted` = ?',
-        [data.orderId, false]
+        [data.order_id, false]
     );
     if (opt.include) {
         for (let row of rows) {

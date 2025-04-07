@@ -199,26 +199,29 @@ async function getAll(conn, opt = {}) {
     if (opt.include) {
         await include(conn, rows, { inclImg: false });
     }
-    for (let row of rows) {
-        if (row.image) {
-            row.image = Buffer.from(row.image).toString('base64');
-        }
+    return rows;
+}
+
+async function getAllByCustomerId(conn, customer_id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    let data = utils.objectAssign(["customer_id"], { customer_id });
+    orderTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `order` WHERE `customer_id` = ? AND `is_deleted` = ?',
+        [data.customer_id, false]
+    );
+    if (opt.include) {
+        await include(conn, rows, { inclImg: false });
     }
     return rows;
 }
 
-async function getManyIdByCustomerId(conn, customerId) {
-    let data = utils.objectAssign(["customerId"], { customerId });
-    let validator = new Validator({
-        customerId: {
-            type: DataType.NUMBER(),
-            isRequired: DataType.NOTNULL()
-        }
-    });
-    validator.validate(data);
+async function getManyIdByCustomerId(conn, customer_id) {
+    let data = utils.objectAssign(["customer_id"], { customer_id });
+    orderTable.validate(data);
     const [rows] = await conn.query(
         'SELECT `id` FROM `order` WHERE `customer_id` = ? AND `is_deleted` = ?',
-        [data.customerId, false]
+        [data.customer_id, false]
     );
     return rows.map(row => row.id);
 }
@@ -446,6 +449,7 @@ async function createOne(conn, order) {
 
 export default {
     getAll,
+    getAllByCustomerId,
     getManyIdByCustomerId,
     getOne,
     createOne,
