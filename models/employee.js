@@ -1,4 +1,5 @@
 import utils from "../helpers/utils.js"
+import auth from "../helpers/auth.js"
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 import pwd from "../helpers/pwd.js";
@@ -30,7 +31,7 @@ const employeeTable = new Table("employee", {
     },
     "role": {
         // 0: staff, 1: manager
-        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
+        type: DataType.NUMBER({ check: (val) => auth.EMPLOYEE_ROLES.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "hourly_rate": {

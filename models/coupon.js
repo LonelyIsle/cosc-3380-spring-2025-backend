@@ -3,6 +3,10 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 
+const PERCENTAGE_TYPE = 0;
+const FIXED_AMOUNT_TYPE = 1;
+const TYPE = [PERCENTAGE_TYPE, FIXED_AMOUNT_TYPE];
+
 const couponTable = new Table("coupon", {
     "id": {
         type: DataType.NUMBER(),
@@ -26,7 +30,7 @@ const couponTable = new Table("coupon", {
     },
     "type": {
         // 0: percentage, 1: fixed amount
-        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
+        type: DataType.NUMBER({ check: (val) => TYPE.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "description": {
@@ -76,6 +80,9 @@ async function getOneByCode(conn, code) {
 
 export default {
     table: couponTable,
+    FIXED_AMOUNT_TYPE,
+    PERCENTAGE_TYPE,
+    TYPE,
     getOneByCode,
     getOne
 }

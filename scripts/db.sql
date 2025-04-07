@@ -50,7 +50,7 @@ DROP TABLE IF EXISTS `coupon`;
 CREATE TABLE `coupon` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     `code` VARCHAR(255) NOT NULL UNIQUE,
-    `value` DECIMAL(12, 2) NOT NULL,
+    `value` DECIMAL(14, 4) NOT NULL,
     `start_at` TIMESTAMP NOT NULL,
     `end_at` TIMESTAMP NOT NULL,
     `type` INT NOT NULL DEFAULT 0, -- 0: percentage, 1: fixed amount
@@ -163,10 +163,11 @@ CREATE TABLE `order` (
     `subscription_id` INT,
     `subscription_discount_percentage` DECIMAL(5, 4),
     `coupon_id` INT,
-    `coupon_value` DECIMAL(12, 2),
+    `coupon_value` DECIMAL(14, 4),
     `coupon_type` INT DEFAULT 0,
     `shipping_fee` DECIMAL(12, 2) NOT NULL,
     `sale_tax` DECIMAL(5, 4) NOT NULL,
+    `total` DECIMAL(12, 2) NOT NULL,
     `tracking` LONGTEXT,
     `status` INT NOT NULL DEFAULT 0, -- -1: cancelled, 0: placed, 1: shipped
     `shipping_address_1` VARCHAR(255) NOT NULL,

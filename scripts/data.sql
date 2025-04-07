@@ -28,7 +28,7 @@ VALUES
 -- COUPON --
 INSERT INTO `coupon` (`id`, `code`, `value`, `start_at`, `end_at`, `type`, `description`)
 VALUES
-(1, '20PERCENT', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 0, '20%'),
+(1, '20PERCENT', 0.20, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 0, '20%'),
 (2, '20BUCKS', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 1, '20.00$');
 
 -- SALE_EVENT --

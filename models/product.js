@@ -146,7 +146,7 @@ async function updateManyQuantityByIds(conn, products) {
     for (let product of products) {
         let data = utils.objectAssign(["id", "quantity"], product);
         productTable.validate(data);
-        queryStrs.push('UPDATE `product` SET `quantity` = `quantity` - ? WHERE `id` = ? AND `is_deleted` = ?');
+        queryStrs.push('UPDATE `product` SET `quantity` = `quantity` + ? WHERE `id` = ? AND `is_deleted` = ?');
         params.push([data.quantity, data.id, false]);
         result.push(data.id);
     }

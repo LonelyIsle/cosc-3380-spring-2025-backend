@@ -9,6 +9,11 @@ import orderProductModel from "./orderProduct.js";
 import productModel from "./product.js";
 import Validator from "../helpers/validator.js";
 
+const CANCELLED_STATUS = -1;
+const PLACED_STATUS = 0;
+const SHIPPED_STATUS = 1;
+const STATUS = [CANCELLED_STATUS, PLACED_STATUS, SHIPPED_STATUS];
+
 const orderTable = new Table("order", {
     "id": {
         type: DataType.NUMBER(),
@@ -51,7 +56,7 @@ const orderTable = new Table("order", {
         isRequired: DataType.NULLABLE()
     },
     "coupon_type": {
-        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
+        type: DataType.NUMBER({ check: (val) => couponModel.TYPE.indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     },
     "shipping_fee": {
@@ -67,7 +72,7 @@ const orderTable = new Table("order", {
         isRequired: DataType.NULLABLE()
     },
     "status": {
-        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
+        type: DataType.NUMBER({ check: (val) => STATUS.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "shipping_address_1":{ 
@@ -205,7 +210,7 @@ async function createOne(conn, order) {
     } else {
         order.coupon_id = null;
         order.coupon_value = 0;
-        order.type = 0;
+        order.coupon_type = couponModel.PERCENTAGE_TYPE;
     }
     // other
     order.shipping_fee = config[configModel.SHIPPING_FEE];
@@ -271,6 +276,29 @@ async function createOne(conn, order) {
             throw new HttpError({statusCode: 400, message: "Invalid items." });
         }
     }
+    // total
+    data.total = 0;
+    for (let key of itemsHashKeys) {
+        data.total = data.total + productHash[key].price * itemsHash[key].quantity;
+    }
+    if (data.subscription_id) {
+        data.total = data.total * (1 -  data.subscription_discount_percentage); 
+    }
+    if (data.coupon_id) {
+        switch(data.coupon_type) {
+            case couponModel.PERCENTAGE_TYPE:
+                data.total = data.total * (1 - data.coupon_value); 
+                break;
+            case couponModel.FIXED_AMOUNT_TYPE:
+                data.total = data.total - data.coupon_value; 
+                break;
+        }
+    }
+    data.total = data.total + data.shipping_fee;
+    data.total = data.total * (1 + data.sale_tax);
+    if (data.total < 0) {
+        data.total = 0;
+    }
     // payment successfully processed
     const [rows] = await conn.query(
         'INSERT INTO `order`('
@@ -286,6 +314,7 @@ async function createOne(conn, order) {
         + '`coupon_type`, '
         + '`shipping_fee`, '
         + '`sale_tax`, '
+        + '`total`, '
         + '`tracking`, '
         + '`status`, '
         + '`shipping_address_1`, '
@@ -303,7 +332,7 @@ async function createOne(conn, order) {
         + '`card_expire_month`, '
         + '`card_expire_year`, '
         + '`card_code`'
-        + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
             data.customer_id,
             data.customer_first_name,
@@ -317,6 +346,7 @@ async function createOne(conn, order) {
             data.coupon_type,
             data.shipping_fee,
             data.sale_tax,
+            data.total,
             data.tracking,
             data.status,
             data.shipping_address_1,
@@ -347,7 +377,10 @@ async function createOne(conn, order) {
     }
     let insertIds = await orderProductModel.createMany(conn, data.items);
     let updateIds = await productModel.updateManyQuantityByIds(conn, data.items.map(item => {
-        return { id: item.product_id, quantity: item.quantity };
+        return { 
+            id: item.product_id, 
+            quantity: -1 * item.quantity 
+        };
     }));
     return rows.insertId;
 }
@@ -355,5 +388,9 @@ async function createOne(conn, order) {
 export default {
     getAll,
     getOne,
-    createOne
+    createOne,
+    STATUS,
+    CANCELLED_STATUS,
+    PLACED_STATUS,
+    SHIPPED_STATUS
 }

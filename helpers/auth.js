@@ -6,6 +6,7 @@ const GUEST = -2;
 const CUSTOMER = -1;
 const STAFF= 0;
 const MANAGER = 1;
+const EMPLOYEE_ROLES = [STAFF, MANAGER];
 
 function is(...roles) {
     return (req, res, next) => {
@@ -71,6 +72,7 @@ export default {
     CUSTOMER,
     STAFF,
     MANAGER,
+    EMPLOYEE_ROLES,
     is,
     attach
 }
