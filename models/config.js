@@ -3,13 +3,24 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 
+const SUBSCRIPTION_DISCOUNT_PERCENTAGE = "subscription_discount_percentage";
+const SHIPPING_FEE = "shipping_fee";
+const SALE_TAX = "sale_tax";
+const SUBSCRIPTION_PRICE = "subscription_price";
+const KEYS = [
+    SUBSCRIPTION_DISCOUNT_PERCENTAGE,
+    SHIPPING_FEE,
+    SALE_TAX,
+    SUBSCRIPTION_PRICE
+];
+
 const configTable = new Table("config", {
     "id": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
     "key": {
-        type: DataType.STRING(),
+        type: DataType.STRING({ check: (val) => KEYS.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "value": {
@@ -36,11 +47,6 @@ const configTable = new Table("config", {
     sort: [],
     filter: {}
 });
-
-const SUBSCRIPTION_DISCOUNT_PERCENTAGE = "SUBSCRIPTION_DISCOUNT_PERCENTAGE";
-const SHIPPING_FEE = "SHIPPING_FEE";
-const SALE_TAX = "SALE_TAX";
-const SUBSCRIPTION_PRICE = "SUBSCRIPTION_PRICE";
 
 async function getAll(conn) {
     const [rows] = await conn.query(

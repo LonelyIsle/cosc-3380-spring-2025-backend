@@ -5,7 +5,7 @@ import DataType from "../helpers/dataType.js";
 
 const PERCENTAGE_TYPE = 0;
 const FIXED_AMOUNT_TYPE = 1;
-const TYPE = [PERCENTAGE_TYPE, FIXED_AMOUNT_TYPE];
+const TYPES = [PERCENTAGE_TYPE, FIXED_AMOUNT_TYPE];
 
 const couponTable = new Table("coupon", {
     "id": {
@@ -30,7 +30,7 @@ const couponTable = new Table("coupon", {
     },
     "type": {
         // 0: percentage, 1: fixed amount
-        type: DataType.NUMBER({ check: (val) => TYPE.indexOf(val) > -1 }),
+        type: DataType.NUMBER({ check: (val) => TYPES.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "description": {
@@ -82,7 +82,7 @@ export default {
     table: couponTable,
     FIXED_AMOUNT_TYPE,
     PERCENTAGE_TYPE,
-    TYPE,
+    TYPES,
     getOneByCode,
     getOne
 }

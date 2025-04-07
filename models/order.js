@@ -56,7 +56,7 @@ const orderTable = new Table("order", {
         isRequired: DataType.NULLABLE()
     },
     "coupon_type": {
-        type: DataType.NUMBER({ check: (val) => couponModel.TYPE.indexOf(val) > -1 }),
+        type: DataType.NUMBER({ check: (val) => couponModel.TYPES.indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     },
     "shipping_fee": {

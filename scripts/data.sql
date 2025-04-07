@@ -20,10 +20,10 @@ VALUES
 -- CONFIG --
 INSERT INTO `config` (`id`, `key`, `value`) 
 VALUES 
-(1, 'SUBSCRIPTION_DISCOUNT_PERCENTAGE', 0.2),
-(2, 'SHIPPING_FEE', 9.99),
-(3, 'SALE_TAX', 0.0825),
-(4, 'SUBSCRIPTION_PRICE', 10.00);
+(1, 'subscription_discount_percentage', 0.2),
+(2, 'shipping_fee', 9.99),
+(3, 'sale_tax', 0.0825),
+(4, 'subscription_price', 10.00);
 
 -- COUPON --
 INSERT INTO `coupon` (`id`, `code`, `value`, `start_at`, `end_at`, `type`, `description`)
