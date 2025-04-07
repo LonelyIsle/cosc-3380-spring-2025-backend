@@ -2,6 +2,7 @@ import utils from "../helpers/utils.js"
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 import productCategoryTableModel from "./productCategory.js";
+import Validator from "../helpers/validator.js";
 
 const productTable = new Table("product", {
     "id": {
@@ -66,17 +67,17 @@ const productTable = new Table("product", {
 });
 
 const COLS_LITE_STR = [
-    "`id`",
-    "`sku`",
-    "`price`",
-    "`quantity`",
-    "`threshold`",
-    "`name`",
-    "`description`",
-    "`created_at`",
-    "`updated_at`",
-    "`deleted_at`",
-    "`is_deleted`",
+    "`product`.`id`",
+    "`product`.`sku`",
+    "`product`.`price`",
+    "`product`.`quantity`",
+    "`product`.`threshold`",
+    "`product`.`name`",
+    "`product`.`description`",
+    "`product`.`created_at`",
+    "`product`.`updated_at`",
+    "`product`.`deleted_at`",
+    "`product`.`is_deleted`",
 ].join(",");
 
 async function include(conn, rows) {
@@ -94,11 +95,37 @@ async function include(conn, rows) {
     }
 }
 
-async function getAll(conn, opt = {}) {
+async function getAll(conn, query, opt = {}) {
     opt = utils.objectAssign(["include", "inclImg"], { include: false, inclImg: true }, opt);
+    let categoryIdsQuery = query.category_id;
+    let validator = new Validator({
+        categoryIdsQuery: {
+            type: DataType.ARRAY(DataType.NUMBER()),
+            isRequired: DataType.NULLABLE()
+        }
+    });
+    validator.validate({ categoryIdsQuery });
+    let joinQuery = "WHERE";
+    let joinParam = [];
+    if (categoryIdsQuery && categoryIdsQuery.length !== 0) {
+        joinQuery = 'INNER JOIN `product_category` ON `product`.`id` = `product_category`.`product_id`'
+            + ' WHERE `product_category`.`category_id` IN (?) AND `product_category`.`is_deleted`= ?' 
+            + ' AND';
+        joinParam = [categoryIdsQuery, false];
+    }
+    let { parsedQuery, whereQueryStr, sortQueryStr, pagingQueryStr, whereParams, pagingParams } = productTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `product`.`id`) FROM `product` ' 
+        + joinQuery + ' ' + whereQueryStr,
+        joinParam.concat(whereParams)
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `product`.`id`)"]) || 0;
     const [rows] = await conn.query(
-        'SELECT ' + (opt.inclImg ? '*' : COLS_LITE_STR) + ' FROM `product` WHERE `is_deleted` = ?',
-        [false]
+        'SELECT ' + (opt.inclImg ? '`product`.*' : COLS_LITE_STR) + ' FROM `product` ' 
+        + joinQuery + ' ' + whereQueryStr 
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        joinParam.concat(whereParams, pagingParams)
     );
     if (opt.include) {
         await include(conn, rows);
@@ -108,7 +135,12 @@ async function getAll(conn, opt = {}) {
             row.image = Buffer.from(row.image).toString('base64');
         }
     }
-    return rows;
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
 }
 
 async function getManyByIds(conn, ids, opt = {}) {

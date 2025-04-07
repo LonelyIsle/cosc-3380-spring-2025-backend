@@ -5,7 +5,6 @@ class Table {
     parseReqQuery(query) {
         return utils.objectAssign(
             [...Object.keys(this.filterAttribute), "sort_by", "limit", "offset"],
-            { limit: 10, offset: 0 },
             query
         );
     }
@@ -47,30 +46,23 @@ class Table {
         whereParams.push(false);
         // ORDER BY
         temp = this.getSortQueryStr(query.sort_by);
-        if (temp.error) {
-            // sort by id or this.sortAttribute[0] by default
-            if (!sortAttrs || sortAttrs.length === 0) {
-                sortAttrs[0] = "id";
-            }
-            if (sortAttrs[0]) {
-                temp = this.getSortQueryStr(sortAttrs[0] + "-asc");
-                if (!temp.error) {
-                    sortQuery.push(...[temp.query]);
-                }
-            }
-        } else {
-            sortQuery.push(...[temp.query]);
+        if (!temp.error) {
+            sortQuery.push(temp.query);
         }
         // LIMIT & OFFSET
-        pagingQuery.push("LIMIT ?");
-        pagingParams.push(query.limit);
-        pagingQuery.push("OFFSET ?");
-        pagingParams.push(query.offset);
+        if (!utils.isNaN(parseInt(query.limit))) {
+            pagingQuery.push("LIMIT ?");
+            pagingParams.push(query.limit);
+        }
+        if (!utils.isNaN(parseInt(query.offset))) {
+            pagingQuery.push("OFFSET ?");
+            pagingParams.push(query.offset);
+        }
         return {
             parsedQuery: query,
-            whereQueryStr: whereQuery.join(" "),
-            sortQueryStr: sortQuery.join(" "),
-            pagingQueryStr: pagingQuery.join(" "),
+            whereQueryStr: whereQuery.length == 0 ? null : whereQuery.join(" "),
+            sortQueryStr: sortQuery.length == 0 ? null : sortQuery.join(" "),
+            pagingQueryStr: pagingQuery.length < 2 ? null : pagingQuery.join(" "),
             whereParams,
             pagingParams
         }

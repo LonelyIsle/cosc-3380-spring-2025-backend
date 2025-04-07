@@ -5,9 +5,11 @@ class ARRAY {
         if (val && !Array.isArray(val)) {
             return false; 
         }
-        for (let v of val) {
-            if(!this.elementType.validate(v)) {
-                return false;
+        if (val) {
+            for (let v of val) {
+                if(!this.elementType.validate(v)) {
+                    return false;
+                }
             }
         }
         return true;
@@ -31,10 +33,10 @@ class NUMBER {
         let [min] = utils.parseStr(_val[0]);
         let [max] = utils.parseStr(_val[1]);
         if (utils.isNaN(min)) {
-            return { op: "<", min: null, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " < ?", params: [max]};
+            return { op: "<=", min: null, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " <= ?", params: [max]};
         } 
         if (utils.isNaN(max)) {
-            return { op: ">", min, max: null, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " > ?", params: [min]};
+            return { op: ">=", min, max: null, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " >= ?", params: [min]};
         }
         if (min == max) {
             return { op: "=", min, max, query: '`' + tableName + '`'+ '.' + '`' + key + '`' + " = ?", params: [min]};
