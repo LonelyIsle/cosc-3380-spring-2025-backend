@@ -244,13 +244,13 @@ async function getAllByCustomerId(conn, customer_id, query, opt = {}) {
     } = orderTable.getQueryStr(query);
     const [countRows] = await conn.query(
         'SELECT COUNT(DISTINCT `order`.`id`) FROM `order` ' 
-        + (!whereQueryStr ? ' WHERE `order`.`customer_id` = ? ' :  ' WHERE `order`.`customer_id` = ? AND ' + whereQueryStr),
+        + (!whereQueryStr ? ' WHERE (`order`.`customer_id` = ?) ' :  ' WHERE (`order`.`customer_id` = ?) AND ' + whereQueryStr),
         [data.customer_id].concat(whereParams)
     );
     const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `order`.`id`)"]) || 0;
     const [rows] = await conn.query(
         'SELECT `order`.* FROM `order` ' 
-        + (!whereQueryStr ? ' WHERE `order`.`customer_id` = ? ' :  ' WHERE `order`.`customer_id` = ? AND ' + whereQueryStr)
+        + (!whereQueryStr ? ' WHERE (`order`.`customer_id` = ?) ' :  ' WHERE (`order`.`customer_id` = ?) AND ' + whereQueryStr)
         + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
         + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
         [data.customer_id].concat(whereParams, pagingParams)

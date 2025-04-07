@@ -46,8 +46,10 @@ const saleEventTable = new Table("sale_event", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["title", "created_at", "updated_at"],
+    filter: {
+        "title": DataType.STRING(),
+    }
 });
 
 async function include(conn, rows) {
@@ -65,16 +67,38 @@ async function include(conn, rows) {
     }
 }
 
-async function getAll(conn, opt = {}) {
+async function getAll(conn, query, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = saleEventTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `sale_event`.`id`) FROM `sale_event` ' 
+        + (!whereQueryStr ? ' (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) ' :  ' WHERE (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) AND ' + whereQueryStr),
+        whereParams
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `sale_event`.`id`)"]) || 0;
     const [rows] = await conn.query(
-        'SELECT * FROM `sale_event` WHERE (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
-        [false]
+        'SELECT `sale_event`.* FROM `sale_event` ' 
+        + (!whereQueryStr ? ' (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) ' :  ' WHERE (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) AND ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
     );
     if (opt.include) {
         await include(conn, rows);
     }
-    return rows;
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
 }
 
 export default {
