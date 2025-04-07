@@ -7,7 +7,7 @@ async function createOne(req, res) {
         let body = req.body;
         body.customer_id  = req.jwt.user.id;
         let subscriptionId  = await subscriptionModel.createOne(conn, body);
-        let subscription = await subscriptionModel.getOneByCustomerID(conn, body.customer_id);
+        let subscription = await subscriptionModel.getOne(conn, subscriptionId);
         return subscription;
     });
 }

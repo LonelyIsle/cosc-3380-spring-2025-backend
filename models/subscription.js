@@ -98,7 +98,7 @@ async function getOne(conn, id) {
 }
 
 
-async function getOneByCustomerID(conn, customer_id) {
+async function getOneActiveByCustomerID(conn, customer_id) {
     let data = utils.objectAssign(["customer_id"], { customer_id });
     subscriptionTable.validate(data);
     const [rows] = await conn.query(
@@ -129,7 +129,7 @@ async function createOne(conn, subscription) {
     if (!customer) {
         throw new HttpError({statusCode: 401 });
     }
-    let existedSubscription = await getOneByCustomerID(conn, data.customer_id);
+    let existedSubscription = await getOneActiveByCustomerID(conn, data.customer_id);
     if (existedSubscription) {
         throw new HttpError({statusCode: 400, message: `You are already subscribed.`});
     }
@@ -179,6 +179,6 @@ async function createOne(conn, subscription) {
 export default {
     table: subscriptionTable,
     getOne,
-    getOneByCustomerID,
+    getOneActiveByCustomerID,
     createOne
 }

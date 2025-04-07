@@ -140,7 +140,7 @@ function prepare(rows) {
 async function include(conn, rows) {
     const _include = async (obj) => {
         if (obj) {
-            obj.subscription = await subscriptionModel.getOneByCustomerID(conn, obj.id);
+            obj.subscription = await subscriptionModel.getOneActiveByCustomerID(conn, obj.id);
         }
     }
     if (!Array.isArray(rows)) {

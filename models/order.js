@@ -301,7 +301,7 @@ async function createOne(conn, order) {
             throw new HttpError({statusCode: 401 });
         }
         order.customer_email = customer.email;
-        let subscription = await subscriptionModel.getOneByCustomerID(conn, order.customer_id);
+        let subscription = await subscriptionModel.getOneActiveByCustomerID(conn, order.customer_id);
         if (subscription) {
             order.subscription_id = subscription.id;
             order.subscription_discount_percentage = config[configModel.SUBSCRIPTION_DISCOUNT_PERCENTAGE];
