@@ -313,7 +313,7 @@ async function createOne(conn, order) {
     }
     // coupon
     if (order.coupon_id) {
-        let coupon = await couponModel.getOne(conn, order.coupon_id);
+        let coupon = await couponModel.getOneActive(conn, order.coupon_id);
         if (!coupon) {
             throw new HttpError({statusCode: 400, message: "Invalid coupon." });
         }

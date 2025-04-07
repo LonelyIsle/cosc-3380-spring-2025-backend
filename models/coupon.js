@@ -62,13 +62,23 @@ async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     couponTable.validate(data);
     const [rows] = await conn.query(
+        'SELECT * FROM `coupon` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    return rows[0] || null;
+}
+
+async function getOneActive(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    couponTable.validate(data);
+    const [rows] = await conn.query(
         'SELECT * FROM `coupon` WHERE `id` = ? AND (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
         [data.id, false]
     );
     return rows[0] || null;
 }
 
-async function getOneByCode(conn, code) {
+async function getOneActiveByCode(conn, code) {
     let data = utils.objectAssign(["code"], { code });
     couponTable.validate(data);
     const [rows] = await conn.query(
@@ -83,6 +93,7 @@ export default {
     FIXED_AMOUNT_TYPE,
     PERCENTAGE_TYPE,
     TYPES,
-    getOneByCode,
+    getOneActive,
+    getOneActiveByCode,
     getOne
 }

@@ -57,7 +57,7 @@ router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOn
 router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
 
 // Coupon
-router.get("/coupon/:code", couponController.getOneByCode);
+router.get("/coupon/:code", couponController.getOneActiveByCode);
 
 // Sale Event
 router.get("/sale-event", saleEventController.getAll);
