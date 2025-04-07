@@ -79,13 +79,13 @@ async function getAll(conn, query, opt = {}) {
     } = saleEventTable.getQueryStr(query);
     const [countRows] = await conn.query(
         'SELECT COUNT(DISTINCT `sale_event`.`id`) FROM `sale_event` ' 
-        + (!whereQueryStr ? ' (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) ' :  ' WHERE (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) AND ' + whereQueryStr),
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
         whereParams
     );
     const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `sale_event`.`id`)"]) || 0;
     const [rows] = await conn.query(
         'SELECT `sale_event`.* FROM `sale_event` ' 
-        + (!whereQueryStr ? ' (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) ' :  ' WHERE (NOW() BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) AND ' + whereQueryStr)
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
         + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
         + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
         whereParams.concat(pagingParams)
