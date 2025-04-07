@@ -207,6 +207,22 @@ async function getAll(conn, opt = {}) {
     return rows;
 }
 
+async function getManyIdByCustomerId(conn, customerId) {
+    let data = utils.objectAssign(["customerId"], { customerId });
+    let validator = new Validator({
+        customerId: {
+            type: DataType.NUMBER(),
+            isRequired: DataType.NOTNULL()
+        }
+    });
+    validator.validate(data);
+    const [rows] = await conn.query(
+        'SELECT `id` FROM `order` WHERE `customer_id` = ? AND `is_deleted` = ?',
+        [data.customerId, false]
+    );
+    return rows.map(row => row.id);
+}
+
 async function getOne(conn, id, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["id"], { id });
@@ -430,6 +446,7 @@ async function createOne(conn, order) {
 
 export default {
     getAll,
+    getManyIdByCustomerId,
     getOne,
     createOne,
     STATUS,
