@@ -1,4 +1,5 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
+import auth from "../helpers/auth.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -111,7 +112,7 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -119,49 +120,89 @@ const customerTable = new Table("customer", {
     filter: {}
 });
 
-async function getOne(conn, id) {
+function prepare(rows) {
+    const _prepare = (obj) => {
+        if (obj) {
+            delete obj.password;
+            delete obj.reset_password_answer;
+            obj.role = auth.CUSTOMER;
+        }
+    }
+    if (!Array.isArray(rows)) {
+        _prepare(rows);
+    } else {
+        for (let row of rows) {
+            _prepare(row);
+        }
+    }
+}
+
+async function include(conn, rows) {
+    const _include = async (obj) => {
+        if (obj) {
+            obj.subscription = await subscriptionModel.getOneActiveByCustomerID(conn, obj.id);
+        }
+    }
+    if (!Array.isArray(rows)) {
+        await _include(rows);
+    } else {
+        for (let row of rows) {
+            await _include(row);
+        }
+    }
+}
+
+async function getOne(conn, id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["id"], { id });
     customerTable.validate(data);
     const [rows] = await conn.query(
         'SELECT * FROM `customer` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
     );
-    if (rows[0]) {
-        rows[0].subscription = await subscriptionModel.getOneByCustomerID(conn, rows[0].id);
+    if (opt.include) {
+        await include(conn, rows[0]);
     }
     return rows[0] || null;
 }
 
-async function getOneByEmail(conn, email) {
+async function getOneByEmail(conn, email, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["email"], { email });
     customerTable.validate(data);
     const [rows] = await conn.query(
         'SELECT * FROM `customer` WHERE `email` = ? AND `is_deleted` = ?',
         [data.email, false]
     );
-    if (rows[0]) {
-        rows[0].subscription = await subscriptionModel.getOneByCustomerID(conn, rows[0].id);
+    if (opt.include) {
+        await include(conn, rows[0]);
     }
     return rows[0] || null;
 }
 
-async function getOneByEmailAndPwd(conn, email, password) {
+async function getOneByEmailAndPwd(conn, email, password, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["email", "password"], { email, password });
     customerTable.validate(data);
     let customer = await getOneByEmail(conn, data.email);
     if (customer && await pwd.compare(password, customer.password)) {
-        customer.subscription = await subscriptionModel.getOneByCustomerID(conn, customer.id);
+        if (opt.include) {
+            await include(conn, customer);
+        }
         return customer;
     }
     return null;
 }
 
-async function getOneByEmailAndAnswer(conn, email, answer) {
+async function getOneByEmailAndAnswer(conn, email, answer, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["email", "answer"], { email, answer });
     customerTable.validate(data);
     let customer = await getOneByEmail(conn, data.email);
     if (customer && await pwd.compare(answer, customer.reset_password_answer)) {
-        customer.subscription = await subscriptionModel.getOneByCustomerID(conn, customer.id);
+        if (opt.include) {
+            await include(conn, customer);
+        }
         return customer;
     }
     return null;
@@ -189,26 +230,29 @@ async function updateOne(conn, newCustomer) {
         throw new HttpError({statusCode: 400, message: `customer ${newCustomer.id} not found.`});
     }
     let data = utils.objectAssign([
-        "id", 
-        "first_name",
-        "middle_name",
-        "last_name",
-        "shipping_address_1",
-        "shipping_address_2",
-        "shipping_address_city",
-        "shipping_address_state",
-        "shipping_address_zip",
-        "billing_address_1",
-        "billing_address_2",
-        "billing_address_city",
-        "billing_address_state",
-        "billing_address_zip",
-        "card_name",
-        "card_number",
-        "card_expire_month",
-        "card_expire_year",
-        "card_code"
-    ], oldCustomer, newCustomer);
+            "id", 
+            "first_name",
+            "middle_name",
+            "last_name",
+            "shipping_address_1",
+            "shipping_address_2",
+            "shipping_address_city",
+            "shipping_address_state",
+            "shipping_address_zip",
+            "billing_address_1",
+            "billing_address_2",
+            "billing_address_city",
+            "billing_address_state",
+            "billing_address_zip",
+            "card_name",
+            "card_number",
+            "card_expire_month",
+            "card_expire_year",
+            "card_code"
+        ], 
+        oldCustomer, 
+        newCustomer
+    );
     customerTable.validate(data);
     const [rows] = await conn.query(
         'UPDATE `customer` SET '
@@ -265,7 +309,7 @@ async function updatePassword(conn, id, password) {
         'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.password, data.id, false]
     );
-    return rows;
+    return id;
 }
 
 async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_password_answer) {
@@ -289,11 +333,12 @@ async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_
             false
         ]
     );
-    return rows;
+    return id;
 }
 
 export default {
-    customerTable,
+    table: customerTable,
+    prepare,
     createOne,
     updateOne,
     getOne,

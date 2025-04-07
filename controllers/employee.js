@@ -9,7 +9,7 @@ async function login(req, res) {
         let body = req.body;
         let employee = await employeeModel.getOneByEmailAndPwd(conn, body.email, body.password);
         if (employee) {
-            delete employee.password;
+            employeeModel.prepare(employee);
             employee.token = jwt.sign({
                 id: employee.id,
                 email: employee.email,
@@ -29,9 +29,7 @@ async function getOne(req, res) {
             throw new HttpError({ statusCode: 401 });
         }
         let employee = await employeeModel.getOne(conn, param.id);
-        if (employee) {
-            delete employee.password;
-        }
+        employeeModel.prepare(employee);
         return employee;
     });
 }

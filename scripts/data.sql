@@ -9,7 +9,7 @@ VALUES
 INSERT INTO `customer` (`id`, `first_name`, `last_name`, `email`, `password`, `reset_password_question`, `reset_password_answer`) 
 VALUES 
 (1, 'John', 'Cena', 'customer@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.', 'How many states are there in the United States?', '$2b$10$cfd3GSy13NfXlRh8fXZequ464lS21Q.Ec2EcahsOpX0y.jOZOV5jK'), -- 123456, 50
-(2, 'John', 'Cena', 'customer_sub@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.', 'How many states are there in the United States?', '$2b$10$cfd3GSy13NfXlRh8fXZequ464lS21Q.Ec2EcahsOpX0y.jOZOV5jK'), -- 123456, 50
+(2, 'James', 'Bond', 'customer_sub@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.', 'How many states are there in the United States?', '$2b$10$cfd3GSy13NfXlRh8fXZequ464lS21Q.Ec2EcahsOpX0y.jOZOV5jK'), -- 123456, 50
 (3, 'Ava', 'Dean', 'somerandom@gmail.com', '$2b$10$nD53mm4ndgrdeMwpLkMsbOwlXVIKY34/nxSb1swYO.Udt3/Pcl9fm', 'How many states are there in the United States?', '$2b$10$cfd3GSy13NfXlRh8fXZequ464lS21Q.Ec2EcahsOpX0y.jOZOV5jK'); -- IWant2Login!, 50
 
 -- SUBSCRIPTION --
@@ -20,15 +20,15 @@ VALUES
 -- CONFIG --
 INSERT INTO `config` (`id`, `key`, `value`) 
 VALUES 
-(1, 'SUBSCRIPTION_DISCOUNT_PERCENTAGE', 0.2),
-(2, 'SHIPPING_FEE', 9.99),
-(3, 'SALE_TAX', 0.08),
-(4, 'SUBSCRIPTION_PRICE', 10.00);
+(1, 'subscription_discount_percentage', 0.2),
+(2, 'shipping_fee', 9.99),
+(3, 'sale_tax', 0.0825),
+(4, 'subscription_price', 10.00);
 
 -- COUPON --
 INSERT INTO `coupon` (`id`, `code`, `value`, `start_at`, `end_at`, `type`, `description`)
 VALUES
-(1, '20PERCENT', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 0, '20%'),
+(1, '20PERCENT', 0.20, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 0, '20%'),
 (2, '20BUCKS', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 1, '20.00$');
 
 -- SALE_EVENT --

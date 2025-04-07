@@ -14,6 +14,7 @@ import couponController from "./controllers/coupon.js";
 import configController from "./controllers/config.js";
 import saleEventController from "./controllers/saleEvent.js";
 import subscriptionController from "./controllers/subscription.js";
+import orderController from "./controllers/order.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -40,7 +41,6 @@ router.patch("/customer/:id", auth.is(auth.CUSTOMER), customerController.updateO
 router.patch("/customer/:id/password", auth.is(auth.CUSTOMER), customerController.updatePassword);
 router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.updateQuestionAndAnswer);
 
-
 // Employee
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
@@ -57,10 +57,15 @@ router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOn
 router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
 
 // Coupon
-router.get("/coupon/:code", couponController.getOneByCode);
+router.get("/coupon/:code", couponController.getOneActiveByCode);
 
 // Sale Event
 router.get("/sale-event", saleEventController.getAll);
+
+// Order
+router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getAll);
+router.get("/order/:id", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getOne);
+router.post("/order", auth.is(auth.GUEST, auth.CUSTOMER), orderController.createOne);
 
 // Config
 router.get("/config", configController.getAll);

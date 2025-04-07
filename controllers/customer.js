@@ -1,4 +1,5 @@
 import customerModel from "../models/customer.js";
+import subscriptionModel from "../models/subscription.js";
 import db from "./db.js";
 import jwt from "../helpers/jwt.js";
 import { HttpError } from "../helpers/error.js";
@@ -15,14 +16,18 @@ async function register(req, res) {
 async function login(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
-        let customer = await customerModel.getOneByEmailAndPwd(conn, body.email, body.password);
+        let customer = await customerModel.getOneByEmailAndPwd(
+            conn, 
+            body.email, 
+            body.password, 
+            { include: true }
+        );
         if (customer) {
-            delete customer.password;
-            delete customer.reset_password_answer;
+            customerModel.prepare(customer);
             customer.token = jwt.sign({
                 id: customer.id,
                 email: customer.email,
-                role: auth.CUSTOMER
+                role: customer.role
             });
         } else {
             throw new HttpError({ statusCode: 400, message: "Wrong email or password." })
@@ -62,12 +67,8 @@ async function getOne(req, res) {
         if (req.jwt.user.role === auth.CUSTOMER && req.jwt.user.id !== param.id) {
             throw new HttpError({ statusCode: 401 });
         }
-        let customer = await customerModel.getOne(conn, param.id);
-        if (customer) {
-            delete customer.password;
-            delete customer.reset_password_answer;
-            customer.role = auth.CUSTOMER;
-        }
+        let customer = await customerModel.getOne(conn, param.id, { include: true });
+        customerModel.prepare(customer);
         return customer;
     });
 }
@@ -81,11 +82,8 @@ async function updateOne(req, res) {
             throw new HttpError({ statusCode: 401 });
         }
         let  customerId = await customerModel.updateOne(conn, body);
-        let customer = await customerModel.getOne(conn, customerId)
-        if (customer) {
-            delete customer.password;
-            delete customer.reset_password_answer;
-        }
+        let customer = await customerModel.getOne(conn, customerId, { include: true });
+        customerModel.prepare(customer);
         return customer;
     });
 }

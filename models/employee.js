@@ -1,4 +1,5 @@
 import utils from "../helpers/utils.js"
+import auth from "../helpers/auth.js"
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 import pwd from "../helpers/pwd.js";
@@ -30,7 +31,7 @@ const employeeTable = new Table("employee", {
     },
     "role": {
         // 0: staff, 1: manager
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => auth.EMPLOYEE_ROLES.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "hourly_rate": {
@@ -50,13 +51,28 @@ const employeeTable = new Table("employee", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
     sort: [],
     filter: {}
 });
+
+function prepare(rows) {
+    const _prepare = (obj) => {
+        if (obj) {
+            delete obj.password;
+        }
+    }
+    if (!Array.isArray(rows)) {
+        _prepare(rows);
+    } else {
+        for (let row of rows) {
+            _prepare(row);
+        }
+    }
+}
 
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
@@ -89,7 +105,8 @@ async function getOneByEmailAndPwd(conn, email, password) {
 }
 
 export default {
-    employeeTable,
+    table: employeeTable,
+    prepare,
     getOne,
     getOneByEmail,
     getOneByEmailAndPwd

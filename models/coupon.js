@@ -3,6 +3,10 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 
+const PERCENTAGE_TYPE = 0;
+const FIXED_AMOUNT_TYPE = 1;
+const TYPES = [PERCENTAGE_TYPE, FIXED_AMOUNT_TYPE];
+
 const couponTable = new Table("coupon", {
     "id": {
         type: DataType.NUMBER(),
@@ -26,7 +30,7 @@ const couponTable = new Table("coupon", {
     },
     "type": {
         // 0: percentage, 1: fixed amount
-        type: DataType.NUMBER({ check: (val) => (val === 0 || val === 1) }),
+        type: DataType.NUMBER({ check: (val) => TYPES.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
     "description": {
@@ -46,7 +50,7 @@ const couponTable = new Table("coupon", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -58,13 +62,23 @@ async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     couponTable.validate(data);
     const [rows] = await conn.query(
+        'SELECT * FROM `coupon` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    return rows[0] || null;
+}
+
+async function getOneActive(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    couponTable.validate(data);
+    const [rows] = await conn.query(
         'SELECT * FROM `coupon` WHERE `id` = ? AND (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
         [data.id, false]
     );
     return rows[0] || null;
 }
 
-async function getOneByCode(conn, code) {
+async function getOneActiveByCode(conn, code) {
     let data = utils.objectAssign(["code"], { code });
     couponTable.validate(data);
     const [rows] = await conn.query(
@@ -75,7 +89,11 @@ async function getOneByCode(conn, code) {
 }
 
 export default {
-    couponTable,
-    getOneByCode,
+    table: couponTable,
+    FIXED_AMOUNT_TYPE,
+    PERCENTAGE_TYPE,
+    TYPES,
+    getOneActive,
+    getOneActiveByCode,
     getOne
 }

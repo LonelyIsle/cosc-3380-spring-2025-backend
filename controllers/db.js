@@ -8,6 +8,7 @@ let config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     connectionLimit : 20,
+    decimalNumbers: true
 }
 
 if (process.env.DB_SSL.toLowerCase() === "true") {

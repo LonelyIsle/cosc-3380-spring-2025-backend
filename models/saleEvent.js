@@ -42,26 +42,66 @@ const saleEventTable = new Table("sale_event", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["title", "created_at", "updated_at"],
+    filter: {
+        "title": DataType.STRING(),
+    }
 });
 
-async function getAll(conn) {
-    const [rows] = await conn.query(
-        'SELECT * FROM `sale_event` WHERE (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
-        [false]
-    );
-    for (let row of rows) {
-        row.coupon = await couponModel.getOne(conn, row.coupon_id);
+async function include(conn, rows) {
+    const _include = async (obj) => {
+        if (obj) {
+            obj.coupon = await couponModel.getOne(conn, obj.coupon_id);
+        }
     }
-    return rows;
+    if (!Array.isArray(rows)) {
+        await _include(rows);
+    } else {
+        for (let row of rows) {
+            await _include(row);
+        }
+    }
+}
+
+async function getAll(conn, query, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = saleEventTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `sale_event`.`id`) FROM `sale_event` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
+        whereParams
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `sale_event`.`id`)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT `sale_event`.* FROM `sale_event` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
+    );
+    if (opt.include) {
+        await include(conn, rows);
+    }
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
 }
 
 export default {
-    saleEventTable,
+    table: saleEventTable,
     getAll
 }

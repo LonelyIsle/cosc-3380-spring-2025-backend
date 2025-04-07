@@ -79,7 +79,7 @@ const subscriptionTable = new Table("subscription", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
@@ -87,7 +87,18 @@ const subscriptionTable = new Table("subscription", {
     filter: {}
 });
 
-async function getOneByCustomerID(conn, customer_id) {
+async function getOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    subscriptionTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `subscription` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    return rows[0] || null;
+}
+
+
+async function getOneActiveByCustomerID(conn, customer_id) {
     let data = utils.objectAssign(["customer_id"], { customer_id });
     subscriptionTable.validate(data);
     const [rows] = await conn.query(
@@ -111,13 +122,14 @@ async function createOne(conn, subscription) {
             "card_expire_year",
             "card_code"
         ], 
-        subscription);
+        subscription
+    );
     subscriptionTable.validate(data);
     let customer = await customerModel.getOne(conn, data.customer_id);
     if (!customer) {
         throw new HttpError({statusCode: 401 });
     }
-    let existedSubscription = await getOneByCustomerID(conn, data.customer_id);
+    let existedSubscription = await getOneActiveByCustomerID(conn, data.customer_id);
     if (existedSubscription) {
         throw new HttpError({statusCode: 400, message: `You are already subscribed.`});
     }
@@ -126,6 +138,7 @@ async function createOne(conn, subscription) {
     data.price = config[configModel.SUBSCRIPTION_PRICE];
     data.start_at = now;
     data.end_at = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 1 month
+    // payment successfully processed
     const [rows] = await conn.query(
         'INSERT INTO `subscription`('
         + '`customer_id`, '
@@ -164,7 +177,8 @@ async function createOne(conn, subscription) {
 }
 
 export default {
-    subscriptionTable,
-    getOneByCustomerID,
+    table: subscriptionTable,
+    getOne,
+    getOneActiveByCustomerID,
     createOne
 }

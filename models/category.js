@@ -2,6 +2,7 @@ import utils from "../helpers/utils.js"
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
+import Validator from "../helpers/validator.js";
 
 const categoryTable = new Table("category", {
     "id": {
@@ -29,33 +30,44 @@ const categoryTable = new Table("category", {
         isRequired: DataType.NULLABLE()
     },
     "is_deleted": {
-        type: DataType.NUMBER(),
+        type: DataType.NUMBER({ check: (val) => [0, 1].indexOf(val) > -1 }),
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["name", "created_at", "updated_at"],
+    filter: {
+        "name": DataType.STRING(),
+    }
 });
 
-async function getAll(conn) {
-    const [rows] = await conn.query(
-        'SELECT * FROM `category` WHERE `is_deleted` = false',
-        [false]
+async function getAll(conn, query) {
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = categoryTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `category`.`id`) FROM `category` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
+        whereParams
     );
-    return rows;
-}
-
-async function getAllByProductId(conn, productId) {
-    let data = utils.objectAssign(["productId"], { productId });
-    let validator = DataType.NUMBER();
-    if (!data.productId || !validator.validate(data.productId)) {
-        throw new HttpError({ statusCode: 400, message: `productId is invalid.` });
-    }
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `category`.`id`)"]) || 0;
     const [rows] = await conn.query(
-        'SELECT DISTINCT `category`.* FROM `category` INNER JOIN `product_category` ON `product_category`.`category_id` = `category`.`id` WHERE `product_category`.`product_id` = ? AND `category`.`is_deleted` = ?',
-        [data.productId, false]
+        'SELECT `category`.* FROM `category` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
     );
-    return rows;
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
 }
 
 async function getOne(conn, id) {
@@ -104,9 +116,8 @@ async function deleteOne(conn, id) {
 }
 
 export default {
-    categoryTable,
+    table: categoryTable,
     getAll,
-    getAllByProductId,
     getOne,
     createOne,
     updateOne,

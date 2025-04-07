@@ -2,29 +2,19 @@ import utils from "../helpers/utils.js"
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
+import Validator from "../helpers/validator.js";
 
-const SUBSCRIPTION_DISCOUNT_PERCENTAGE = "subscription_discount_percentage";
-const SHIPPING_FEE = "shipping_fee";
-const SALE_TAX = "sale_tax";
-const SUBSCRIPTION_PRICE = "subscription_price";
-const KEYS = [
-    SUBSCRIPTION_DISCOUNT_PERCENTAGE,
-    SHIPPING_FEE,
-    SALE_TAX,
-    SUBSCRIPTION_PRICE
-];
-
-const configTable = new Table("config", {
+const productCategoryTable = new Table("product_category", {
     "id": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
-    "key": {
-        type: DataType.STRING({ check: (val) => KEYS.indexOf(val) > -1 }),
+    "category_id": {
+        type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
-    "value": {
-        type: DataType.STRING(),
+    "product_id": {
+        type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
     "created_at": {
@@ -48,24 +38,17 @@ const configTable = new Table("config", {
     filter: {}
 });
 
-async function getAll(conn) {
+async function getCategoryByProductId(conn, product_id) {
+    let data = utils.objectAssign(["product_id"], { product_id });
+    productCategoryTable.validate(data);
     const [rows] = await conn.query(
-        'SELECT * FROM `config` WHERE `is_deleted` = ?',
-        [false]
+        'SELECT `category`.* FROM `category` INNER JOIN `product_category` ON `product_category`.`category_id` = `category`.`id` WHERE `product_category`.`product_id` = ? AND `category`.`is_deleted` = ?',
+        [data.product_id, false]
     );
-    let configObj = {};
-    for (let row of rows) {
-        let [val] = utils.parseStr(row.value)
-        configObj[row.key] = val;
-    }
-    return configObj;
+    return rows;
 }
 
 export default {
-    SUBSCRIPTION_DISCOUNT_PERCENTAGE,
-    SHIPPING_FEE,
-    SALE_TAX,
-    SUBSCRIPTION_PRICE,
-    table: configTable,
-    getAll
+    table: productCategoryTable,
+    getCategoryByProductId
 }
