@@ -5,11 +5,12 @@ import { HttpError } from "../helpers/error.js";
 
 async function getAll(req, res) {
     await db.tx(req, res, async (conn) => {
+        let query = req.query;
         let rows = [];
         if (req.jwt.user.role === auth.CUSTOMER) {
-            rows = await orderModel.getAllByCustomerId(conn, req.jwt.user.id, { include: true });
+            rows = await orderModel.getAllByCustomerId(conn, req.jwt.user.id, query, { include: true });
         } else {
-            rows = await orderModel.getAll(conn, { include: true });
+            rows = await orderModel.getAll(conn, query, { include: true });
         }
         return rows;
     });

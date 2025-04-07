@@ -68,6 +68,10 @@ const orderTable = new Table("order", {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
+    "total": {
+        type: DataType.NUMBER(),
+        isRequired: DataType.NOTNULL()
+    },
     "tracking": {
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
@@ -76,63 +80,63 @@ const orderTable = new Table("order", {
         type: DataType.NUMBER({ check: (val) => STATUS.indexOf(val) > -1 }),
         isRequired: DataType.NOTNULL()
     },
-    "shipping_address_1":{ 
+    "shipping_address_1": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "shipping_address_2":{ 
+    "shipping_address_2": { 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
     },
-    "shipping_address_city":{ 
+    "shipping_address_city": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "shipping_address_state":{ 
+    "shipping_address_state": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "shipping_address_zip":{ 
+    "shipping_address_zip": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "billing_address_1":{ 
+    "billing_address_1": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "billing_address_2":{ 
+    "billing_address_2": { 
         type: DataType.STRING(),
         isRequired: DataType.NULLABLE()
     },
-    "billing_address_city":{ 
+    "billing_address_city": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "billing_address_state":{ 
+    "billing_address_state": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "billing_address_zip":{ 
+    "billing_address_zip": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "card_name":{ 
+    "card_name": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "card_number":{ 
+    "card_number": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "card_expire_month":{ 
+    "card_expire_month": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "card_expire_year":{ 
+    "card_expire_year": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
-    "card_code":{ 
+    "card_code": { 
         type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
@@ -153,8 +157,10 @@ const orderTable = new Table("order", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["total", "created_at", "updated_at"],
+    filter: {
+        "customer_email": DataType.STRING(),
+    }
 });
 
 const itemsValidator = new Validator({
@@ -190,30 +196,74 @@ async function include(conn, rows, opt = {}) {
     }
 }
 
-async function getAll(conn, opt = {}) {
+async function getAll(conn, query, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = orderTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `order`.`id`) FROM `order` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
+        whereParams
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `order`.`id`)"]) || 0;
     const [rows] = await conn.query(
-        'SELECT * FROM `order` WHERE `is_deleted` = ?',
-        [false]
+        'SELECT `order`.* FROM `order` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
     );
     if (opt.include) {
         await include(conn, rows, { inclImg: false });
     }
-    return rows;
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
 }
 
-async function getAllByCustomerId(conn, customer_id, opt = {}) {
+async function getAllByCustomerId(conn, customer_id, query, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["customer_id"], { customer_id });
     orderTable.validate(data);
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = orderTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `order`.`id`) FROM `order` ' 
+        + (!whereQueryStr ? ' WHERE `order`.`customer_id` = ? ' :  ' WHERE `order`.`customer_id` = ? AND ' + whereQueryStr),
+        [data.customer_id].concat(whereParams)
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `order`.`id`)"]) || 0;
     const [rows] = await conn.query(
-        'SELECT * FROM `order` WHERE `customer_id` = ? AND `is_deleted` = ?',
-        [data.customer_id, false]
+        'SELECT `order`.* FROM `order` ' 
+        + (!whereQueryStr ? ' WHERE `order`.`customer_id` = ? ' :  ' WHERE `order`.`customer_id` = ? AND ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        [data.customer_id].concat(whereParams, pagingParams)
     );
     if (opt.include) {
         await include(conn, rows, { inclImg: false });
     }
-    return rows;
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
 }
 
 async function getManyIdByCustomerId(conn, customer_id) {
