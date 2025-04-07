@@ -59,6 +59,21 @@ const employeeTable = new Table("employee", {
     filter: {}
 });
 
+function prepareResp(rows) {
+    const prepare = (obj) => {
+        if (obj) {
+            delete obj.password;
+        }
+    }
+    if (!Array.isArray(rows)) {
+        prepare(rows);
+    } else {
+        for (let row of rows) {
+            prepare(row);
+        }
+    }
+}
+
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     employeeTable.validate(data);
@@ -91,6 +106,7 @@ async function getOneByEmailAndPwd(conn, email, password) {
 
 export default {
     table: employeeTable,
+    prepareResp,
     getOne,
     getOneByEmail,
     getOneByEmailAndPwd

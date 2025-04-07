@@ -135,7 +135,6 @@ function prepareResp(rows) {
             prepare(row);
         }
     }
-    
 }
 
 async function getOne(conn, id) {
