@@ -60,7 +60,7 @@ router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteO
 router.get("/coupon/:code", couponController.getOneActiveByCode);
 
 // Sale Event
-router.get("/sale-event", saleEventController.getAll);
+router.get("/sale-event/one/active", saleEventController.getOneActive);
 
 // Order
 router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getAll);

@@ -1,14 +1,13 @@
 import saleEventModel from "../models/saleEvent.js";
 import db from "./db.js";
 
-async function getAll(req, res) {
+async function getOneActive(req, res) {
     await db.tx(req, res, async (conn) => {
-        let query = req.query;
-        let data = await saleEventModel.getAll(conn, query, { include: true });
-        return data;
+        let saleEvent = await saleEventModel.getOneActive(conn, { include: true });
+        return saleEvent;
     });
 }
 
 export default {
-    getAll
+    getOneActive
 }

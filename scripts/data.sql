@@ -34,8 +34,8 @@ VALUES
 -- SALE_EVENT --
 INSERT INTO `sale_event` (`id`, `coupon_id`, `start_at`, `end_at`, `title`, `description`)
 VALUES
-(1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'Save 20% on Your Next Purchase!', 'Save 20% on Your Next Purchase!'),
-(2, 2, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'Save 20$ on Your Next Purchase!', 'Save 20$ on Your Next Purchase!');
+(1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), '20% OFF ALL ITEMS!', '20% OFF ALL ITEMS!'),
+(2, 2, DATE_ADD(NOW(), INTERVAL 31 DAY), DATE_ADD(NOW(), INTERVAL 61 DAY), '20$ OFF ALL ITEMS!', '20$ OFF ALL ITEMS!');
 
 -- CATEGORY --
 INSERT INTO `category` (`id`, `name`, `description`)

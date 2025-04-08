@@ -101,7 +101,20 @@ async function getAll(conn, query, opt = {}) {
     };
 }
 
+async function getOneActive(conn, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    const [rows] = await conn.query(
+        'SELECT `sale_event`.* FROM `sale_event` WHERE (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
+        [false]
+    );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
+    return rows[0] || null;
+}
+
 export default {
     table: saleEventTable,
-    getAll
+    getAll,
+    getOneActive
 }
