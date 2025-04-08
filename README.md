@@ -12,7 +12,7 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 - [Node.js](https://nodejs.org/en)
 - [MySQL](https://www.mysql.com/)
 #### How To Run (Linux/MacOS)
-- Import the following SQL files into MySQL in the specified order:
+- Import the following SQL files into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommend) in the specified order:
     - Drop and Create database (recommend):
         ```
         DROP DATABASE IF EXISTS `db-name`;
