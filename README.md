@@ -36,7 +36,7 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 - When deploying, ```--env=[name]``` option can be omitted, allowing the server to use environment variables set by the user.
 - Note that even when using the ```--env=[name]``` option, the server will prioritize environment variables set by the user and ignore ```[name].env``` file.
 #### How To Run (Windows)
-- Similar to Linux/MacOS. However, to start the server, run below commands one by one in Command Prompt (PowerShell not tested) from the same directory as /app.js:
+- Similar to Linux/MacOS. However, to start the server, run below commands one by one in **Command Prompt** from the **same directory as /app.js**:
     ```
     SET DB_HOST=127.0.0.1
     SET DB_PORT=3306
@@ -48,3 +48,4 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
     SET JWT_SECRET=secret
     npm start
     ```
+- Note that the commands above have been tested locally, but this does not guarantee they will work on all Windows machines. The main problem is that Windows sets environment variables differently than Linux/MacOS. Be sure to set all environment variables properly as above, and then start the server using `npm start`.
