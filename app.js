@@ -72,6 +72,7 @@ router.get("/sale-event/one/active", saleEventController.getOneActive);
 router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getAll);
 router.get("/order/:id", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getOne);
 router.post("/order", auth.is(auth.GUEST, auth.CUSTOMER), orderController.createOne);
+router.patch("/order/:id", auth.is(auth.STAFF, auth.MANAGER), orderController.updateOne);
 
 // Config
 router.get("/config", configController.getAll);

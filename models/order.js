@@ -501,12 +501,32 @@ async function createOne(conn, order) {
     return rows.insertId;
 }
 
+async function updateOne(conn, newOrder) {
+    let oldOrder = await getOne(conn, newOrder.id);
+    if (!oldOrder) {
+        throw new HttpError({statusCode: 400, message: `order not found.`});
+    }
+    let data = utils.objectAssign(["id", "tracking"], oldOrder, newOrder);
+    orderTable.validate(data);
+    if (!data.tracking) {
+        data.status = PLACED_STATUS;
+    } else {
+        data.status = SHIPPED_STATUS;
+    }
+    const [rows] = await conn.query(
+        'UPDATE `order` SET `tracking` = ?, `status` = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.tracking, data.status, data.id, false]
+    );
+    return newOrder.id;
+}
+
 export default {
     getAll,
     getAllByCustomerId,
     getOne,
     getOneByCustomerId,
     createOne,
+    updateOne,
     STATUS,
     CANCELLED_STATUS,
     PLACED_STATUS,
