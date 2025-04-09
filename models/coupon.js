@@ -13,7 +13,7 @@ const couponTable = new Table("coupon", {
         isRequired: DataType.NOTNULL()
     },
     "code": {
-        type: DataType.STRING(),
+        type: DataType.STRING({ check: (val) => /^[^ ]*$/.test(val) }),
         isRequired: DataType.NOTNULL()
     },
     "value": {
@@ -131,8 +131,8 @@ async function getAll(conn, query) {
 }
 
 async function createOne(conn, coupon) {
-    console.log("DEBUG");
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "code",
             "value",
             "start_at",
@@ -164,18 +164,46 @@ async function createOne(conn, coupon) {
     return rows.insertId;
 }
 
-async function updateOne(conn, newCategory) {
-    let oldCategory = await getOne(conn, newCategory.id);
-    if (!oldCategory) {
-        throw new HttpError({statusCode: 400, message: `category not found.`});
+async function updateOne(conn, newCoupon) {
+    let oldCoupon = await getOne(conn, newCoupon.id);
+    if (!oldCoupon) {
+        throw new HttpError({statusCode: 400, message: `coupon not found.`});
     }
-    let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
-    categoryTable.validate(data);
-    const [rows] = await conn.query(
-        'UPDATE `category` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
-        [data.name, data.description, data.id, false]
+    let data = utils.objectAssign(
+        [
+            "id",
+            "code",
+            "value",
+            "start_at",
+            "end_at",
+            "type",
+            "description"
+        ], 
+        oldCoupon, 
+        newCoupon
     );
-    return newCategory.id;
+    couponTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `coupon` SET '
+        + '`code` = ?,'
+        + '`value` = ?,'
+        + '`start_at` = ?,'
+        + '`end_at` = ?,'
+        + '`type` = ?,'
+        + '`description` = ?' 
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [   
+            data.code,
+            data.value,
+            new Date(data.start_at),
+            new Date(data.end_at),
+            data.type,
+            data.description,
+            data.id,
+            false
+        ]
+    );
+    return newCoupon.id;
 }
 
 export default {

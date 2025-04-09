@@ -214,7 +214,8 @@ async function createOne(conn, product) {
             isRequired: DataType.NULLABLE()
         }
     });
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "sku",
             "price",
             "quantity",
@@ -261,7 +262,8 @@ async function updateOne(conn, newProduct) {
             isRequired: DataType.NULLABLE()
         }
     });
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "id",
             "sku",
             "price",

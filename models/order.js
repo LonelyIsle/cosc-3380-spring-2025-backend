@@ -333,7 +333,8 @@ async function createOne(conn, order) {
     order.sale_tax = config[configModel.SALE_TAX];
     order.status = 0;
     order.tracking = null;
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "customer_id",
             "customer_first_name",
             "customer_middle_name",

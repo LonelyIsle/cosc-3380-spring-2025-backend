@@ -59,6 +59,7 @@ CREATE TABLE `coupon` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+    CONSTRAINT `coupon-check-code` CHECK (`code` REGEXP '^[^ ]*$'), -- string with no Spaces
     CONSTRAINT `coupon-check-value` CHECK (`value` >= 0),
     CONSTRAINT `coupon-check-start_at-end_at` CHECK (`end_at` > `start_at`)
 );
@@ -66,7 +67,7 @@ CREATE TABLE `coupon` (
 DROP TABLE IF EXISTS `sale_event`;
 CREATE TABLE `sale_event` (
     `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `coupon_id` INT NOT NULL UNIQUE, -- 1:1 relationship
+    `coupon_id` INT UNIQUE, -- 1:1 relationship
     `start_at` TIMESTAMP NOT NULL,
     `end_at` TIMESTAMP NOT NULL,
     `title` LONGTEXT NOT NULL,

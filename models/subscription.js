@@ -109,7 +109,8 @@ async function getOneActiveByCustomerID(conn, customer_id) {
 }
 
 async function createOne(conn, subscription) {
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "customer_id",
             "billing_address_1",
             "billing_address_2",

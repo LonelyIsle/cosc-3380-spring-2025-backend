@@ -229,7 +229,8 @@ async function updateOne(conn, newCustomer) {
     if (!oldCustomer) {
         throw new HttpError({statusCode: 400, message: `customer not found.`});
     }
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "id", 
             "first_name",
             "middle_name",

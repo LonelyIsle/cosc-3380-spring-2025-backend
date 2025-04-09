@@ -11,7 +11,7 @@ const saleEventTable = new Table("sale_event", {
     },
     "coupon_id": {
         type: DataType.NUMBER(),
-        isRequired: DataType.NOTNULL()
+        isRequired: DataType.NULLABLE()
     },
     "start_at": {
         type: DataType.TIMESTAMP(),
