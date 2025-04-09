@@ -25,8 +25,21 @@ async function createOne(req, res) {
         return product;
     });
 }
+
+async function updateOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        let  productId = await productModel.updateOne(conn, body);
+        let product = await productModel.getOne(conn, productId, { include: true })
+        return product;
+    });
+}
+
 export default {
     getAll,
     getOne,
-    createOne
+    createOne,
+    updateOne
 }

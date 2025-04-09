@@ -53,7 +53,7 @@ async function deleteCategoryByProductId(conn, product_id) {
     let data = utils.objectAssign(["product_id"], { product_id });
     productCategoryTable.validate(data);
     const [rows] = await conn.query(
-        'DELTE FROM `product_category` WHERE `product_id` = ?',
+        'DELETE FROM `product_category` WHERE `product_id` = ?',
         [data.product_id]
     );
     return rows;
