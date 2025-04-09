@@ -1,4 +1,4 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -13,7 +13,7 @@ const couponTable = new Table("coupon", {
         isRequired: DataType.NOTNULL()
     },
     "code": {
-        type: DataType.STRING(),
+        type: DataType.STRING({ check: (val) => /^[^ ]*$/.test(val) }),
         isRequired: DataType.NOTNULL()
     },
     "value": {
@@ -54,8 +54,10 @@ const couponTable = new Table("coupon", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["code", "created_at", "updated_at"],
+    filter: {
+        "code": DataType.STRING(),
+    }
 });
 
 async function getOne(conn, id) {
@@ -88,6 +90,122 @@ async function getOneActiveByCode(conn, code) {
     return rows[0] || null;
 }
 
+async function getOneByCode(conn, code) {
+    let data = utils.objectAssign(["code"], { code });
+    couponTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `coupon` WHERE `code` = ? AND `is_deleted` = ?',
+        [data.code, false]
+    );
+    return rows[0] || null;
+}
+
+async function getAll(conn, query) {
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = couponTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `coupon`.`id`) FROM `coupon` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
+        whereParams
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `coupon`.`id`)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT `coupon`.* FROM `coupon` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
+    );
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
+}
+
+async function createOne(conn, coupon) {
+    let data = utils.objectAssign(
+        [
+            "code",
+            "value",
+            "start_at",
+            "end_at",
+            "type",
+            "description"
+        ], 
+        coupon
+    );
+    couponTable.validate(data);
+    const [rows] = await conn.query(
+        'INSERT INTO `coupon`('
+        + '`code`,'
+        + '`value`,'
+        + '`start_at`,'
+        + '`end_at`,'
+        + '`type`,'
+        + '`description`'
+        + ') VALUES (?, ?, ?, ?, ?, ?)',
+        [
+            data.code,
+            data.value,
+            new Date(data.start_at),
+            new Date(data.end_at),
+            data.type,
+            data.description
+        ]
+    );
+    return rows.insertId;
+}
+
+async function updateOne(conn, newCoupon) {
+    let oldCoupon = await getOne(conn, newCoupon.id);
+    if (!oldCoupon) {
+        throw new HttpError({statusCode: 400, message: `coupon not found.`});
+    }
+    let data = utils.objectAssign(
+        [
+            "id",
+            "code",
+            "value",
+            "start_at",
+            "end_at",
+            "type",
+            "description"
+        ], 
+        oldCoupon, 
+        newCoupon
+    );
+    couponTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `coupon` SET '
+        + '`code` = ?,'
+        + '`value` = ?,'
+        + '`start_at` = ?,'
+        + '`end_at` = ?,'
+        + '`type` = ?,'
+        + '`description` = ?' 
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [   
+            data.code,
+            data.value,
+            new Date(data.start_at),
+            new Date(data.end_at),
+            data.type,
+            data.description,
+            data.id,
+            false
+        ]
+    );
+    return newCoupon.id;
+}
+
 export default {
     table: couponTable,
     FIXED_AMOUNT_TYPE,
@@ -95,5 +213,9 @@ export default {
     TYPES,
     getOneActive,
     getOneActiveByCode,
-    getOne
+    getOne,
+    getOneByCode,
+    getAll,
+    createOne,
+    updateOne
 }

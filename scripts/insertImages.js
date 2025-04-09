@@ -8,7 +8,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const __dirimages = path.join(__dirname, "images/"); 
 const pool = db.pool;
 
-
 let files = await fs.readdir(__dirimages);
 
 for (let file of files) {

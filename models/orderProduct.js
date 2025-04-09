@@ -65,21 +65,23 @@ async function getProductByOrderId(conn, order_id, opt = {}) {
 async function createMany(conn, items) {
     let query = [];
     let param = [];
+    let productIds = [];
     for (let item of items) {
         let data = utils.objectAssign(["order_id", "product_id", "price", "quantity"], item);
         orderProductTable.validate(data);
         query.push('(?, ? , ?, ?)');
         param.push(data.order_id, data.product_id, data.price, data.quantity);
+        productIds.push(data.product_id);
+    }
+    let products = await productModel.getManyByIds(conn, productIds, { inclImg: false });
+    if (products.length != productIds.length) {
+        throw new HttpError({statusCode: 400, message: "Invalid items." });
     }
     const [rows] = await conn.query(
         'INSERT INTO `order_product`(`order_id`, `product_id`, `price`, `quantity`) VALUES ' + query.join(","),
         param
     );
-    var result = [];
-    for (var i = rows.insertId; i <= rows.insertId + rows.affectedRows; i++) {
-        result.push(i);
-    }
-    return result;
+    return rows;
 }
 
 export default {

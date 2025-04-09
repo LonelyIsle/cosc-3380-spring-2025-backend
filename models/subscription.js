@@ -1,4 +1,4 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -109,7 +109,8 @@ async function getOneActiveByCustomerID(conn, customer_id) {
 }
 
 async function createOne(conn, subscription) {
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "customer_id",
             "billing_address_1",
             "billing_address_2",

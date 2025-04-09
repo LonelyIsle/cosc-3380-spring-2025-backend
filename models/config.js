@@ -1,4 +1,5 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
+import Validator from "../helpers/validator.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -48,6 +49,25 @@ const configTable = new Table("config", {
     filter: {}
 });
 
+const valuesValidator = new Validator({
+    SUBSCRIPTION_DISCOUNT_PERCENTAGE: {
+        type: DataType.NUMBER({ check: (val) => (val >= 0 && val <= 1) }),
+        isRequired: DataType.NOTNULL()
+    },
+    SHIPPING_FEE: {
+        type: DataType.NUMBER({ check: (val) => (val >= 0) }),
+        isRequired: DataType.NOTNULL()
+    },
+    SALE_TAX: {
+        type: DataType.NUMBER({ check: (val) => (val >= 0 && val <= 1) }),
+        isRequired: DataType.NOTNULL()
+    },
+    SUBSCRIPTION_PRICE: {
+        type: DataType.NUMBER({ check: (val) => (val >= 0) }),
+        isRequired: DataType.NOTNULL()
+    },
+})
+
 async function getAll(conn) {
     const [rows] = await conn.query(
         'SELECT * FROM `config` WHERE `is_deleted` = ?',
@@ -61,11 +81,25 @@ async function getAll(conn) {
     return configObj;
 }
 
+async function updateAll(conn, newConfig) {
+    let oldConfig = await getAll(conn);
+    let data = utils.objectAssign(KEYS, oldConfig, newConfig);
+    valuesValidator.validate(data);
+    for (let key of KEYS) {
+        await conn.query(
+            'UPDATE `config` SET `value` = ? WHERE `key` = ?',
+            [data[key], key]
+        );
+    }
+    return null;
+}
+
 export default {
     SUBSCRIPTION_DISCOUNT_PERCENTAGE,
     SHIPPING_FEE,
     SALE_TAX,
     SUBSCRIPTION_PRICE,
     table: configTable,
-    getAll
+    getAll,
+    updateAll
 }

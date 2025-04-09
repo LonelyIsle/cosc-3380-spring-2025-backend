@@ -10,6 +10,16 @@ async function getAll(req, res) {
     });
 }
 
+async function updateAll(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        await configModel.updateAll(conn, body);
+        let config = await configModel.getAll(conn);
+        return config;
+    });
+}
+
 export default {
-    getAll
+    getAll,
+    updateAll
 }

@@ -1,4 +1,4 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -70,6 +70,18 @@ async function getAll(conn, query) {
     };
 }
 
+async function getManyByIds(conn, ids, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    const [rows] = await conn.query(
+        'SELECT * FROM `category` WHERE `id` IN (?) AND `is_deleted` = ?',
+        [ids, false]
+    );
+    if (opt.include) {
+        await include(conn, rows);
+    }
+    return rows;
+}
+
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     categoryTable.validate(data);
@@ -93,7 +105,7 @@ async function createOne(conn, category) {
 async function updateOne(conn, newCategory) {
     let oldCategory = await getOne(conn, newCategory.id);
     if (!oldCategory) {
-        throw new HttpError({statusCode: 400, message: `category ${newCategory.id} not found.`});
+        throw new HttpError({statusCode: 400, message: `category not found.`});
     }
     let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
     categoryTable.validate(data);
@@ -118,6 +130,7 @@ async function deleteOne(conn, id) {
 export default {
     table: categoryTable,
     getAll,
+    getManyByIds,
     getOne,
     createOne,
     updateOne,

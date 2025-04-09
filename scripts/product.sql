@@ -1,5 +1,6 @@
 -- PRODUCT --
-INSERT INTO `product` (`id`, `sku`, `price`, `quantity`, `threshold`, `name`, `description`) VALUES
+INSERT INTO `product` (`id`, `sku`, `price`, `quantity`, `threshold`, `name`, `description`) 
+VALUES
 (1, '82310475', 19.99, 142, 50, 'Totoro Plush', 'Soft and cuddly Totoro plush from My Neighbor Totoro.'),
 (2, '01928374', 24.99, 135, 50, 'Pikachu Plush', 'Electric-type Pokémon Pikachu in plush form.'),
 (3, '78123456', 22.95, 127, 50, 'Naruto Plush', 'Plush toy of Naruto Uzumaki with headband.'),

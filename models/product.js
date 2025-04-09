@@ -1,8 +1,9 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
-import productCategoryTableModel from "./productCategory.js";
 import Validator from "../helpers/validator.js";
+import productCategoryModel from "./productCategory.js";
+import { HttpError } from "../helpers/error.js";
 
 const productTable = new Table("product", {
     "id": {
@@ -10,7 +11,7 @@ const productTable = new Table("product", {
         isRequired: DataType.NOTNULL()
     },
     "sku": {
-        type: DataType.NUMBER(),
+        type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
     "price": {
@@ -83,7 +84,7 @@ const COLS_LITE_STR = [
 async function include(conn, rows) {
     const _include = async (obj) => {
         if (obj) {
-            obj.category = await productCategoryTableModel.getCategoryByProductId(conn, obj.id);
+            obj.category = await productCategoryModel.getCategoryByProductId(conn, obj.id);
         }
     }
     if (!Array.isArray(rows)) {
@@ -206,10 +207,129 @@ async function updateManyQuantityByIds(conn, products) {
     return result;
 }
 
+async function createOne(conn, product) {
+    let validator = new Validator({
+        category_id: {
+            type: DataType.ARRAY(DataType.NUMBER()),
+            isRequired: DataType.NULLABLE()
+        }
+    });
+    let data = utils.objectAssign(
+        [
+            "sku",
+            "price",
+            "quantity",
+            "threshold",
+            "name",
+            "description",
+            "category_id"
+        ], 
+        product
+    );
+    productTable.validate(data);
+    validator.validate(data)
+    const [rows] = await conn.query(
+        'INSERT INTO `product`('
+        + '`sku`,'
+        + '`price`,'
+        + '`quantity`,'
+        + '`threshold`,'
+        + '`name`,'
+        + '`description`'
+        + ') VALUES (?, ?, ?, ?, ?, ?)',
+        [
+            data.sku,
+            data.price,
+            data.quantity,
+            data.threshold,
+            data.name,
+            data.description
+        ]
+    );
+    let productId = rows.insertId;
+    await productCategoryModel.createCategoryByProductId(conn, productId, data.category_id);
+    return productId;
+}
+
+async function updateOne(conn, newProduct) {
+    let oldProduct = await getOne(conn, newProduct.id);
+    if (!oldProduct) {
+        throw new HttpError({statusCode: 400, message: `product not found.`});
+    }
+    let validator = new Validator({
+        category_id: {
+            type: DataType.ARRAY(DataType.NUMBER()),
+            isRequired: DataType.NULLABLE()
+        }
+    });
+    let data = utils.objectAssign(
+        [
+            "id",
+            "sku",
+            "price",
+            "quantity",
+            "threshold",
+            "name",
+            "description",
+            "category_id"
+        ], 
+        oldProduct,
+        newProduct
+    );
+    productTable.validate(data);
+    validator.validate(data)
+    const [rows] = await conn.query(
+        'UPDATE `product`SET'
+        + '`sku` = ?,'
+        + '`price` = ?,'
+        + '`quantity` = ?,'
+        + '`threshold` = ?,'
+        + '`name` = ?,'
+        + '`description` = ?'
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [
+            data.sku,
+            data.price,
+            data.quantity,
+            data.threshold,
+            data.name,
+            data.description,
+            data.id,
+            false
+        ]
+    );
+    await productCategoryModel.deleteCategoryByProductId(conn, newProduct.id);
+    await productCategoryModel.createCategoryByProductId(conn, newProduct.id, data.category_id);
+    return newProduct.id;
+}
+
+async function updateOneImage(conn, newProduct) {
+    let oldProduct = await getOne(conn, newProduct.id);
+    if (!oldProduct) {
+        throw new HttpError({statusCode: 400, message: `product not found.`});
+    }
+    const [rows] = await conn.query(
+        'UPDATE `product`SET'
+        + '`image` = ?,'
+        + '`image_extension` = ?'
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [
+            newProduct.file.buffer,
+            newProduct.file.mimetype.split("/")[1],
+            newProduct.id,
+            false
+        ]
+    );
+    return newProduct.id;
+}
+
 export default {
     table: productTable,
     getAll,
     getOne,
     getManyByIds,
-    updateManyQuantityByIds
+    updateManyQuantityByIds,
+    createOne,
+    updateOne,
+    updateOneImage
 }

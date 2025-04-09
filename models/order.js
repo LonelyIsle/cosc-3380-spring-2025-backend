@@ -1,4 +1,4 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -266,16 +266,6 @@ async function getAllByCustomerId(conn, customer_id, query, opt = {}) {
     };
 }
 
-async function getManyIdByCustomerId(conn, customer_id) {
-    let data = utils.objectAssign(["customer_id"], { customer_id });
-    orderTable.validate(data);
-    const [rows] = await conn.query(
-        'SELECT `id` FROM `order` WHERE `customer_id` = ? AND `is_deleted` = ?',
-        [data.customer_id, false]
-    );
-    return rows.map(row => row.id);
-}
-
 async function getOne(conn, id, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["id"], { id });
@@ -283,6 +273,20 @@ async function getOne(conn, id, opt = {}) {
     const [rows] = await conn.query(
         'SELECT * FROM `order` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
+    );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
+    return rows[0] || null;
+}
+
+async function getOneByCustomerId(conn, customer_id, id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    let data = utils.objectAssign(["id", "customer_id"], { id, customer_id });
+    orderTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `order` WHERE `id` = ? AND `customer_id` = ? AND `is_deleted` = ?',
+        [data.id, data.customer_id, false]
     );
     if (opt.include) {
         await include(conn, rows[0]);
@@ -329,7 +333,8 @@ async function createOne(conn, order) {
     order.sale_tax = config[configModel.SALE_TAX];
     order.status = 0;
     order.tracking = null;
-    let data = utils.objectAssign([
+    let data = utils.objectAssign(
+        [
             "customer_id",
             "customer_first_name",
             "customer_middle_name",
@@ -487,7 +492,7 @@ async function createOne(conn, order) {
             quantity: itemsHash[key].quantity
         });
     }
-    let insertIds = await orderProductModel.createMany(conn, data.items);
+    await orderProductModel.createMany(conn, data.items);
     let updateIds = await productModel.updateManyQuantityByIds(conn, data.items.map(item => {
         return { 
             id: item.product_id, 
@@ -497,12 +502,32 @@ async function createOne(conn, order) {
     return rows.insertId;
 }
 
+async function updateOne(conn, newOrder) {
+    let oldOrder = await getOne(conn, newOrder.id);
+    if (!oldOrder) {
+        throw new HttpError({statusCode: 400, message: `order not found.`});
+    }
+    let data = utils.objectAssign(["id", "tracking"], oldOrder, newOrder);
+    orderTable.validate(data);
+    if (!data.tracking) {
+        data.status = PLACED_STATUS;
+    } else {
+        data.status = SHIPPED_STATUS;
+    }
+    const [rows] = await conn.query(
+        'UPDATE `order` SET `tracking` = ?, `status` = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.tracking, data.status, data.id, false]
+    );
+    return newOrder.id;
+}
+
 export default {
     getAll,
     getAllByCustomerId,
-    getManyIdByCustomerId,
     getOne,
+    getOneByCustomerId,
     createOne,
+    updateOne,
     STATUS,
     CANCELLED_STATUS,
     PLACED_STATUS,

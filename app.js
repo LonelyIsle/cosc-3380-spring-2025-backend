@@ -4,6 +4,7 @@ import httpResp from "./helpers/httpResp.js";
 import corsHandler from "./helpers/cors.js";
 import bodyParser from "./helpers/bodyParser.js";
 import auth from "./helpers/auth.js";
+import multer from "multer";
 
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
@@ -15,10 +16,16 @@ import configController from "./controllers/config.js";
 import saleEventController from "./controllers/saleEvent.js";
 import subscriptionController from "./controllers/subscription.js";
 import orderController from "./controllers/order.js";
+import notificationController from "./controllers/notification.js";
 
 const server = http.createServer();
 const router = new Router();
 
+// Multer
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// Global handlers
 router.use(corsHandler);
 router.use(bodyParser.json);
 
@@ -45,9 +52,17 @@ router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.upda
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
 
+// Notification
+router.get("/notification", auth.is(auth.STAFF, auth.MANAGER), notificationController.getAll);
+router.get("/notification/:id", auth.is(auth.STAFF, auth.MANAGER), notificationController.getOne);
+router.patch("/notification/:id", auth.is(auth.STAFF, auth.MANAGER), notificationController.updateOne);
+
 // Product
 router.get("/product", productController.getAll);
 router.get("/product/:id", productController.getOne);
+router.post("/product", auth.is(auth.MANAGER), productController.createOne);
+router.patch("/product/:id", auth.is(auth.MANAGER), productController.updateOne);
+router.patch("/product/:id/image", auth.is(auth.MANAGER), upload.single("image"), productController.updateOneImage)
 
 // Category
 router.get("/category", categoryController.getAll);
@@ -57,18 +72,24 @@ router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOn
 router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
 
 // Coupon
-router.get("/coupon/:code", couponController.getOneActiveByCode);
+router.get("/coupon/:code/active", couponController.getOneActiveByCode);
+router.get("/coupon", auth.is(auth.MANAGER), couponController.getAll);
+router.get("/coupon/:id", auth.is(auth.MANAGER), couponController.getOne);
+router.post("/coupon", auth.is(auth.MANAGER), couponController.createOne);
+router.patch("/coupon/:id", auth.is(auth.MANAGER), couponController.updateOne);
 
 // Sale Event
-router.get("/sale-event", saleEventController.getAll);
+router.get("/sale-event/one/active", saleEventController.getOneActive);
 
 // Order
 router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getAll);
 router.get("/order/:id", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getOne);
 router.post("/order", auth.is(auth.GUEST, auth.CUSTOMER), orderController.createOne);
+router.patch("/order/:id", auth.is(auth.STAFF, auth.MANAGER), orderController.updateOne);
 
 // Config
 router.get("/config", configController.getAll);
+router.patch("/config", auth.is(auth.MANAGER), configController.updateAll);
 
 // *
 router.all("/*",  httpResp.Error[404]);

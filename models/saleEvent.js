@@ -1,4 +1,4 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
@@ -11,7 +11,7 @@ const saleEventTable = new Table("sale_event", {
     },
     "coupon_id": {
         type: DataType.NUMBER(),
-        isRequired: DataType.NOTNULL()
+        isRequired: DataType.NULLABLE()
     },
     "start_at": {
         type: DataType.TIMESTAMP(),
@@ -101,7 +101,20 @@ async function getAll(conn, query, opt = {}) {
     };
 }
 
+async function getOneActive(conn, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    const [rows] = await conn.query(
+        'SELECT `sale_event`.* FROM `sale_event` WHERE (NOW() BETWEEN `start_at` AND `end_at`) AND `is_deleted` = ?',
+        [false]
+    );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
+    return rows[0] || null;
+}
+
 export default {
     table: saleEventTable,
-    getAll
+    getAll,
+    getOneActive
 }
