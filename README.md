@@ -19,6 +19,7 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
         CREATE DATABASE `db-name`;
         ```
     - /scripts/db.sql
+    - /scripts/trigger.sql
     - /scripts/product-with-image.sql
     - /scripts/data.sql
 - In project directory, execute the following commands

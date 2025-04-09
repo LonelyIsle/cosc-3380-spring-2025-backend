@@ -1,7 +1,80 @@
--- prevent sale events from overlapping --
-DROP TRIGGER IF EXISTS `before_sale_event_insert_prevent_overlap`;
+-- PRODUCT and NOTIFICATION --
+DROP TRIGGER IF EXISTS `after_insert_product_notify_low_quantity`;
 DELIMITER //
-CREATE TRIGGER `before_sale_event_insert_prevent_overlap`
+CREATE TRIGGER `after_insert_product_notify_low_quantity`
+AFTER INSERT ON `product`
+FOR EACH ROW
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE manager_id INT;
+    DECLARE manager_cursor CURSOR FOR 
+        SELECT `id` FROM `employee` WHERE `role` = 1 AND `is_deleted` = false;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    IF NEW.`quantity` <= NEW.`threshold` THEN
+        OPEN manager_cursor;
+        
+        read_loop: LOOP
+            FETCH manager_cursor INTO manager_id;
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+            INSERT INTO `notification`(`status`, `employee_id`, `title`, `description`)
+                VALUES (
+                    0,
+                    manager_id,
+                    CONCAT('Product ', NEW.`name`, ' (', NEW.`id`,')', ' needs to be reordered.'), 
+                    CONCAT('Product ', NEW.`name`, ' (', NEW.`id`,')', ' has quantity ', NEW.`quantity`,' which is less than or equal to the threshold of ', NEW.`threshold`, ' and needs to be reordered.')
+                );
+        END LOOP;
+        
+        CLOSE manager_cursor;
+    END IF;
+END //
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `after_update_product_notify_low_quantity`;
+DELIMITER //
+CREATE TRIGGER `after_update_product_notify_low_quantity`
+AFTER UPDATE ON product
+FOR EACH ROW
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE manager_id INT;
+    DECLARE manager_cursor CURSOR FOR 
+        SELECT `id` FROM `employee` WHERE `role` = 1 AND `is_deleted` = false;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    IF NEW.`quantity` <= NEW.`threshold` AND OLD.`quantity` > OLD.`threshold` THEN
+        OPEN manager_cursor;
+        
+        read_loop: LOOP
+            FETCH manager_cursor INTO manager_id;
+            IF done THEN
+                LEAVE read_loop;
+            END IF;
+            INSERT INTO `notification`(`status`, `employee_id`, `title`, `description`)
+                VALUES (
+                    0,
+                    manager_id,
+                    CONCAT('Product ', NEW.`name`, ' (', NEW.`id`,')', ' needs to be reordered.'), 
+                    CONCAT('Product ', NEW.`name`, ' (', NEW.`id`,')', ' has quantity ', NEW.`quantity`,' which is less than or equal to the threshold of ', NEW.`threshold`, ' and needs to be reordered.')
+                );
+        END LOOP;
+        
+        CLOSE manager_cursor;
+    END IF;
+END//
+
+DELIMITER ;
+
+-- EMPLOYEE --
+
+-- SALE_EVENT and COUPON --
+-- prevent sale events from overlapping --
+DROP TRIGGER IF EXISTS `before_insert_sale_event_prevent_overlap`;
+DELIMITER //
+CREATE TRIGGER `before_insert_sale_event_prevent_overlap`
 BEFORE INSERT ON `sale_event` 
 FOR EACH ROW
 BEGIN
@@ -23,9 +96,9 @@ BEGIN
 END //
 DELIMITER ;
 
-DROP TRIGGER IF EXISTS `before_sale_event_update_prevent_overlap`;
+DROP TRIGGER IF EXISTS `before_update_sale_event_prevent_overlap`;
 DELIMITER //
-CREATE TRIGGER `before_sale_event_update_prevent_overlap`
+CREATE TRIGGER `before_update_sale_event_prevent_overlap`
 BEFORE UPDATE ON `sale_event` 
 FOR EACH ROW
 BEGIN
@@ -33,7 +106,7 @@ BEGIN
         SELECT 1 
         FROM `sale_event`
         WHERE 
-            `sale_event`.`id` != NEW.id
+            `sale_event`.`id` <> NEW.id
             AND `sale_event`.`is_deleted` = false
             AND (
                 (NEW.`start_at` BETWEEN `sale_event`.`start_at` AND `sale_event`.`end_at`) 
@@ -45,32 +118,5 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Sale event overlaps with an existing event.';
     END IF;
-END //
-DELIMITER ;
-
--- synchronize the start_at and end_at of the sale event with the referenced coupon. --
-DROP TRIGGER IF EXISTS `after_sale_event_insert_sync_coupon_date`;
-DELIMITER //
-CREATE TRIGGER `after_sale_event_insert_sync_coupon_date`
-AFTER INSERT ON `sale_event` 
-FOR EACH ROW
-BEGIN
-    UPDATE `coupon`
-    SET `coupon`.`start_at` = NEW.`start_at`,
-        `coupon`.`end_at` = NEW.`end_at`
-    WHERE `coupon`.`id` = NEW.`coupon_id` AND `coupon`.`is_deleted` = false;
-END //
-DELIMITER ;
-
-DROP TRIGGER IF EXISTS `after_sale_event_update_sync_coupon_date`;
-DELIMITER //
-CREATE TRIGGER `after_sale_event_update_sync_coupon_date`
-AFTER UPDATE ON `sale_event` 
-FOR EACH ROW
-BEGIN
-    UPDATE `coupon`
-    SET `coupon`.`start_at` = NEW.`start_at`,
-        `coupon`.`end_at` = NEW.`end_at`
-    WHERE `coupon`.`id` = NEW.`coupon_id` AND `coupon`.`is_deleted` = false;
 END //
 DELIMITER ;
