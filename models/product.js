@@ -3,6 +3,7 @@ import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 import productCategoryTableModel from "./productCategory.js";
 import Validator from "../helpers/validator.js";
+import productCategory from "./productCategory.js";
 
 const productTable = new Table("product", {
     "id": {
@@ -10,7 +11,7 @@ const productTable = new Table("product", {
         isRequired: DataType.NOTNULL()
     },
     "sku": {
-        type: DataType.NUMBER(),
+        type: DataType.STRING(),
         isRequired: DataType.NOTNULL()
     },
     "price": {
@@ -206,10 +207,54 @@ async function updateManyQuantityByIds(conn, products) {
     return result;
 }
 
+async function createOne(conn, product) {
+    let validator = new Validator({
+        category_id: {
+            type: DataType.ARRAY(DataType.NUMBER()),
+            isRequired: DataType.NULLABLE()
+        }
+    });
+    let data = utils.objectAssign([
+            "sku",
+            "price",
+            "quantity",
+            "threshold",
+            "name",
+            "description",
+            "category_id"
+        ], 
+        product
+    );
+    productTable.validate(data);
+    validator.validate(data)
+    const [rows] = await conn.query(
+        'INSERT INTO `product`('
+        + '`sku`,'
+        + '`price`,'
+        + '`quantity`,'
+        + '`threshold`,'
+        + '`name`,'
+        + '`description`'
+        + ') VALUES (?, ?, ?, ?, ?, ?)',
+        [
+            data.sku,
+            data.price,
+            data.quantity,
+            data.threshold,
+            data.name,
+            data.description
+        ]
+    );
+    let productId = rows.insertId;
+    await productCategory.createCategoryByProductId(conn, productId, data.category_id);
+    return productId;
+}
+
 export default {
     table: productTable,
     getAll,
     getOne,
     getManyByIds,
-    updateManyQuantityByIds
+    updateManyQuantityByIds,
+    createOne
 }

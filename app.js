@@ -54,6 +54,7 @@ router.patch("/notification/:id", auth.is(auth.STAFF, auth.MANAGER), notificatio
 // Product
 router.get("/product", productController.getAll);
 router.get("/product/:id", productController.getOne);
+router.post("/product", auth.is(auth.MANAGER), productController.createOne);
 
 // Category
 router.get("/category", categoryController.getAll);

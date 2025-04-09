@@ -17,7 +17,16 @@ async function getOne(req, res) {
     });
 }
 
+async function createOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let  productId  = await productModel.createOne(conn, body);
+        let product = await productModel.getOne(conn, productId, { include: true })
+        return product;
+    });
+}
 export default {
     getAll,
-    getOne
+    getOne,
+    createOne
 }

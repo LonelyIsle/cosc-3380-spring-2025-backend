@@ -70,6 +70,18 @@ async function getAll(conn, query) {
     };
 }
 
+async function getManyByIds(conn, ids, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    const [rows] = await conn.query(
+        'SELECT * FROM `category` WHERE `id` IN (?) AND `is_deleted` = ?',
+        [ids, false]
+    );
+    if (opt.include) {
+        await include(conn, rows);
+    }
+    return rows;
+}
+
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     categoryTable.validate(data);
@@ -118,6 +130,7 @@ async function deleteOne(conn, id) {
 export default {
     table: categoryTable,
     getAll,
+    getManyByIds,
     getOne,
     createOne,
     updateOne,

@@ -491,7 +491,7 @@ async function createOne(conn, order) {
             quantity: itemsHash[key].quantity
         });
     }
-    let insertIds = await orderProductModel.createMany(conn, data.items);
+    await orderProductModel.createMany(conn, data.items);
     let updateIds = await productModel.updateManyQuantityByIds(conn, data.items.map(item => {
         return { 
             id: item.product_id, 
