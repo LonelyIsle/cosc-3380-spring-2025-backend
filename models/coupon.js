@@ -54,8 +54,10 @@ const couponTable = new Table("coupon", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["code", "created_at", "updated_at"],
+    filter: {
+        "code": DataType.STRING(),
+    }
 });
 
 async function getOne(conn, id) {
@@ -88,6 +90,60 @@ async function getOneActiveByCode(conn, code) {
     return rows[0] || null;
 }
 
+async function getAll(conn, query) {
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = couponTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `coupon`.`id`) FROM `coupon` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
+        whereParams
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `coupon`.`id`)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT `coupon`.* FROM `coupon` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
+    );
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
+}
+
+async function createOne(conn, category) {
+    let data = utils.objectAssign(["name", "description"], category);
+    categoryTable.validate(data);
+    const [rows] = await conn.query(
+        'INSERT INTO `category`(`name`, `description`) VALUES (?, ?)',
+        [data.name, data.description]
+    );
+    return rows.insertId;
+}
+
+async function updateOne(conn, newCategory) {
+    let oldCategory = await getOne(conn, newCategory.id);
+    if (!oldCategory) {
+        throw new HttpError({statusCode: 400, message: `category not found.`});
+    }
+    let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
+    categoryTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `category` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.name, data.description, data.id, false]
+    );
+    return newCategory.id;
+}
+
 export default {
     table: couponTable,
     FIXED_AMOUNT_TYPE,
@@ -95,5 +151,8 @@ export default {
     TYPES,
     getOneActive,
     getOneActiveByCode,
-    getOne
+    getOne,
+    getAll,
+    createOne,
+    updateOne
 }
