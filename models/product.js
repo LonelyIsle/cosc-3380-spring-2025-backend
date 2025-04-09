@@ -301,6 +301,26 @@ async function updateOne(conn, newProduct) {
     return newProduct.id;
 }
 
+async function updateOneImage(conn, newProduct) {
+    let oldProduct = await getOne(conn, newProduct.id);
+    if (!oldProduct) {
+        throw new HttpError({statusCode: 400, message: `product not found.`});
+    }
+    const [rows] = await conn.query(
+        'UPDATE `product`SET'
+        + '`image` = ?,'
+        + '`image_extension` = ?'
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [
+            newProduct.file.buffer,
+            newProduct.file.mimetype.split("/")[1],
+            newProduct.id,
+            false
+        ]
+    );
+    return newProduct.id;
+}
+
 export default {
     table: productTable,
     getAll,
@@ -308,5 +328,6 @@ export default {
     getManyByIds,
     updateManyQuantityByIds,
     createOne,
-    updateOne
+    updateOne,
+    updateOneImage
 }

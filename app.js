@@ -4,6 +4,7 @@ import httpResp from "./helpers/httpResp.js";
 import corsHandler from "./helpers/cors.js";
 import bodyParser from "./helpers/bodyParser.js";
 import auth from "./helpers/auth.js";
+import multer from "multer";
 
 import testController from "./controllers/test.js";
 import categoryController from "./controllers/category.js";
@@ -20,6 +21,11 @@ import notificationController from "./controllers/notification.js";
 const server = http.createServer();
 const router = new Router();
 
+// Multer
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// Global handlers
 router.use(corsHandler);
 router.use(bodyParser.json);
 
@@ -56,6 +62,7 @@ router.get("/product", productController.getAll);
 router.get("/product/:id", productController.getOne);
 router.post("/product", auth.is(auth.MANAGER), productController.createOne);
 router.patch("/product/:id", auth.is(auth.MANAGER), productController.updateOne);
+router.patch("/product/:id/image", auth.is(auth.MANAGER), upload.single("image"), productController.updateOneImage)
 
 // Category
 router.get("/category", categoryController.getAll);
