@@ -227,7 +227,7 @@ async function createOne(conn, customer) {
 async function updateOne(conn, newCustomer) {
     let oldCustomer = await getOne(conn, newCustomer.id);
     if (!oldCustomer) {
-        throw new HttpError({statusCode: 400, message: `customer ${newCustomer.id} not found.`});
+        throw new HttpError({statusCode: 400, message: `customer not found.`});
     }
     let data = utils.objectAssign([
             "id", 

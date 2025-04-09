@@ -15,6 +15,7 @@ import configController from "./controllers/config.js";
 import saleEventController from "./controllers/saleEvent.js";
 import subscriptionController from "./controllers/subscription.js";
 import orderController from "./controllers/order.js";
+import notificationController from "./controllers/notification.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -44,6 +45,11 @@ router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.upda
 // Employee
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
+
+// Notification
+router.get("/notification", auth.is(auth.STAFF, auth.MANAGER), notificationController.getAll);
+router.get("/notification/:id", auth.is(auth.STAFF, auth.MANAGER), notificationController.getOne);
+router.patch("/notification/:id", auth.is(auth.STAFF, auth.MANAGER), notificationController.updateOne);
 
 // Product
 router.get("/product", productController.getAll);

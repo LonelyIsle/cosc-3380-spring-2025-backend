@@ -266,16 +266,6 @@ async function getAllByCustomerId(conn, customer_id, query, opt = {}) {
     };
 }
 
-async function getManyIdByCustomerId(conn, customer_id) {
-    let data = utils.objectAssign(["customer_id"], { customer_id });
-    orderTable.validate(data);
-    const [rows] = await conn.query(
-        'SELECT `id` FROM `order` WHERE `customer_id` = ? AND `is_deleted` = ?',
-        [data.customer_id, false]
-    );
-    return rows.map(row => row.id);
-}
-
 async function getOne(conn, id, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["id"], { id });
@@ -283,6 +273,20 @@ async function getOne(conn, id, opt = {}) {
     const [rows] = await conn.query(
         'SELECT * FROM `order` WHERE `id` = ? AND `is_deleted` = ?',
         [data.id, false]
+    );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
+    return rows[0] || null;
+}
+
+async function getOneByCustomerId(conn, customer_id, id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    let data = utils.objectAssign(["id", "customer_id"], { id, customer_id });
+    orderTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `order` WHERE `id` = ? AND `customer_id` = ? AND `is_deleted` = ?',
+        [data.id, data.customer_id, false]
     );
     if (opt.include) {
         await include(conn, rows[0]);
@@ -500,8 +504,8 @@ async function createOne(conn, order) {
 export default {
     getAll,
     getAllByCustomerId,
-    getManyIdByCustomerId,
     getOne,
+    getOneByCustomerId,
     createOne,
     STATUS,
     CANCELLED_STATUS,

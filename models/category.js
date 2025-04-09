@@ -93,7 +93,7 @@ async function createOne(conn, category) {
 async function updateOne(conn, newCategory) {
     let oldCategory = await getOne(conn, newCategory.id);
     if (!oldCategory) {
-        throw new HttpError({statusCode: 400, message: `category ${newCategory.id} not found.`});
+        throw new HttpError({statusCode: 400, message: `category not found.`});
     }
     let data = utils.objectAssign(["id", "name", "description"], oldCategory, newCategory);
     categoryTable.validate(data);
