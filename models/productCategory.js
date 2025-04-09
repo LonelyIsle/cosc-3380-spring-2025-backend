@@ -1,4 +1,4 @@
-import utils from "../helpers/utils.js"
+import utils from "../helpers/utils.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";

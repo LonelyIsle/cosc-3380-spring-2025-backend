@@ -69,6 +69,7 @@ router.post("/order", auth.is(auth.GUEST, auth.CUSTOMER), orderController.create
 
 // Config
 router.get("/config", configController.getAll);
+router.patch("/config", auth.is(auth.MANAGER), configController.updateAll);
 
 // *
 router.all("/*",  httpResp.Error[404]);
