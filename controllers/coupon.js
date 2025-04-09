@@ -28,7 +28,7 @@ async function getOne(req, res) {
 async function createOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
-        let  couponId  = await couponModel.createOne(conn, body);
+        let  couponId = await couponModel.createOne(conn, body);
         let coupon = await couponModel.getOne(conn, couponId)
         return coupon;
     });

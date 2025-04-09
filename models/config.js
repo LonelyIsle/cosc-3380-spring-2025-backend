@@ -87,7 +87,7 @@ async function updateAll(conn, newConfig) {
     valuesValidator.validate(data);
     for (let key of KEYS) {
         await conn.query(
-            'UPDATE `config` SET `value`  = ? WHERE `key` = ?',
+            'UPDATE `config` SET `value` = ? WHERE `key` = ?',
             [data[key], key]
         );
     }

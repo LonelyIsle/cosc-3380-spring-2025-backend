@@ -60,7 +60,7 @@ CREATE TABLE `coupon` (
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT `coupon-check-value` CHECK (`value` >= 0),
-    CONSTRAINT `coupon-check-start_at-end_at` CHECK (`end_at` >= `start_at`)
+    CONSTRAINT `coupon-check-start_at-end_at` CHECK (`end_at` > `start_at`)
 );
 
 DROP TABLE IF EXISTS `sale_event`;
@@ -75,7 +75,7 @@ CREATE TABLE `sale_event` (
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    CONSTRAINT `sale_event-check-start_at-end_at` CHECK (`end_at` >= `start_at`)
+    CONSTRAINT `sale_event-check-start_at-end_at` CHECK (`end_at` > `start_at`)
 );
 
 DROP TABLE IF EXISTS `employee`;
@@ -149,7 +149,7 @@ CREATE TABLE `subscription` (
     `deleted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT `subscription-check-price` CHECK (`price` >= 0),
-    CONSTRAINT `subscription-check-start_at-end_at` CHECK (`end_at` >= `start_at`)
+    CONSTRAINT `subscription-check-start_at-end_at` CHECK (`end_at` > `start_at`)
 );
 
 DROP TABLE IF EXISTS `order`;

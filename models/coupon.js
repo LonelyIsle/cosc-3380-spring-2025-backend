@@ -90,6 +90,16 @@ async function getOneActiveByCode(conn, code) {
     return rows[0] || null;
 }
 
+async function getOneByCode(conn, code) {
+    let data = utils.objectAssign(["code"], { code });
+    couponTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `coupon` WHERE `code` = ? AND `is_deleted` = ?',
+        [data.code, false]
+    );
+    return rows[0] || null;
+}
+
 async function getAll(conn, query) {
     let { 
         parsedQuery, 
@@ -120,12 +130,36 @@ async function getAll(conn, query) {
     };
 }
 
-async function createOne(conn, category) {
-    let data = utils.objectAssign(["name", "description"], category);
-    categoryTable.validate(data);
+async function createOne(conn, coupon) {
+    console.log("DEBUG");
+    let data = utils.objectAssign([
+            "code",
+            "value",
+            "start_at",
+            "end_at",
+            "type",
+            "description"
+        ], 
+        coupon
+    );
+    couponTable.validate(data);
     const [rows] = await conn.query(
-        'INSERT INTO `category`(`name`, `description`) VALUES (?, ?)',
-        [data.name, data.description]
+        'INSERT INTO `coupon`('
+        + '`code`,'
+        + '`value`,'
+        + '`start_at`,'
+        + '`end_at`,'
+        + '`type`,'
+        + '`description`'
+        + ') VALUES (?, ?, ?, ?, ?, ?)',
+        [
+            data.code,
+            data.value,
+            new Date(data.start_at),
+            new Date(data.end_at),
+            data.type,
+            data.description
+        ]
     );
     return rows.insertId;
 }
@@ -152,6 +186,7 @@ export default {
     getOneActive,
     getOneActiveByCode,
     getOne,
+    getOneByCode,
     getAll,
     createOne,
     updateOne

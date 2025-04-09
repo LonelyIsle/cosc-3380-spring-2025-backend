@@ -73,8 +73,9 @@ router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteO
 
 // Coupon
 router.get("/coupon/:code/active", couponController.getOneActiveByCode);
-router.get("/coupon", couponController.getAll);
-router.get("/coupon/:id", couponController.getOne);
+router.get("/coupon", auth.is(auth.MANAGER), couponController.getAll);
+router.get("/coupon/:id", auth.is(auth.MANAGER), couponController.getOne);
+router.post("/coupon", auth.is(auth.MANAGER), couponController.createOne);
 
 // Sale Event
 router.get("/sale-event/one/active", saleEventController.getOneActive);

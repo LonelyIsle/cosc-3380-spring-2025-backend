@@ -28,7 +28,7 @@ async function createOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
         if (req.jwt) {
-            body.customer_id  = req.jwt.user.id;
+            body.customer_id = req.jwt.user.id;
         }
         let orderId = await orderModel.createOne(conn, body);
         let order = await orderModel.getOne(conn, orderId, { include: true });

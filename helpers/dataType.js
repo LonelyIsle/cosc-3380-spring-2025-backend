@@ -85,12 +85,18 @@ class STRING {
 class TIMESTAMP {
     validate(val) {
         // val must be in milliseconds
-        if(val && utils.isNaN(val)) {
+        if (val && utils.isNaN(val)) {
+            return false;
+        }
+        if (val && !this.check(val)) {
             return false;
         }
         return true;
     }
-    constructor() {}
+    constructor(opt = {}) {
+        let { check } = Object.assign({ check: () => true }, opt);
+        this.check = check;
+    }
 }
 
 class ANY {
