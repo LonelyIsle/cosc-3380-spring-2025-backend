@@ -89,9 +89,19 @@ async function updateOne(req, res) {
     });
 }
 
+async function createOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        body.role = auth.STAFF;
+        let data = await employeeModel.createOne(conn, body);
+        return data;
+    });
+}
+
 export default {
     login,
     getOne,
     updatePassword,
-    updateOne
+    updateOne,
+    createOne
 }

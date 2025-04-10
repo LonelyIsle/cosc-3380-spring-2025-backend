@@ -1,4 +1,5 @@
 import notificationModel from "../models/notification.js";
+import { HttpError } from "../helpers/error.js";
 import db from "./db.js";
 
 async function getAll(req, res) {
@@ -23,8 +24,12 @@ async function updateOne(req, res) {
         let param = req.param;
         body.id = param.id;
         body.employee_id = req.jwt.user.id;
-        let  notificationId = await notificationModel.updateOneByEmployeeId(conn, body);
-        let notification = await notificationModel.getOneByEmployeeId(conn, body.employee_id, notificationId)
+        let notification = await notificationModel.getOneByEmployeeId(conn, body.employee_id, body.id);
+        if (!notification) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let notificationId = await notificationModel.updateOne(conn, body);
+        notification = await notificationModel.getOne(conn, notificationId, { include: true });
         return notification;
     });
 }

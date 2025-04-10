@@ -524,7 +524,7 @@ async function updateOne(conn, newOrder) {
         'UPDATE `order` SET `tracking` = ?, `status` = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.tracking, data.status, data.id, false]
     );
-    return newOrder.id;
+    return data.id;
 }
 
 export default {

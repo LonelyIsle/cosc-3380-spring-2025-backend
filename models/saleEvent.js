@@ -198,7 +198,7 @@ async function updateOne(conn, newSaleEvent) {
             false
         ]
     );
-    return newSaleEvent.id;
+    return data.id;
 }
 
 export default {

@@ -304,7 +304,7 @@ async function updateOne(conn, newProduct) {
     );
     await productCategoryModel.deleteCategoryByProductId(conn, newProduct.id);
     await productCategoryModel.createCategoryByProductId(conn, newProduct.id, data.category_id);
-    return newProduct.id;
+    return data.id;
 }
 
 async function updateOneImage(conn, newProduct) {
@@ -312,19 +312,28 @@ async function updateOneImage(conn, newProduct) {
     if (!oldProduct) {
         throw new HttpError({statusCode: 400, message: `product not found.`});
     }
+    let data = utils.objectAssign(["id", "image"], oldProduct, newProduct);
+    productTable.validate(data);
+    if (data.image && data.image.size) {
+        data.image_extension = data.image.mimetype.split("/")[1];
+        data.image = data.image.buffer;
+    } else {
+        data.image = null;
+        data.image_extension = null;
+    }
     const [rows] = await conn.query(
         'UPDATE `product`SET'
         + '`image` = ?,'
         + '`image_extension` = ?'
         + ' WHERE `id` = ? AND `is_deleted` = ?',
         [
-            newProduct.file.buffer,
-            newProduct.file.mimetype.split("/")[1],
-            newProduct.id,
+            data.image,
+            data.image_extension,
+            data.id,
             false
         ]
     );
-    return newProduct.id;
+    return data.id;
 }
 
 export default {

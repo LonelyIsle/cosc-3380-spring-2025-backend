@@ -203,7 +203,7 @@ async function updateOne(conn, newCoupon) {
             false
         ]
     );
-    return newCoupon.id;
+    return data.id;
 }
 
 export default {

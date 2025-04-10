@@ -81,7 +81,7 @@ async function updateOne(req, res) {
         if (req.jwt.user.id !== param.id) {
             throw new HttpError({ statusCode: 401 });
         }
-        let  customerId = await customerModel.updateOne(conn, body);
+        let customerId = await customerModel.updateOne(conn, body);
         let customer = await customerModel.getOne(conn, customerId, { include: true });
         customerModel.prepare(customer);
         return customer;

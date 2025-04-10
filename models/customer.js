@@ -328,7 +328,7 @@ async function updateOne(conn, newCustomer) {
             false
         ]
     );
-    return newCustomer.id;
+    return data.id;
 }
 
 async function updatePassword(conn, id, password) {
@@ -343,7 +343,7 @@ async function updatePassword(conn, id, password) {
         'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.password, data.id, false]
     );
-    return id;
+    return data.id;
 }
 
 async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_password_answer) {

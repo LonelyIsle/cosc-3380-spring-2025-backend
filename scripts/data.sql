@@ -1,8 +1,9 @@
 -- EMPLOYEE --
 INSERT INTO `employee` (`id`, `first_name`, `last_name`, `role`, `hourly_rate`, `email`, `password`) 
 VALUES 
-(1, 'Chad', 'Gilmore', 1, 30.00, 'manager@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.'), -- 123456
-(2, 'Peter', 'Parker', 0, 15.00, 'staff@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.'); -- 123456
+(1, 'Chad', 'Gilmore', 1, 25.00, 'manager@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.'), -- 123456
+(2, 'Luke', 'Skywalker', 1, 30.00, 'manager1@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.'), -- 123456
+(3, 'Peter', 'Parker', 0, 15.00, 'staff@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.'); -- 123456
 
 -- CUSTOMER -- 
 INSERT INTO `customer` (`id`, `first_name`, `last_name`, `email`, `password`, `reset_password_question`, `reset_password_answer`) 

@@ -113,7 +113,7 @@ async function updateOne(conn, newCategory) {
         'UPDATE `category` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.name, data.description, data.id, false]
     );
-    return newCategory.id;
+    return data.id;
 }
 
 async function deleteOne(conn, id) {
