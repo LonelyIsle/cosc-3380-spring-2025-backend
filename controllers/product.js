@@ -49,6 +49,17 @@ async function updateOneImage(req, res) {
     });
 }
 
+async function restockOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        let productId = await productModel.restockOne(conn, body);
+        let product = await productModel.getOne(conn, productId, { include: true })
+        return product;
+    });
+}
+
 async function deleteOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let param = req.param;
@@ -63,5 +74,6 @@ export default {
     createOne,
     updateOne,
     updateOneImage,
-    deleteOne
+    deleteOne,
+    restockOne
 }

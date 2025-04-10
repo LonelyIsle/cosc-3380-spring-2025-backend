@@ -68,7 +68,8 @@ router.get("/product", productController.getAll);
 router.get("/product/:id", productController.getOne);
 router.post("/product", auth.is(auth.STAFF, auth.MANAGER), productController.createOne);
 router.patch("/product/:id", auth.is(auth.STAFF, auth.MANAGER), productController.updateOne);
-router.patch("/product/:id/image", auth.is(auth.STAFF, auth.MANAGER), upload.single("image"), productController.updateOneImage)
+router.patch("/product/:id/image", auth.is(auth.STAFF, auth.MANAGER), upload.single("image"), productController.updateOneImage);
+router.patch("/product/:id/restock", auth.is(auth.STAFF, auth.MANAGER), productController.restockOne);
 router.delete("/product/:id", auth.is(auth.STAFF, auth.MANAGER), productController.deleteOne);
 
 // Category
