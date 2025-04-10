@@ -83,6 +83,7 @@ router.get("/coupon", auth.is(auth.MANAGER), couponController.getAll);
 router.get("/coupon/:id", auth.is(auth.MANAGER), couponController.getOne);
 router.post("/coupon", auth.is(auth.MANAGER), couponController.createOne);
 router.patch("/coupon/:id", auth.is(auth.MANAGER), couponController.updateOne);
+router.delete("/coupon/:id", auth.is(auth.MANAGER), couponController.deleteOne);
 
 // Sale Event
 router.get("/sale-event/one/active", saleEventController.getOneActive);
@@ -90,6 +91,7 @@ router.get("/sale-event", auth.is(auth.MANAGER), saleEventController.getAll);
 router.get("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.getOne);
 router.post("/sale-event", auth.is(auth.MANAGER), saleEventController.createOne);
 router.patch("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.updateOne);
+router.delete("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.deleteOne);
 
 // Order
 router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getAll);

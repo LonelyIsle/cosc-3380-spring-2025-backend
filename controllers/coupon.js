@@ -45,10 +45,19 @@ async function updateOne(req, res) {
     });
 }
 
+async function deleteOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let param = req.param;
+        await couponModel.deleteOne(conn, param.id);
+        return null;
+    });
+}
+
 export default {
     getOneActiveByCode,
     getAll,
     getOne,
     createOne,
-    updateOne
+    updateOne,
+    deleteOne
 }
