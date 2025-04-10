@@ -73,9 +73,9 @@ router.delete("/product/:id", auth.is(auth.STAFF, auth.MANAGER), productControll
 // Category
 router.get("/category", categoryController.getAll);
 router.get("/category/:id", categoryController.getOne);
-router.post("/category", auth.is(auth.MANAGER), categoryController.createOne);
-router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOne);
-router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
+router.post("/category", auth.is(auth.STAFF, auth.MANAGER), categoryController.createOne);
+router.patch("/category/:id", auth.is(auth.STAFF, auth.MANAGER), categoryController.updateOne);
+router.delete("/category/:id", auth.is(auth.STAFF, auth.MANAGER), categoryController.deleteOne);
 
 // Coupon
 router.get("/coupon/:code/active", couponController.getOneActiveByCode);
