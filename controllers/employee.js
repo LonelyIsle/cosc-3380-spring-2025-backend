@@ -27,13 +27,13 @@ async function getOne(req, res) {
         let param = req.param;
         let employee = null;
         if (req.jwt.user.id === param.id) {
-            let employee = await employeeModel.getOne(conn, param.id);
+            employee = await employeeModel.getOne(conn, param.id);
             employeeModel.prepare(employee);
         } else {
             if (req.jwt.user.role !== auth.MANAGER) {
                 throw new HttpError({ statusCode: 401 });
             } else {
-                let employee = await employeeModel.getOneStaff(conn, param.id);
+                employee = await employeeModel.getOneStaff(conn, param.id);
                 employeeModel.prepare(employee);
             }
         }
