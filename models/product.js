@@ -341,8 +341,8 @@ async function deleteOne(conn, id) {
     productTable.validate(data);
     let now = new Date();
     const [rows] = await conn.query(
-        'UPDATE `product` SET sku = CONCAT(sku, ?), is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
-        ["#deleted", true, now, data.id, false]
+        'UPDATE `product` SET sku = CONCAT(sku, ?, ?), is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+        ["#deleted", "#" + now.getTime(), true, now, data.id, false]
     );
     await productCategoryModel.deleteCategoryByProductId(conn, data.id);
     return rows;

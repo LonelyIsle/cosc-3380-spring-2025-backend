@@ -212,8 +212,8 @@ async function deleteOne(conn, id) {
     couponTable.validate(data);
     let now = new Date();
     const [rows] = await conn.query(
-        'UPDATE `coupon` SET code = CONCAT(code, ?), is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
-        ["#deleted", true, now, data.id, false]
+        'UPDATE `coupon` SET code = CONCAT(code, ?, ?), is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+        ["#deleted", "#" + now.getTime(), true, now, data.id, false]
     );
     await saleEventModel.setCouponIdToNullByCouponId(conn, data.id);
     return rows;
