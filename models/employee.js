@@ -84,6 +84,16 @@ async function getOne(conn, id) {
     return rows[0] || null;
 }
 
+async function getOneStaff(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    employeeTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `employee` WHERE `id` = ? AND `role` = ? AND `is_deleted` = ?',
+        [data.id, auth.STAFF, false]
+    );
+    return rows[0] || null;
+}
+
 async function getOneByEmail(conn, email) {
     let data = utils.objectAssign(["email"], { email });
     employeeTable.validate(data);
@@ -104,10 +114,70 @@ async function getOneByEmailAndPwd(conn, email, password) {
     return null;
 }
 
+async function updatePassword(conn, id, password) {
+    let data = utils.objectAssign(["id", "password"], { id, password });
+    employeeTable.validate(data);
+    let employee = await getOne(conn, data.id);
+    if (!employee) {
+        throw new HttpError({statusCode: 400, message: `employee not found.`});
+    }
+    data.password = await pwd.hash(data.password);
+    const [rows] = await conn.query(
+        'UPDATE `employee` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.password, data.id, false]
+    );
+    return id;
+}
+
+async function updateOne(conn, newEmployee) {
+    let oldEmployee = await getOne(conn, newEmployee.id);
+    if (!oldEmployee) {
+        throw new HttpError({statusCode: 400, message: `employee not found.`});
+    }
+    let data = utils.objectAssign(
+        [
+            "id", 
+            "first_name",
+            "middle_name",
+            "last_name",
+            "email",
+            "role",
+            "hourly_rate"
+        ], 
+        oldEmployee, 
+        newEmployee
+    );
+    employeeTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `employee` SET '
+        + '`first_name` = ?, '
+        + '`middle_name` = ?, '
+        + '`last_name` = ?, '
+        + '`email` = ?,'
+        + '`role` = ?,'
+        + '`hourly_rate` = ?'
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [
+            data.first_name,
+            data.middle_name,
+            data.last_name,
+            data.email,
+            data.role,
+            data.hourly_rate,
+            data.id,
+            false
+        ]
+    );
+    return newEmployee.id;
+}
+
 export default {
     table: employeeTable,
     prepare,
     getOne,
+    getOneStaff,
     getOneByEmail,
-    getOneByEmailAndPwd
+    getOneByEmailAndPwd,
+    updatePassword,
+    updateOne
 }

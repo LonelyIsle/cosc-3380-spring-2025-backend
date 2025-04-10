@@ -55,7 +55,11 @@ const saleEventTable = new Table("sale_event", {
 async function include(conn, rows) {
     const _include = async (obj) => {
         if (obj) {
-            obj.coupon = await couponModel.getOne(conn, obj.coupon_id);
+            if (obj.coupon_id) {
+                obj.coupon = await couponModel.getOne(conn, obj.coupon_id);
+            } else {
+                obj.coupon = null;
+            }
         }
     }
     if (!Array.isArray(rows)) {
@@ -113,8 +117,95 @@ async function getOneActive(conn, opt = {}) {
     return rows[0] || null;
 }
 
+async function getOne(conn, id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    let data = utils.objectAssign(["id"], { id });
+    saleEventTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `sale_event` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
+    return rows[0] || null;
+}
+
+async function createOne(conn, saleEvent) {
+    let data = utils.objectAssign(
+        [
+            "coupon_id",
+            "start_at",
+            "end_at",
+            "title",
+            "description"
+        ], 
+        saleEvent
+    );
+    saleEventTable.validate(data);
+    const [rows] = await conn.query(
+        'INSERT INTO `sale_event`('
+        + '`coupon_id`,'
+        + '`start_at`,'
+        + '`end_at`,'
+        + '`title`,'
+        + '`description`'
+        + ') VALUES (?, ?, ?, ?, ?)',
+        [
+            data.coupon_id,
+            new Date(data.start_at),
+            new Date(data.end_at),
+            data.title,
+            data.description
+        ]
+    );
+    return rows.insertId;
+}
+
+async function updateOne(conn, newSaleEvent) {
+    let oldSaleEvent = await getOne(conn, newSaleEvent.id);
+    if (!oldSaleEvent) {
+        throw new HttpError({statusCode: 400, message: `sale event not found.`});
+    }
+    let data = utils.objectAssign(
+        [
+            "id",
+            "coupon_id",
+            "start_at",
+            "end_at",
+            "title",
+            "description"
+        ], 
+        oldSaleEvent, 
+        newSaleEvent
+    );
+    saleEventTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `sale_event` SET '
+        + '`coupon_id` = ?,'
+        + '`start_at` = ?,'
+        + '`end_at` = ?,'
+        + '`title` = ?,'
+        + '`description` = ?' 
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [   
+            data.coupon_id,
+            new Date(data.start_at),
+            new Date(data.end_at),
+            data.title,
+            data.description,
+            data.id,
+            false
+        ]
+    );
+    return newSaleEvent.id;
+}
+
 export default {
     table: saleEventTable,
     getAll,
-    getOneActive
+    getOneActive,
+    getOne,
+    updateOne,
+    createOne
 }

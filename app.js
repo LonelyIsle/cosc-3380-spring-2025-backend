@@ -38,6 +38,7 @@ router.get("/test/which", testController.which);
 router.get("/test/kill", testController.kill);
 
 // Customer
+router.get("/customer", auth.is(auth.MANAGER), customerController.getAll);
 router.get("/customer/:id", auth.is(auth.CUSTOMER, auth.MANAGER), customerController.getOne);
 router.post("/customer/forget/question", customerController.getQuestion);
 router.post("/customer/forget", customerController.forget);
@@ -51,6 +52,8 @@ router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.upda
 // Employee
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
+router.patch("/employee/:id", auth.is(auth.MANAGER), employeeController.updateOne);
+router.patch("/employee/:id/password", auth.is(auth.STAFF, auth.MANAGER), employeeController.updatePassword);
 
 // Notification
 router.get("/notification", auth.is(auth.STAFF, auth.MANAGER), notificationController.getAll);
@@ -80,6 +83,10 @@ router.patch("/coupon/:id", auth.is(auth.MANAGER), couponController.updateOne);
 
 // Sale Event
 router.get("/sale-event/one/active", saleEventController.getOneActive);
+router.get("/sale-event", auth.is(auth.MANAGER), saleEventController.getAll);
+router.get("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.getOne);
+router.post("/sale-event", auth.is(auth.MANAGER), saleEventController.createOne);
+router.patch("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.updateOne);
 
 // Order
 router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getAll);

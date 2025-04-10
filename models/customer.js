@@ -116,8 +116,10 @@ const customerTable = new Table("customer", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["email", "created_at", "updated_at"],
+    filter: {
+        "email": DataType.STRING(),
+    }
 });
 
 function prepare(rows) {
@@ -137,10 +139,37 @@ function prepare(rows) {
     }
 }
 
+function prepareStrict(rows) {
+    const _prepare = (obj) => {
+        if (obj) {
+            delete obj.password;
+            delete obj.reset_password_answer;
+            obj.role = auth.CUSTOMER;
+
+            delete obj.card_name;
+            delete obj.card_number;
+            delete obj.card_expire_month;
+            delete obj.card_expire_year;
+            delete obj.card_code;            
+        }
+    }
+    if (!Array.isArray(rows)) {
+        _prepare(rows);
+    } else {
+        for (let row of rows) {
+            _prepare(row);
+        }
+    }
+}
+
 async function include(conn, rows) {
     const _include = async (obj) => {
         if (obj) {
-            obj.subscription = await subscriptionModel.getOneActiveByCustomerID(conn, obj.id);
+            if (obj.id) {
+                obj.subscription = await subscriptionModel.getOneActiveByCustomerID(conn, obj.id);
+            } else {
+                obj.subscription = null;
+            }
         }
     }
     if (!Array.isArray(rows)) {
@@ -305,6 +334,10 @@ async function updateOne(conn, newCustomer) {
 async function updatePassword(conn, id, password) {
     let data = utils.objectAssign(["id", "password"], { id, password });
     customerTable.validate(data);
+    let customer = await getOne(conn, data.id);
+    if (!customer) {
+        throw new HttpError({statusCode: 400, message: `customer not found.`});
+    }
     data.password = await pwd.hash(data.password);
     const [rows] = await conn.query(
         'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
@@ -337,9 +370,44 @@ async function updateQuestionAndAnswer(conn, id, reset_password_question, reset_
     return id;
 }
 
+async function getAll(conn, query, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = customerTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `customer`.`id`) FROM `customer` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr),
+        whereParams
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `customer`.`id`)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT `customer`.* FROM `customer` ' 
+        + (!whereQueryStr ? ' ' :  ' WHERE ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        whereParams.concat(pagingParams)
+    );
+    if (opt.include) {
+        await include(conn, rows);
+    }
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
+}
+
 export default {
     table: customerTable,
     prepare,
+    prepareStrict,
     createOne,
     updateOne,
     getOne,
@@ -347,5 +415,6 @@ export default {
     getOneByEmailAndPwd,
     getOneByEmailAndAnswer,
     updatePassword,
-    updateQuestionAndAnswer
+    updateQuestionAndAnswer,
+    getAll
 }

@@ -25,16 +25,73 @@ async function login(req, res) {
 async function getOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let param = req.param;
-        if (req.jwt.user.role === auth.STAFF && req.jwt.user.id !== param.id) {
-            throw new HttpError({ statusCode: 401 });
+        let employee = null;
+        if (req.jwt.user.id === param.id) {
+            let employee = await employeeModel.getOne(conn, param.id);
+            employeeModel.prepare(employee);
+        } else {
+            if (req.jwt.user.role !== auth.MANAGER) {
+                throw new HttpError({ statusCode: 401 });
+            } else {
+                let employee = await employeeModel.getOneStaff(conn, param.id);
+                employeeModel.prepare(employee);
+            }
         }
-        let employee = await employeeModel.getOne(conn, param.id);
-        employeeModel.prepare(employee);
+        return employee;
+    });
+}
+
+async function updatePassword(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        if (req.jwt.user.id === param.id) {
+            await employeeModel.updatePassword(conn, body.id, body.password);
+        } else {
+            if (req.jwt.user.role !== auth.MANAGER) {
+                throw new HttpError({ statusCode: 401 });
+            } else {
+                let employee = await employeeModel.getOne(conn, body.id);
+                if (!employee || employee.role !== auth.STAFF) {
+                    throw new HttpError({ statusCode: 401 });
+                }
+                await employeeModel.updatePassword(conn, body.id, body.password);
+            }
+        }
+        return null;
+    });
+}
+
+async function updateOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        let employee = null;
+        body.id = param.id;
+        if (req.jwt.user.id === param.id) {
+            throw new HttpError({ statusCode: 401 });
+        } else {
+            if (req.jwt.user.role !== auth.MANAGER) {
+                throw new HttpError({ statusCode: 401 });
+            } else {
+                employee = await employeeModel.getOne(conn, body.id);
+                if (!employee || employee.role !== auth.STAFF) {
+                    throw new HttpError({ statusCode: 401 });
+                }
+                delete body.role;
+                let employeeId = await employeeModel.updateOne(conn, body);
+                employee = await employeeModel.getOne(conn, employeeId, { include: true });
+                employeeModel.prepare(employee);
+            }
+        }
         return employee;
     });
 }
 
 export default {
     login,
-    getOne
+    getOne,
+    updatePassword,
+    updateOne
 }

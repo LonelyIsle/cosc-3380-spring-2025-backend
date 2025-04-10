@@ -56,8 +56,12 @@ const notificationTable = new Table("notification", {
 async function include(conn, rows) {
     const _include = async (obj) => {
         if (obj) {
-            obj.employee = await employeeModel.getOne(conn, obj.employee_id);
-            employeeModel.prepare(obj.employee);
+            if (obj.employee_id) {
+                obj.employee = await employeeModel.getOne(conn, obj.employee_id);
+                employeeModel.prepare(obj.employee);
+            } else {
+                obj.employee = null;
+            }
         }
     }
     if (!Array.isArray(rows)) {
