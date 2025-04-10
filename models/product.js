@@ -336,6 +336,18 @@ async function updateOneImage(conn, newProduct) {
     return data.id;
 }
 
+async function deleteOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    productTable.validate(data);
+    let now = new Date();
+    const [rows] = await conn.query(
+        'UPDATE `product` SET sku = CONCAT(sku, ?), is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+        ["#deleted", true, now, data.id, false]
+    );
+    await productCategoryModel.deleteCategoryByProductId(conn, data.id);
+    return rows;
+}
+
 export default {
     table: productTable,
     getAll,
@@ -344,5 +356,6 @@ export default {
     updateManyQuantityByIds,
     createOne,
     updateOne,
-    updateOneImage
+    updateOneImage,
+    deleteOne
 }

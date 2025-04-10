@@ -40,11 +40,10 @@ async function updateOne(req, res) {
 async function deleteOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let param = req.param;
-        let result = await categoryModel.deleteOne(conn, param.id);
+        await categoryModel.deleteOne(conn, param.id);
         return null;
     });
 }
-
 
 export default {
     getAll,

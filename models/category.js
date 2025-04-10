@@ -123,7 +123,7 @@ async function deleteOne(conn, id) {
     let now = new Date();
     const [rows] = await conn.query(
         'UPDATE `category` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
-        [true, now, id, false]
+        [true, now, data.id, false]
     );
     await productCategoryModel.deleteProductByCategoryId(conn, data.id);
     return rows;

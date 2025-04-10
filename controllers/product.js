@@ -49,10 +49,19 @@ async function updateOneImage(req, res) {
     });
 }
 
+async function deleteOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let param = req.param;
+        await productModel.deleteOne(conn, param.id);
+        return null;
+    });
+}
+
 export default {
     getAll,
     getOne,
     createOne,
     updateOne,
-    updateOneImage
+    updateOneImage,
+    deleteOne
 }
