@@ -521,7 +521,7 @@ async function createOne(conn, order) {
         });
     }
     await orderProductModel.createMany(conn, data.items);
-    let updateIds = await productModel.updateManyQuantityByIds(conn, data.items.map(item => {
+    await productModel.updateManyQuantityByIds(conn, data.items.map(item => {
         return { 
             id: item.product_id, 
             quantity: -1 * item.quantity 
@@ -549,6 +549,27 @@ async function updateOne(conn, newOrder) {
     return data.id;
 }
 
+async function cancelOne(conn, newOrder) {
+    let oldOrder = await getOne(conn, newOrder.id);
+    if (!oldOrder) {
+        throw new HttpError({statusCode: 400, message: `order not found.`});
+    }
+    let data = utils.objectAssign(["id"], oldOrder, newOrder);
+    orderTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `order` SET `status` = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [CANCELLED_STATUS, data.id, false]
+    );
+    let items = await orderProductModel.getProductByOrderId(conn, data.id, { inclImg: false });
+    await productModel.updateManyQuantityByIds(conn, items.map(item => {
+        return { 
+            id: item.product_id, 
+            quantity: 1 * item.quantity 
+        };
+    }));
+    return data.id;
+}
+
 export default {
     table: orderTable,
     prepare,
@@ -558,6 +579,7 @@ export default {
     getOneByCustomerId,
     createOne,
     updateOne,
+    cancelOne,
     STATUS,
     CANCELLED_STATUS,
     PLACED_STATUS,

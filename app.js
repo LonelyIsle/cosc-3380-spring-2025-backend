@@ -99,6 +99,7 @@ router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderCont
 router.get("/order/:id", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getOne);
 router.post("/order", auth.is(auth.GUEST, auth.CUSTOMER), orderController.createOne);
 router.patch("/order/:id", auth.is(auth.STAFF, auth.MANAGER), orderController.updateOne);
+router.patch("/order/:id/cancel", auth.is(auth.STAFF, auth.MANAGER), orderController.cancelOne);
 
 // Config
 router.get("/config", configController.getAll);
