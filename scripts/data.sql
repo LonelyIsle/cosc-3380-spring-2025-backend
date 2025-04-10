@@ -3,14 +3,12 @@ INSERT INTO `employee` (`id`, `first_name`, `last_name`, `role`, `hourly_rate`, 
 VALUES 
 (1, 'Chad', 'Gilmore', 1, 30.00, 'manager@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.'), -- 123456
 (2, 'Peter', 'Parker', 0, 15.00, 'staff@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.'), -- 123456
-(3, 'Aria', 'Park', 1, 30.00, 'employee@example.com', '$2b$10$o8xtDsSqut4PMZx7HLBgP.TcgNokt1J/K08X75Iu9SyCfMF3GIGbW'); -- Password123
 
 -- CUSTOMER -- 
 INSERT INTO `customer` (`id`, `first_name`, `last_name`, `email`, `password`, `reset_password_question`, `reset_password_answer`) 
 VALUES 
 (1, 'John', 'Cena', 'customer@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.', 'How many states are there in the United States?', '$2b$10$cfd3GSy13NfXlRh8fXZequ464lS21Q.Ec2EcahsOpX0y.jOZOV5jK'), -- 123456, 50
 (2, 'James', 'Bond', 'customer_sub@domain.com', '$2b$10$dqmrkVGpQxnlj/c.dv0OROiWGRicBoewqeyCiM1EQzKtFQlSIZKJ.', 'How many states are there in the United States?', '$2b$10$cfd3GSy13NfXlRh8fXZequ464lS21Q.Ec2EcahsOpX0y.jOZOV5jK'), -- 123456, 50
-(3, 'Ava', 'Dean', 'somerandom@gmail.com', '$2b$10$nD53mm4ndgrdeMwpLkMsbOwlXVIKY34/nxSb1swYO.Udt3/Pcl9fm', 'How many states are there in the United States?', '$2b$10$cfd3GSy13NfXlRh8fXZequ464lS21Q.Ec2EcahsOpX0y.jOZOV5jK'); -- IWant2Login!, 50
 
 -- SUBSCRIPTION --
 INSERT INTO `subscription` (`id`, `customer_id`, `price`, `start_at`, `end_at`, `billing_address_1`, `billing_address_city`, `billing_address_state`, `billing_address_zip`, `card_name`, `card_number`, `card_expire_month`, `card_expire_year`, `card_code`)

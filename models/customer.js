@@ -334,6 +334,10 @@ async function updateOne(conn, newCustomer) {
 async function updatePassword(conn, id, password) {
     let data = utils.objectAssign(["id", "password"], { id, password });
     customerTable.validate(data);
+    let customer = await getOne(conn, data.id);
+    if (!customer) {
+        throw new HttpError({statusCode: 400, message: `customer not found.`});
+    }
     data.password = await pwd.hash(data.password);
     const [rows] = await conn.query(
         'UPDATE `customer` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
