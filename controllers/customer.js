@@ -115,6 +115,18 @@ async function updateQuestionAndAnswer(req, res) {
     });
 }
 
+async function getAll(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let query = req.query;
+        let data = await customerModel.getAll(conn, query, { include: true });
+        for (let customer of data.rows) {
+            customerModel.prepareStrict(customer);
+        }
+        return data;
+    });
+}
+
+
 export default {
     register,
     login,
@@ -123,5 +135,6 @@ export default {
     forget,
     updateOne,
     updatePassword,
-    updateQuestionAndAnswer
+    updateQuestionAndAnswer,
+    getAll
 }

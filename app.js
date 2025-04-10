@@ -38,6 +38,7 @@ router.get("/test/which", testController.which);
 router.get("/test/kill", testController.kill);
 
 // Customer
+router.get("/customer", auth.is(auth.MANAGER), customerController.getAll);
 router.get("/customer/:id", auth.is(auth.CUSTOMER, auth.MANAGER), customerController.getOne);
 router.post("/customer/forget/question", customerController.getQuestion);
 router.post("/customer/forget", customerController.forget);
