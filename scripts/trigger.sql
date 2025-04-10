@@ -140,8 +140,7 @@ BEGIN
         
         CLOSE manager_cursor;
     END IF;
-END//
-
+END //
 DELIMITER ;
 
 -- SALE_EVENT and COUPON --
