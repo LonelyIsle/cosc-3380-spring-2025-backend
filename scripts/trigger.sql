@@ -1,6 +1,6 @@
 -- EMPLOYEE --
 -- prevent staff hourly rate from being higher than manager hourly rate --
-DROP IF EXISTS `insert_prevent_staff_hourly_rate_above_manager`
+DROP TRIGGER IF EXISTS `insert_prevent_staff_hourly_rate_above_manager`;
 DELIMITER //
 CREATE TRIGGER `insert_prevent_staff_hourly_rate_above_manager`
 BEFORE INSERT ON `employee`
@@ -18,7 +18,7 @@ BEGIN
 END //
 DELIMITER ;
 
-DROP IF EXISTS `update_prevent_staff_hourly_rate_above_manager`
+DROP TRIGGER IF EXISTS `update_prevent_staff_hourly_rate_above_manager`;
 DELIMITER //
 CREATE TRIGGER `update_prevent_staff_hourly_rate_above_manager`
 BEFORE UPDATE ON `employee`
@@ -37,7 +37,7 @@ END //
 DELIMITER ;
 
 -- prevent manager hourly rate from being lower than staff hourly rate --
-DROP IF EXISTS `insert_prevent_manager_hourly_rate_below_staff`
+DROP TRIGGER IF EXISTS `insert_prevent_manager_hourly_rate_below_staff`;
 DELIMITER //
 CREATE TRIGGER `insert_prevent_manager_hourly_rate_below_staff`
 BEFORE INSERT ON `employee`
@@ -55,7 +55,7 @@ BEGIN
 END //
 DELIMITER ;
 
-DROP IF EXISTS `update_prevent_manager_hourly_rate_below_staff`
+DROP TRIGGER IF EXISTS `update_prevent_manager_hourly_rate_below_staff`;
 DELIMITER //
 CREATE TRIGGER `update_prevent_manager_hourly_rate_below_staff`
 BEFORE UPDATE ON `employee`
