@@ -107,11 +107,30 @@ async function createOne(req, res) {
     });
 }
 
+async function deleteOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        if (req.jwt.user.id === param.id) {
+            throw new HttpError({ statusCode: 401 });
+        } else {
+            let employee = await employeeModel.getOne(conn, body.id);
+            if (!employee || employee.role !== auth.STAFF) {
+                throw new HttpError({ statusCode: 401 });
+            }
+            await employeeModel.deleteOne(conn, body.id);
+        }
+        return null;
+    });
+}
+
 export default {
     login,
     getAll,
     getOne,
     updatePassword,
     updateOne,
-    createOne
+    createOne,
+    deleteOne
 }

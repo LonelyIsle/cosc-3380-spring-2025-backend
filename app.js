@@ -56,6 +56,7 @@ router.post("/employee/login", employeeController.login);
 router.post("/employee", auth.is(auth.MANAGER), employeeController.createOne);
 router.patch("/employee/:id", auth.is(auth.MANAGER), employeeController.updateOne);
 router.patch("/employee/:id/password", auth.is(auth.STAFF, auth.MANAGER), employeeController.updatePassword);
+router.delete("/employee/:id", auth.is(auth.MANAGER), employeeController.deleteOne);
 
 // Notification
 router.get("/notification", auth.is(auth.STAFF, auth.MANAGER), notificationController.getAll);

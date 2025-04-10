@@ -151,10 +151,22 @@ async function updateOne(conn, newNotification) {
     return data.id;
 }
 
+async function deleteManyByEmployeeId(conn, employee_id) {
+    let data = utils.objectAssign(["employee_id"], { employee_id });
+    notificationTable.validate(data);
+    let now = new Date();
+    const [rows] = await conn.query(
+        'UPDATE `notification` SET is_deleted = ?, deleted_at = ? WHERE `employee_id` = ? AND `is_deleted` = ?',
+        [true, now, data.employee_id, false]
+    );
+    return rows;
+}
+
 export default {
     table: notificationTable,
     getAllByEmployeeId,
     getOne,
     getOneByEmployeeId,
     updateOne,
+    deleteManyByEmployeeId
 }

@@ -4,6 +4,7 @@ import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 import pwd from "../helpers/pwd.js";
 import { HttpError } from "../helpers/error.js";
+import notificationModel from "./notification.js";
 
 const employeeTable = new Table("employee", {
     "id": {
@@ -230,6 +231,18 @@ async function getAllStaff(conn, query) {
     };
 }
 
+async function deleteOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    employeeTable.validate(data);
+    let now = new Date();
+    const [rows] = await conn.query(
+        'UPDATE `employee` SET email = CONCAT(email, ?, ?), is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+        ["#deleted", "#" + now.getTime(), true, now, data.id, false]
+    );
+    await notificationModel.deleteManyByEmployeeId(conn, data.id);
+    return rows;
+}
+
 export default {
     table: employeeTable,
     prepare,
@@ -240,5 +253,6 @@ export default {
     getOneByEmailAndPwd,
     updatePassword,
     updateOne,
-    createOne
+    createOne,
+    deleteOne
 }
