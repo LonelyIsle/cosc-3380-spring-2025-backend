@@ -22,6 +22,15 @@ async function login(req, res) {
     });
 }
 
+async function getAll(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let query = req.query;
+        let data = await employeeModel.getAllStaff(conn, query);
+        employeeModel.prepare(data.rows);
+        return data;
+    });
+}
+
 async function getOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let param = req.param;
@@ -81,7 +90,7 @@ async function updateOne(req, res) {
                 }
                 delete body.role;
                 let employeeId = await employeeModel.updateOne(conn, body);
-                employee = await employeeModel.getOne(conn, employeeId, { include: true });
+                employee = await employeeModel.getOne(conn, employeeId);
                 employeeModel.prepare(employee);
             }
         }
@@ -100,6 +109,7 @@ async function createOne(req, res) {
 
 export default {
     login,
+    getAll,
     getOne,
     updatePassword,
     updateOne,

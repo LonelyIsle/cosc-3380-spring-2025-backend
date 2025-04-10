@@ -56,8 +56,10 @@ const employeeTable = new Table("employee", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: [],
-    filter: {}
+    sort: ["email", "created_at", "updated_at"],
+    filter: {
+        "email": DataType.STRING(),
+    }
 });
 
 function prepare(rows) {
@@ -198,9 +200,40 @@ async function createOne(conn, employee) {
     return rows.insertId;
 }
 
+async function getAllStaff(conn, query) {
+    let { 
+        parsedQuery, 
+        whereQueryStr, 
+        sortQueryStr, 
+        pagingQueryStr, 
+        whereParams, 
+        pagingParams 
+    } = employeeTable.getQueryStr(query);
+    const [countRows] = await conn.query(
+        'SELECT COUNT(DISTINCT `employee`.`id`) FROM `employee` ' 
+        + (!whereQueryStr ? ' WHERE `employee`.role = ? ' :  ' WHERE `employee`.role = ? AND ' + whereQueryStr),
+        [auth.STAFF].concat(whereParams)
+    );
+    const total =  (countRows[0] && countRows[0]["COUNT(DISTINCT `employee`.`id`)"]) || 0;
+    const [rows] = await conn.query(
+        'SELECT `employee`.* FROM `employee` ' 
+        + (!whereQueryStr ? ' WHERE `employee`.role = ? ' :  ' WHERE `employee`.role = ? AND ' + whereQueryStr)
+        + (!sortQueryStr ? ' ' : ' ORDER BY ' + sortQueryStr)
+        + (!pagingQueryStr ? ' ' : ' ' + pagingQueryStr),
+        [auth.STAFF].concat(whereParams, pagingParams)
+    );
+    return {
+        total,
+        limit: pagingQueryStr ? parsedQuery.limit : total,
+        offset: pagingQueryStr ? parsedQuery.offset : 0,
+        rows
+    };
+}
+
 export default {
     table: employeeTable,
     prepare,
+    getAllStaff,
     getOne,
     getOneStaff,
     getOneByEmail,

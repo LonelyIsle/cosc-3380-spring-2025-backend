@@ -50,6 +50,7 @@ router.patch("/customer/:id/password", auth.is(auth.CUSTOMER), customerControlle
 router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.updateQuestionAndAnswer);
 
 // Employee
+router.get("/employee", auth.is(auth.MANAGER), employeeController.getAll);
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
 router.post("/employee", auth.is(auth.MANAGER), employeeController.createOne);
@@ -64,9 +65,9 @@ router.patch("/notification/:id", auth.is(auth.STAFF, auth.MANAGER), notificatio
 // Product
 router.get("/product", productController.getAll);
 router.get("/product/:id", productController.getOne);
-router.post("/product", auth.is(auth.MANAGER), productController.createOne);
-router.patch("/product/:id", auth.is(auth.MANAGER), productController.updateOne);
-router.patch("/product/:id/image", auth.is(auth.MANAGER), upload.single("image"), productController.updateOneImage)
+router.post("/product", auth.is(auth.STAFF, auth.MANAGER), productController.createOne);
+router.patch("/product/:id", auth.is(auth.STAFF, auth.MANAGER), productController.updateOne);
+router.patch("/product/:id/image", auth.is(auth.STAFF, auth.MANAGER), upload.single("image"), productController.updateOneImage)
 
 // Category
 router.get("/category", categoryController.getAll);
