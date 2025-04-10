@@ -115,11 +115,54 @@ async function updatePassword(conn, id, password) {
     return id;
 }
 
+async function updateOne(conn, newEmployee) {
+    let oldEmployee = await getOne(conn, newEmployee.id);
+    if (!oldEmployee) {
+        throw new HttpError({statusCode: 400, message: `employee not found.`});
+    }
+    let data = utils.objectAssign(
+        [
+            "id", 
+            "first_name",
+            "middle_name",
+            "last_name",
+            "email",
+            "role",
+            "hourly_rate"
+        ], 
+        oldEmployee, 
+        newEmployee
+    );
+    employeeTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `employee` SET '
+        + '`first_name` = ?, '
+        + '`middle_name` = ?, '
+        + '`last_name` = ?, '
+        + '`email` = ?,'
+        + '`role` = ?,'
+        + '`hourly_rate` = ?'
+        + ' WHERE `id` = ? AND `is_deleted` = ?',
+        [
+            data.first_name,
+            data.middle_name,
+            data.last_name,
+            data.email,
+            data.role,
+            data.hourly_rate,
+            data.id,
+            false
+        ]
+    );
+    return newEmployee.id;
+}
+
 export default {
     table: employeeTable,
     prepare,
     getOne,
     getOneByEmail,
     getOneByEmailAndPwd,
-    updatePassword
+    updatePassword,
+    updateOne
 }

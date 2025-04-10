@@ -47,8 +47,24 @@ async function updatePassword(req, res) {
     });
 }
 
+async function updateOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        if (req.jwt.user.id === param.id) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let  employeeId = await employeeModel.updateOne(conn, body);
+        let employee = await employeeModel.getOne(conn, employeeId, { include: true });
+        employeeModel.prepare(employee);
+        return employee;
+    });
+}
+
 export default {
     login,
     getOne,
-    updatePassword
+    updatePassword,
+    updateOne
 }
