@@ -84,7 +84,11 @@ const COLS_LITE_STR = [
 async function include(conn, rows) {
     const _include = async (obj) => {
         if (obj) {
-            obj.category = await productCategoryModel.getCategoryByProductId(conn, obj.id);
+            if (obj.id) {
+                obj.category = await productCategoryModel.getCategoryByProductId(conn, obj.id);
+            } else {
+                obj.category = null;
+            }
         }
     }
     if (!Array.isArray(rows)) {

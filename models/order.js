@@ -178,12 +178,18 @@ async function include(conn, rows, opt = {}) {
             if (obj.customer_id) {
                 obj.customer = await customerModel.getOne(conn, obj.customer_id);
                 customerModel.prepare(obj.customer);
+            } else {
+                obj.customer = null;
             }
             if (obj.subscription_id) {
                 obj.subscription = await subscriptionModel.getOne(conn, obj.subscription_id);
+            } else {
+                obj.subscription = null;
             }
             if (obj.coupon_id) {
                 obj.coupon = await couponModel.getOne(conn, obj.coupon_id);
+            } else {
+                obj.coupon = null;
             }
         }
     }

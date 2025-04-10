@@ -28,14 +28,14 @@ VALUES
 -- COUPON --
 INSERT INTO `coupon` (`id`, `code`, `value`, `start_at`, `end_at`, `type`, `description`)
 VALUES
-(1, '20PERCENT', 0.20, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 0, '20%'),
-(2, '20BUCKS', 20.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 1, '20.00$');
+(1, '20PERCENT', 0.20, NOW(), DATE_ADD(NOW(), INTERVAL 3 DAY), 0, '20%'),
+(2, '20BUCKS', 20.00, DATE_ADD(NOW(), INTERVAL 4 DAY), DATE_ADD(NOW(), INTERVAL 7 DAY), 1, '20.00$');
 
 -- SALE_EVENT --
 INSERT INTO `sale_event` (`id`, `coupon_id`, `start_at`, `end_at`, `title`, `description`)
 VALUES
-(1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), '20% OFF ALL ITEMS!', '20% OFF ALL ITEMS!'),
-(2, 2, DATE_ADD(NOW(), INTERVAL 31 DAY), DATE_ADD(NOW(), INTERVAL 61 DAY), '20$ OFF ALL ITEMS!', '20$ OFF ALL ITEMS!');
+(1, 1, NOW(), DATE_ADD(NOW(), INTERVAL 3 DAY), '20% OFF ALL ITEMS!', '20% OFF ALL ITEMS!'),
+(2, 2, DATE_ADD(NOW(), INTERVAL 4 DAY), DATE_ADD(NOW(), INTERVAL 7 DAY), '20$ OFF ALL ITEMS!', '20$ OFF ALL ITEMS!');
 
 -- CATEGORY --
 INSERT INTO `category` (`id`, `name`, `description`)
