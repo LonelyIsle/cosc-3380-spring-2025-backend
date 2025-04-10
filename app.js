@@ -50,10 +50,13 @@ router.patch("/customer/:id/password", auth.is(auth.CUSTOMER), customerControlle
 router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.updateQuestionAndAnswer);
 
 // Employee
+router.get("/employee", auth.is(auth.MANAGER), employeeController.getAll);
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
+router.post("/employee", auth.is(auth.MANAGER), employeeController.createOne);
 router.patch("/employee/:id", auth.is(auth.MANAGER), employeeController.updateOne);
 router.patch("/employee/:id/password", auth.is(auth.STAFF, auth.MANAGER), employeeController.updatePassword);
+router.delete("/employee/:id", auth.is(auth.MANAGER), employeeController.deleteOne);
 
 // Notification
 router.get("/notification", auth.is(auth.STAFF, auth.MANAGER), notificationController.getAll);
@@ -63,16 +66,18 @@ router.patch("/notification/:id", auth.is(auth.STAFF, auth.MANAGER), notificatio
 // Product
 router.get("/product", productController.getAll);
 router.get("/product/:id", productController.getOne);
-router.post("/product", auth.is(auth.MANAGER), productController.createOne);
-router.patch("/product/:id", auth.is(auth.MANAGER), productController.updateOne);
-router.patch("/product/:id/image", auth.is(auth.MANAGER), upload.single("image"), productController.updateOneImage)
+router.post("/product", auth.is(auth.STAFF, auth.MANAGER), productController.createOne);
+router.patch("/product/:id", auth.is(auth.STAFF, auth.MANAGER), productController.updateOne);
+router.patch("/product/:id/image", auth.is(auth.STAFF, auth.MANAGER), upload.single("image"), productController.updateOneImage);
+router.patch("/product/:id/restock", auth.is(auth.STAFF, auth.MANAGER), productController.restockOne);
+router.delete("/product/:id", auth.is(auth.STAFF, auth.MANAGER), productController.deleteOne);
 
 // Category
 router.get("/category", categoryController.getAll);
 router.get("/category/:id", categoryController.getOne);
-router.post("/category", auth.is(auth.MANAGER), categoryController.createOne);
-router.patch("/category/:id", auth.is(auth.MANAGER), categoryController.updateOne);
-router.delete("/category/:id", auth.is(auth.MANAGER), categoryController.deleteOne);
+router.post("/category", auth.is(auth.STAFF, auth.MANAGER), categoryController.createOne);
+router.patch("/category/:id", auth.is(auth.STAFF, auth.MANAGER), categoryController.updateOne);
+router.delete("/category/:id", auth.is(auth.STAFF, auth.MANAGER), categoryController.deleteOne);
 
 // Coupon
 router.get("/coupon/:code/active", couponController.getOneActiveByCode);
@@ -80,6 +85,7 @@ router.get("/coupon", auth.is(auth.MANAGER), couponController.getAll);
 router.get("/coupon/:id", auth.is(auth.MANAGER), couponController.getOne);
 router.post("/coupon", auth.is(auth.MANAGER), couponController.createOne);
 router.patch("/coupon/:id", auth.is(auth.MANAGER), couponController.updateOne);
+router.delete("/coupon/:id", auth.is(auth.MANAGER), couponController.deleteOne);
 
 // Sale Event
 router.get("/sale-event/one/active", saleEventController.getOneActive);
@@ -87,12 +93,14 @@ router.get("/sale-event", auth.is(auth.MANAGER), saleEventController.getAll);
 router.get("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.getOne);
 router.post("/sale-event", auth.is(auth.MANAGER), saleEventController.createOne);
 router.patch("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.updateOne);
+router.delete("/sale-event/:id", auth.is(auth.MANAGER), saleEventController.deleteOne);
 
 // Order
 router.get("/order", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getAll);
 router.get("/order/:id", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), orderController.getOne);
 router.post("/order", auth.is(auth.GUEST, auth.CUSTOMER), orderController.createOne);
 router.patch("/order/:id", auth.is(auth.STAFF, auth.MANAGER), orderController.updateOne);
+router.patch("/order/:id/cancel", auth.is(auth.STAFF, auth.MANAGER), orderController.cancelOne);
 
 // Config
 router.get("/config", configController.getAll);

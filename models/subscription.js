@@ -87,6 +87,25 @@ const subscriptionTable = new Table("subscription", {
     filter: {}
 });
 
+function prepare(rows) {
+    const _prepare = (obj) => {
+        if (obj) {
+            delete obj.card_name;
+            delete obj.card_number;
+            delete obj.card_expire_month;
+            delete obj.card_expire_year;
+            delete obj.card_code;   
+        }
+    }
+    if (!Array.isArray(rows)) {
+        _prepare(rows);
+    } else {
+        for (let row of rows) {
+            _prepare(row);
+        }
+    }
+}
+
 async function getOne(conn, id) {
     let data = utils.objectAssign(["id"], { id });
     subscriptionTable.validate(data);
@@ -128,7 +147,7 @@ async function createOne(conn, subscription) {
     subscriptionTable.validate(data);
     let customer = await customerModel.getOne(conn, data.customer_id);
     if (!customer) {
-        throw new HttpError({statusCode: 401 });
+        throw new HttpError({ statusCode: 400, message: "customer not found." });
     }
     let existedSubscription = await getOneActiveByCustomerID(conn, data.customer_id);
     if (existedSubscription) {
@@ -179,6 +198,7 @@ async function createOne(conn, subscription) {
 
 export default {
     table: subscriptionTable,
+    prepare,
     getOne,
     getOneActiveByCustomerID,
     createOne

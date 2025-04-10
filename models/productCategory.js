@@ -43,7 +43,7 @@ async function getCategoryByProductId(conn, product_id) {
     let data = utils.objectAssign(["product_id"], { product_id });
     productCategoryTable.validate(data);
     const [rows] = await conn.query(
-        'SELECT `category`.* FROM `category` INNER JOIN `product_category` ON `product_category`.`category_id` = `category`.`id` WHERE `product_category`.`product_id` = ? AND `category`.`is_deleted` = ?',
+        'SELECT `category`.* FROM `category` INNER JOIN `product_category` ON `product_category`.`category_id` = `category`.`id` WHERE `product_category`.`product_id` = ?',
         [data.product_id, false]
     );
     return rows;
@@ -55,6 +55,16 @@ async function deleteCategoryByProductId(conn, product_id) {
     const [rows] = await conn.query(
         'DELETE FROM `product_category` WHERE `product_id` = ?',
         [data.product_id]
+    );
+    return rows;
+}
+
+async function deleteProductByCategoryId(conn, category_id) {
+    let data = utils.objectAssign(["category_id"], { category_id });
+    productCategoryTable.validate(data);
+    const [rows] = await conn.query(
+        'DELETE FROM `product_category` WHERE `category_id` = ?',
+        [data.category_id]
     );
     return rows;
 }
@@ -90,5 +100,6 @@ export default {
     table: productCategoryTable,
     getCategoryByProductId,
     deleteCategoryByProductId,
+    deleteProductByCategoryId,
     createCategoryByProductId
 }

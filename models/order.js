@@ -202,6 +202,28 @@ async function include(conn, rows, opt = {}) {
     }
 }
 
+function prepare(rows) {
+    const _prepare = (obj) => {
+        if (obj) {
+            delete obj.card_name;
+            delete obj.card_number;
+            delete obj.card_expire_month;
+            delete obj.card_expire_year;
+            delete obj.card_code;   
+
+            customerModel.prepareStrict(obj.customer);
+            subscriptionModel.prepare(obj.subscription);
+        }
+    }
+    if (!Array.isArray(rows)) {
+        _prepare(rows);
+    } else {
+        for (let row of rows) {
+            _prepare(row);
+        }
+    }
+}
+
 async function getAll(conn, query, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
     let { 
@@ -308,7 +330,7 @@ async function createOne(conn, order) {
     if (order.customer_id) {
         let customer = await customerModel.getOne(conn, order.customer_id);
         if (!customer) {
-            throw new HttpError({statusCode: 401 });
+            throw new HttpError({statusCode: 400, message: "customer not found." });
         }
         order.customer_email = customer.email;
         let subscription = await subscriptionModel.getOneActiveByCustomerID(conn, order.customer_id);
@@ -499,7 +521,7 @@ async function createOne(conn, order) {
         });
     }
     await orderProductModel.createMany(conn, data.items);
-    let updateIds = await productModel.updateManyQuantityByIds(conn, data.items.map(item => {
+    await productModel.updateManyQuantityByIds(conn, data.items.map(item => {
         return { 
             id: item.product_id, 
             quantity: -1 * item.quantity 
@@ -524,16 +546,40 @@ async function updateOne(conn, newOrder) {
         'UPDATE `order` SET `tracking` = ?, `status` = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.tracking, data.status, data.id, false]
     );
-    return newOrder.id;
+    return data.id;
+}
+
+async function cancelOne(conn, newOrder) {
+    let oldOrder = await getOne(conn, newOrder.id);
+    if (!oldOrder) {
+        throw new HttpError({statusCode: 400, message: `order not found.`});
+    }
+    let data = utils.objectAssign(["id"], oldOrder, newOrder);
+    orderTable.validate(data);
+    const [rows] = await conn.query(
+        'UPDATE `order` SET `status` = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [CANCELLED_STATUS, data.id, false]
+    );
+    let items = await orderProductModel.getProductByOrderId(conn, data.id, { inclImg: false });
+    await productModel.updateManyQuantityByIds(conn, items.map(item => {
+        return { 
+            id: item.product_id, 
+            quantity: 1 * item.quantity 
+        };
+    }));
+    return data.id;
 }
 
 export default {
+    table: orderTable,
+    prepare,
     getAll,
     getAllByCustomerId,
     getOne,
     getOneByCustomerId,
     createOne,
     updateOne,
+    cancelOne,
     STATUS,
     CANCELLED_STATUS,
     PLACED_STATUS,

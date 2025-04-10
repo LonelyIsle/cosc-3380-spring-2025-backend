@@ -2,6 +2,7 @@ import utils from "../helpers/utils.js";
 import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
+import saleEventModel from "./saleEvent.js";
 
 const PERCENTAGE_TYPE = 0;
 const FIXED_AMOUNT_TYPE = 1;
@@ -203,7 +204,19 @@ async function updateOne(conn, newCoupon) {
             false
         ]
     );
-    return newCoupon.id;
+    return data.id;
+}
+
+async function deleteOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    couponTable.validate(data);
+    let now = new Date();
+    const [rows] = await conn.query(
+        'UPDATE `coupon` SET code = CONCAT(code, ?, ?), is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+        ["#deleted", "#" + now.getTime(), true, now, data.id, false]
+    );
+    await saleEventModel.setCouponIdToNullByCouponId(conn, data.id);
+    return rows;
 }
 
 export default {
@@ -217,5 +230,6 @@ export default {
     getOneByCode,
     getAll,
     createOne,
-    updateOne
+    updateOne,
+    deleteOne
 }

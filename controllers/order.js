@@ -6,20 +6,41 @@ import { HttpError } from "../helpers/error.js";
 async function getAll(req, res) {
     await db.tx(req, res, async (conn) => {
         let query = req.query;
-        let rows = [];
-        if (req.jwt.user.role === auth.CUSTOMER) {
-            rows = await orderModel.getAllByCustomerId(conn, req.jwt.user.id, query, { include: true });
-        } else {
-            rows = await orderModel.getAll(conn, query, { include: true });
+        let data = {};
+        switch(req.jwt.user.role) {
+            case auth.CUSTOMER:
+                data = await orderModel.getAllByCustomerId(conn, req.jwt.user.id, query, { include: true });
+                break;
+            case auth.STAFF:
+                data = await orderModel.getAll(conn, query, { include: true });
+                orderModel.prepare(data.rows);
+                break;
+            case auth.MANAGER:
+                data = await orderModel.getAll(conn, query, { include: true });
+                orderModel.prepare(data.rows);
+                break;
         }
-        return rows;
+        return data;
     });
 }
 
 async function getOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let orderId = req.param.id;
-        let order = await orderModel.getOneByCustomerId(conn, req.jwt.user.id, orderId, { include: true });
+        let order = null;
+        switch(req.jwt.user.role) {
+            case auth.CUSTOMER:
+                order = await orderModel.getOneByCustomerId(conn, req.jwt.user.id, orderId, { include: true });
+                break;
+            case auth.STAFF:
+                order = await orderModel.getOne(conn, orderId, { include: true });
+                orderModel.prepare(order);
+                break;
+            case auth.MANAGER:
+                order = await orderModel.getOne(conn, orderId, { include: true });
+                orderModel.prepare(order);
+                break;
+        }
         return order;
     });
 }
@@ -47,9 +68,21 @@ async function updateOne(req, res) {
     });
 }
 
+async function cancelOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        let orderId = await orderModel.cancelOne(conn, body);
+        let order = await orderModel.getOne(conn, orderId, { include: true });
+        return order;
+    });
+}
+
 export default {
     getAll,
     getOne,
     createOne,
-    updateOne
+    updateOne,
+    cancelOne
 }

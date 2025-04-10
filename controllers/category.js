@@ -20,7 +20,7 @@ async function getOne(req, res) {
 async function createOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
-        let  categoryId = await categoryModel.createOne(conn, body);
+        let categoryId = await categoryModel.createOne(conn, body);
         let category = await categoryModel.getOne(conn, categoryId)
         return category;
     });
@@ -31,7 +31,7 @@ async function updateOne(req, res) {
         let body = req.body;
         let param = req.param;
         body.id = param.id;
-        let  categoryId = await categoryModel.updateOne(conn, body);
+        let categoryId = await categoryModel.updateOne(conn, body);
         let category = await categoryModel.getOne(conn, categoryId)
         return category;
     });
@@ -40,11 +40,10 @@ async function updateOne(req, res) {
 async function deleteOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let param = req.param;
-        let result = await categoryModel.deleteOne(conn, param.id);
+        await categoryModel.deleteOne(conn, param.id);
         return null;
     });
 }
-
 
 export default {
     getAll,

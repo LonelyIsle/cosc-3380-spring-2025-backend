@@ -198,7 +198,31 @@ async function updateOne(conn, newSaleEvent) {
             false
         ]
     );
-    return newSaleEvent.id;
+    return data.id;
+}
+
+async function setCouponIdToNullByCouponId(conn, coupon_id) {
+    let data = utils.objectAssign(["coupon_id"], { coupon_id });
+    saleEventTable.validate(data);
+    if (!data.coupon_id) {
+        return null;
+    }
+    const [rows] = await conn.query(
+        'UPDATE `sale_event` SET `coupon_id` = ? WHERE `coupon_id` = ?',
+        [null, data.coupon_id]
+    );
+    return rows;
+}
+
+async function deleteOne(conn, id) {
+    let data = utils.objectAssign(["id"], { id });
+    saleEventTable.validate(data);
+    let now = new Date();
+    const [rows] = await conn.query(
+        'UPDATE `sale_event` SET `coupon_id` = ?, is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [null, true, now, data.id, false]
+    );
+    return rows;
 }
 
 export default {
@@ -207,5 +231,7 @@ export default {
     getOneActive,
     getOne,
     updateOne,
-    createOne
+    createOne,
+    setCouponIdToNullByCouponId,
+    deleteOne
 }

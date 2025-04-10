@@ -3,6 +3,7 @@ import { HttpError } from "../helpers/error.js";
 import Table from "../helpers/table.js";
 import DataType from "../helpers/dataType.js";
 import Validator from "../helpers/validator.js";
+import productCategoryModel from "./productCategory.js";
 
 const categoryTable = new Table("category", {
     "id": {
@@ -113,7 +114,7 @@ async function updateOne(conn, newCategory) {
         'UPDATE `category` SET name = ?, description = ? WHERE `id` = ? AND `is_deleted` = ?',
         [data.name, data.description, data.id, false]
     );
-    return newCategory.id;
+    return data.id;
 }
 
 async function deleteOne(conn, id) {
@@ -122,8 +123,9 @@ async function deleteOne(conn, id) {
     let now = new Date();
     const [rows] = await conn.query(
         'UPDATE `category` SET is_deleted = ?, deleted_at = ? WHERE `id` = ? AND `is_deleted` = ?',
-        [true, now, id, false]
+        [true, now, data.id, false]
     );
+    await productCategoryModel.deleteProductByCategoryId(conn, data.id);
     return rows;
 }
 

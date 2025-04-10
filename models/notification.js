@@ -109,6 +109,20 @@ async function getAllByEmployeeId(conn, employee_id, query, opt = {}) {
     };
 }
 
+async function getOne(conn, id, opt = {}) {
+    opt = utils.objectAssign(["include"], { include: false }, opt);
+    let data = utils.objectAssign(["id"], { id });
+    notificationTable.validate(data);
+    const [rows] = await conn.query(
+        'SELECT * FROM `notification` WHERE `id` = ? AND `is_deleted` = ?',
+        [data.id, false]
+    );
+    if (opt.include) {
+        await include(conn, rows[0]);
+    }
+    return rows[0] || null;
+}
+
 async function getOneByEmployeeId(conn, employee_id, id, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
     let data = utils.objectAssign(["id", "employee_id"], { id, employee_id });
@@ -123,23 +137,36 @@ async function getOneByEmployeeId(conn, employee_id, id, opt = {}) {
     return rows[0] || null;
 }
 
-async function updateOneByEmployeeId(conn, newNotification) {
-    let oldNotification = await getOneByEmployeeId(conn, newNotification.employee_id, newNotification.id);
+async function updateOne(conn, newNotification) {
+    let oldNotification = await getOne(conn, newNotification.id);
     if (!oldNotification) {
         throw new HttpError({statusCode: 400, message: `notification not found.`});
     }
-    let data = utils.objectAssign(["id", "employee_id", "status"], newNotification);
+    let data = utils.objectAssign(["id", "employee_id", "status"], oldNotification, newNotification);
     notificationTable.validate(data);
     const [rows] = await conn.query(
         'UPDATE `notification` SET status = ? WHERE `id` = ? AND `employee_id` = ? AND `is_deleted` = ?',
         [data.status, data.id, data.employee_id, false]
     );
-    return newNotification.id;
+    return data.id;
+}
+
+async function deleteManyByEmployeeId(conn, employee_id) {
+    let data = utils.objectAssign(["employee_id"], { employee_id });
+    notificationTable.validate(data);
+    let now = new Date();
+    const [rows] = await conn.query(
+        'UPDATE `notification` SET is_deleted = ?, deleted_at = ? WHERE `employee_id` = ? AND `is_deleted` = ?',
+        [true, now, data.employee_id, false]
+    );
+    return rows;
 }
 
 export default {
     table: notificationTable,
     getAllByEmployeeId,
+    getOne,
     getOneByEmployeeId,
-    updateOneByEmployeeId,
+    updateOne,
+    deleteManyByEmployeeId
 }

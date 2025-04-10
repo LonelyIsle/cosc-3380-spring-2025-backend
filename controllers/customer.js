@@ -68,7 +68,14 @@ async function getOne(req, res) {
             throw new HttpError({ statusCode: 401 });
         }
         let customer = await customerModel.getOne(conn, param.id, { include: true });
-        customerModel.prepare(customer);
+        switch (req.jwt.user.role) {
+            case auth.CUSTOMER:
+                customerModel.prepare(customer);
+                break;
+            case auth.MANAGER:
+                customerModel.prepareStrict(customer);
+                break;
+        }
         return customer;
     });
 }
@@ -81,13 +88,12 @@ async function updateOne(req, res) {
         if (req.jwt.user.id !== param.id) {
             throw new HttpError({ statusCode: 401 });
         }
-        let  customerId = await customerModel.updateOne(conn, body);
+        let customerId = await customerModel.updateOne(conn, body);
         let customer = await customerModel.getOne(conn, customerId, { include: true });
         customerModel.prepare(customer);
         return customer;
     });
 }
-
 
 async function updatePassword(req, res) {
     await db.tx(req, res, async (conn) => {
@@ -119,9 +125,7 @@ async function getAll(req, res) {
     await db.tx(req, res, async (conn) => {
         let query = req.query;
         let data = await customerModel.getAll(conn, query, { include: true });
-        for (let customer of data.rows) {
-            customerModel.prepareStrict(customer);
-        }
+        customerModel.prepareStrict(data.rows);
         return data;
     });
 }

@@ -28,7 +28,7 @@ async function getOne(req, res) {
 async function createOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
-        let  couponId = await couponModel.createOne(conn, body);
+        let couponId = await couponModel.createOne(conn, body);
         let coupon = await couponModel.getOne(conn, couponId)
         return coupon;
     });
@@ -39,9 +39,17 @@ async function updateOne(req, res) {
         let body = req.body;
         let param = req.param;
         body.id = param.id;
-        let  couponId = await couponModel.updateOne(conn, body);
+        let couponId = await couponModel.updateOne(conn, body);
         let coupon = await couponModel.getOne(conn, couponId)
         return coupon;
+    });
+}
+
+async function deleteOne(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let param = req.param;
+        await couponModel.deleteOne(conn, param.id);
+        return null;
     });
 }
 
@@ -50,5 +58,6 @@ export default {
     getAll,
     getOne,
     createOne,
-    updateOne
+    updateOne,
+    deleteOne
 }

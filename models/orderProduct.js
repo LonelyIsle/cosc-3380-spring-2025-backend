@@ -51,7 +51,7 @@ async function getProductByOrderId(conn, order_id, opt = {}) {
     let data = utils.objectAssign(["order_id"], { order_id });
     orderProductTable.validate(data);
     const [rows] = await conn.query(
-        'SELECT `order_product`.* FROM `product` INNER JOIN `order_product` ON `order_product`.`product_id` = `product`.`id` WHERE `order_product`.`order_id` = ? AND `product`.`is_deleted` = ?',
+        'SELECT `order_product`.* FROM `product` INNER JOIN `order_product` ON `order_product`.`product_id` = `product`.`id` WHERE `order_product`.`order_id` = ?',
         [data.order_id, false]
     );
     if (opt.include) {
