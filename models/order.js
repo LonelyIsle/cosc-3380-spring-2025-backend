@@ -202,6 +202,28 @@ async function include(conn, rows, opt = {}) {
     }
 }
 
+function prepare(rows) {
+    const _prepare = (obj) => {
+        if (obj) {
+            delete obj.card_name;
+            delete obj.card_number;
+            delete obj.card_expire_month;
+            delete obj.card_expire_year;
+            delete obj.card_code;   
+
+            customerModel.prepareStrict(obj.customer);
+            subscriptionModel.prepare(obj.subscription);
+        }
+    }
+    if (!Array.isArray(rows)) {
+        _prepare(rows);
+    } else {
+        for (let row of rows) {
+            _prepare(row);
+        }
+    }
+}
+
 async function getAll(conn, query, opt = {}) {
     opt = utils.objectAssign(["include"], { include: false }, opt);
     let { 
@@ -308,7 +330,7 @@ async function createOne(conn, order) {
     if (order.customer_id) {
         let customer = await customerModel.getOne(conn, order.customer_id);
         if (!customer) {
-            throw new HttpError({statusCode: 401 });
+            throw new HttpError({statusCode: 400, message: "customer not found." });
         }
         order.customer_email = customer.email;
         let subscription = await subscriptionModel.getOneActiveByCustomerID(conn, order.customer_id);
@@ -528,6 +550,8 @@ async function updateOne(conn, newOrder) {
 }
 
 export default {
+    table: orderTable,
+    prepare,
     getAll,
     getAllByCustomerId,
     getOne,

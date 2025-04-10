@@ -150,7 +150,9 @@ function prepareStrict(rows) {
             delete obj.card_number;
             delete obj.card_expire_month;
             delete obj.card_expire_year;
-            delete obj.card_code;            
+            delete obj.card_code;    
+            
+            subscriptionModel.prepare(obj.subscription);
         }
     }
     if (!Array.isArray(rows)) {
