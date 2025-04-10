@@ -59,6 +59,16 @@ async function deleteCategoryByProductId(conn, product_id) {
     return rows;
 }
 
+async function deleteProductByCategoryId(conn, category_id) {
+    let data = utils.objectAssign(["category_id"], { category_id });
+    productCategoryTable.validate(data);
+    const [rows] = await conn.query(
+        'DELETE FROM `product_category` WHERE `category_id` = ?',
+        [data.category_id]
+    );
+    return rows;
+}
+
 async function createCategoryByProductId(conn, product_id, category_ids) {
     let validator = new Validator({
         category_ids: {
@@ -90,5 +100,6 @@ export default {
     table: productCategoryTable,
     getCategoryByProductId,
     deleteCategoryByProductId,
+    deleteProductByCategoryId,
     createCategoryByProductId
 }
