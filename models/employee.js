@@ -104,10 +104,22 @@ async function getOneByEmailAndPwd(conn, email, password) {
     return null;
 }
 
+async function updatePassword(conn, id, password) {
+    let data = utils.objectAssign(["id", "password"], { id, password });
+    employeeTable.validate(data);
+    data.password = await pwd.hash(data.password);
+    const [rows] = await conn.query(
+        'UPDATE `employee` SET password = ? WHERE `id` = ? AND `is_deleted` = ?',
+        [data.password, data.id, false]
+    );
+    return id;
+}
+
 export default {
     table: employeeTable,
     prepare,
     getOne,
     getOneByEmail,
-    getOneByEmailAndPwd
+    getOneByEmailAndPwd,
+    updatePassword
 }

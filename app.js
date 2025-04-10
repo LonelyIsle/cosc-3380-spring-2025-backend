@@ -52,6 +52,7 @@ router.patch("/customer/:id/qa", auth.is(auth.CUSTOMER), customerController.upda
 // Employee
 router.get("/employee/:id", auth.is(auth.STAFF, auth.MANAGER), employeeController.getOne);
 router.post("/employee/login", employeeController.login);
+router.patch("/employee/:id/password", auth.is(auth.STAFF, auth.MANAGER), employeeController.updatePassword);
 
 // Notification
 router.get("/notification", auth.is(auth.STAFF, auth.MANAGER), notificationController.getAll);

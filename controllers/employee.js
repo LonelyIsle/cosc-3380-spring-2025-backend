@@ -34,7 +34,21 @@ async function getOne(req, res) {
     });
 }
 
+async function updatePassword(req, res) {
+    await db.tx(req, res, async (conn) => {
+        let body = req.body;
+        let param = req.param;
+        body.id = param.id;
+        if (req.jwt.user.role === auth.STAFF && req.jwt.user.id !== param.id) {
+            throw new HttpError({ statusCode: 401 });
+        }
+        let data = await employeeModel.updatePassword(conn, body.id, body.password);
+        return null;
+    });
+}
+
 export default {
     login,
-    getOne
+    getOne,
+    updatePassword
 }
