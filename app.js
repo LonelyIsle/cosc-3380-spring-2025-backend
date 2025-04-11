@@ -17,6 +17,7 @@ import saleEventController from "./controllers/saleEvent.js";
 import subscriptionController from "./controllers/subscription.js";
 import orderController from "./controllers/order.js";
 import notificationController from "./controllers/notification.js";
+import reportController from "./controllers/report.js";
 
 const server = http.createServer();
 const router = new Router();
@@ -101,6 +102,11 @@ router.get("/order/:id", auth.is(auth.CUSTOMER, auth.STAFF, auth.MANAGER), order
 router.post("/order", auth.is(auth.GUEST, auth.CUSTOMER), orderController.createOne);
 router.patch("/order/:id", auth.is(auth.STAFF, auth.MANAGER), orderController.updateOne);
 router.patch("/order/:id/cancel", auth.is(auth.STAFF, auth.MANAGER), orderController.cancelOne);
+
+// Report
+router.get("/report/order-product", auth.is(auth.MANAGER), reportController.getOrderProductReport);
+router.get("/report/order-coupon", auth.is(auth.MANAGER), reportController.getOrderCouponReport);
+router.get("/report/order-customer", auth.is(auth.MANAGER), reportController.getOrderCustomerReport);
 
 // Config
 router.get("/config", configController.getAll);
