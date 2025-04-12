@@ -12,16 +12,25 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 - [Node.js](https://nodejs.org/en)
 - [MySQL](https://www.mysql.com/)
 #### How To Run (Linux/MacOS)
-- Import the following SQL files into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommend) in the specified order:
+- Import dump file into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommend)
     - Drop and Create database (recommend):
         ```
         DROP DATABASE IF EXISTS `db-name`;
         CREATE DATABASE `db-name`;
         ```
-    - /scripts/db.sql
-    - /scripts/trigger.sql
-    - /scripts/product-with-image.sql
-    - /scripts/data.sql
+    - Import /script/dump.sql
+- **OR** Import the following SQL files into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommend) in the specified order:
+    - Drop and Create database (recommend):
+        ```
+        DROP DATABASE IF EXISTS `db-name`;
+        CREATE DATABASE `db-name`;
+        ```
+    - Import /scripts/db.sql
+    - Import /scripts/trigger.sql
+    - Import /scripts/product-with-image.sql
+    - Import /scripts/data.sql
+    - Import /scripts/report-1.sql
+    - Import /scripts/report-2.sql
 - In project directory, execute the following commands
     ```
     npm install

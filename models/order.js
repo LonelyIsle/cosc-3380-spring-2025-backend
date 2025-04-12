@@ -68,7 +68,23 @@ const orderTable = new Table("order", {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
-    "total": {
+    "total_origin": {
+        type: DataType.NUMBER(),
+        isRequired: DataType.NOTNULL()
+    },
+    "total_subscription": {
+        type: DataType.NUMBER(),
+        isRequired: DataType.NOTNULL()
+    },
+    "total_coupon": {
+        type: DataType.NUMBER(),
+        isRequired: DataType.NOTNULL()
+    },
+    "total_sale_tax": {
+        type: DataType.NUMBER(),
+        isRequired: DataType.NOTNULL()
+    },
+    "total_final": {
         type: DataType.NUMBER(),
         isRequired: DataType.NOTNULL()
     },
@@ -157,7 +173,7 @@ const orderTable = new Table("order", {
         isRequired: DataType.NULLABLE()
     }
 }, {
-    sort: ["total", "created_at", "updated_at"],
+    sort: ["total_final", "created_at", "updated_at"],
     filter: {
         "customer_email": DataType.STRING(),
     }
@@ -324,9 +340,9 @@ async function getOneByCustomerId(conn, customer_id, id, opt = {}) {
 
 async function createOne(conn, order) {
     let config = await configModel.getAll(conn);
-    // items
+    // validate items
     itemsValidator.validate(order);
-    // customer and subscription
+    // validate customer and subscription
     if (order.customer_id) {
         let customer = await customerModel.getOne(conn, order.customer_id);
         if (!customer) {
@@ -343,7 +359,7 @@ async function createOne(conn, order) {
         order.subscription_id = null
         order.subscription_discount_percentage = 0;
     }
-    // coupon
+    // validate coupon
     if (order.coupon_id) {
         let coupon = await couponModel.getOneActive(conn, order.coupon_id);
         if (!coupon) {
@@ -356,11 +372,12 @@ async function createOne(conn, order) {
         order.coupon_value = 0;
         order.coupon_type = couponModel.PERCENTAGE_TYPE;
     }
-    // other
+    // init value from config
     order.shipping_fee = config[configModel.SHIPPING_FEE];
     order.sale_tax = config[configModel.SALE_TAX];
     order.status = 0;
     order.tracking = null;
+    // validate other information
     let data = utils.objectAssign(
         [
             "customer_id",
@@ -396,7 +413,7 @@ async function createOne(conn, order) {
         order
     );
     orderTable.validate(data);
-    // item
+    // init and deep validate items
     let itemsHash = {};
     for (let item of order.items) {
         let itemData = utils.objectAssign(["product_id", "quantity"], item);
@@ -421,29 +438,43 @@ async function createOne(conn, order) {
             throw new HttpError({statusCode: 400, message: "Invalid items." });
         }
     }
-    // total
-    data.total = 0;
+    // calculate total
+    data.total_final = 0;
+    // original total
     for (let key of itemsHashKeys) {
-        data.total = data.total + productHash[key].price * itemsHash[key].quantity;
+        data.total_final = data.total_final + productHash[key].price * itemsHash[key].quantity;
     }
+    data.total_origin = data.total_final;
+    // total subscription
     if (data.subscription_id) {
-        data.total = data.total * (1 -  data.subscription_discount_percentage); 
+        data.total_subscription = data.total_final * data.subscription_discount_percentage;
+        data.total_final = data.total_final - data.total_subscription;
+    } else {
+        data.total_subscription = 0;
     }
+    // total coupon
     if (data.coupon_id) {
         switch(data.coupon_type) {
             case couponModel.PERCENTAGE_TYPE:
-                data.total = data.total * (1 - data.coupon_value); 
+                data.total_coupon = data.total_final * data.coupon_value;
+                data.total_final = data.total_final - data.total_coupon; 
                 break;
             case couponModel.FIXED_AMOUNT_TYPE:
-                data.total = data.total - data.coupon_value; 
+                data.total_coupon = data.coupon_value;
+                data.total_final = data.total_final - data.total_coupon; 
                 break;
         }
+    } else {
+        data.total_coupon = 0;
     }
-    data.total = data.total + data.shipping_fee;
-    data.total = data.total * (1 + data.sale_tax);
-    if (data.total < 0) {
-        data.total = 0;
+    if (data.total_final < 0) {
+        data.total_coupon = data.total_coupon + data.total_final;
+        data.total_final = 0;
     }
+    // shipping fee and sale tax
+    data.total_final = data.total_final + data.shipping_fee;
+    data.total_sale_tax = data.total_final * data.sale_tax;
+    data.total_final = data.total_final + data.total_sale_tax;
     // payment successfully processed
     const [rows] = await conn.query(
         'INSERT INTO `order`('
@@ -459,7 +490,11 @@ async function createOne(conn, order) {
         + '`coupon_type`, '
         + '`shipping_fee`, '
         + '`sale_tax`, '
-        + '`total`, '
+        + '`total_origin`, '
+        + '`total_subscription`, '
+        + '`total_coupon`, '
+        + '`total_sale_tax`, '
+        + '`total_final`, '
         + '`tracking`, '
         + '`status`, '
         + '`shipping_address_1`, '
@@ -477,7 +512,7 @@ async function createOne(conn, order) {
         + '`card_expire_month`, '
         + '`card_expire_year`, '
         + '`card_code`'
-        + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        + ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
             data.customer_id,
             data.customer_first_name,
@@ -491,7 +526,11 @@ async function createOne(conn, order) {
             data.coupon_type,
             data.shipping_fee,
             data.sale_tax,
-            data.total,
+            data.total_origin,
+            data.total_subscription,
+            data.total_coupon,
+            data.total_sale_tax,
+            data.total_final,
             data.tracking,
             data.status,
             data.shipping_address_1,
