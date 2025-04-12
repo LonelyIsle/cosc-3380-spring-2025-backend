@@ -5,7 +5,28 @@ import orderModel from "./order.js";
 import Validator from "../helpers/validator.js";
 import productCategoryModel from "./productCategory.js";
 
+const queryValidator = new Validator({
+    "start_at": {
+        type: DataType.TIMESTAMP(),
+        isRequired: DataType.NULLABLE()
+    },
+    "end_at": {
+        type: DataType.TIMESTAMP(),
+        isRequired: DataType.NULLABLE()
+    }
+});
+
 async function getOrderProductReport(conn, query) {
+    let data = utils.objectAssign(["start_at", "end_at"], query);
+    let params = [];
+    let queryStr = [];
+    queryValidator.validate(data);
+    if (data.start_at && data.end_at) {
+        let startAt = new Date(data.start_at);
+        let endAt = new Date(data.end_at);
+        queryStr.push("AND", '(`order_product`.`created_at` BETWEEN ? AND ?)');
+        params.push(startAt, endAt);
+    }
     let attributes = [
         '`product`.`id` AS `product_id`',
         '`product`.`sku` AS `product_sku`',
@@ -22,11 +43,11 @@ async function getOrderProductReport(conn, query) {
     const [rows] = await conn.query(
         'SELECT ' + attributes.join(",")
         + ' FROM `product` '
-        + ' LEFT JOIN `order_product` on `product`.`id` = `order_product`.`product_id` '
-        + ' LEFT JOIN `order` on `order`.`id` = `order_product`.`order_id` '
-        + ' WHERE `product`.`is_deleted` = ? AND (`order`.`status` IS NULL || `order`.status <> ?) '
-        + ' ORDER BY `product`.`id` DESC ',
-        [false, orderModel.CANCELLED_STATUS]
+        + ' LEFT JOIN `order_product` ON `product`.`id` = `order_product`.`product_id` '
+        + (queryStr.length ? queryStr.join(" ") : " ")
+        + ' LEFT JOIN `order` on `order`.`id` = `order_product`.`order_id` AND `order`.status <> ? '
+        + ' WHERE `product`.`is_deleted` = ? ',
+        params.concat([orderModel.CANCELLED_STATUS, false])
     );
     let productHash = {};
     for (let row of rows) {
@@ -55,6 +76,16 @@ async function getOrderProductReport(conn, query) {
 }
 
 async function getOrderCouponReport(conn, query) {
+    let data = utils.objectAssign(["start_at", "end_at"], query);
+    let params = [];
+    let queryStr = [];
+    queryValidator.validate(data);
+    if (data.start_at && data.end_at) {
+        let startAt = new Date(data.start_at);
+        let endAt = new Date(data.end_at);
+        queryStr.push("AND", '(`order`.`created_at` BETWEEN ? AND ?)');
+        params.push(startAt, endAt);
+    }
     let attributes = [
         '`coupon`.`id` AS `coupon_id`',
         '`coupon`.`code` AS `coupon_code`',
@@ -75,10 +106,10 @@ async function getOrderCouponReport(conn, query) {
     const [rows] = await conn.query(
         'SELECT ' + attributes.join(",")
         + ' FROM `coupon` '
-        + ' LEFT JOIN `order` on `coupon`.`id` = `order`.`coupon_id` '
-        + ' WHERE `coupon`.`is_deleted` = ? AND (`order`.`status` IS NULL || `order`.status <> ?) '
-        + ' ORDER BY `coupon`.`id` DESC ',
-        [false, orderModel.CANCELLED_STATUS]
+        + ' LEFT JOIN `order` on `coupon`.`id` = `order`.`coupon_id` AND `order`.status <> ? '
+        + (queryStr.length ? queryStr.join(" ") : " ")
+        + ' WHERE `coupon`.`is_deleted` = ? ',
+        [orderModel.CANCELLED_STATUS].concat(params, [false])
     );
     let couponHash = {};
     for (let row of rows) {
@@ -114,6 +145,16 @@ async function getOrderCouponReport(conn, query) {
 }
 
 async function getOrderCustomerReport(conn, query) {
+    let data = utils.objectAssign(["start_at", "end_at"], query);
+    let params = [];
+    let queryStr = [];
+    queryValidator.validate(data);
+    if (data.start_at && data.end_at) {
+        let startAt = new Date(data.start_at);
+        let endAt = new Date(data.end_at);
+        queryStr.push("AND", '(`order`.`created_at` BETWEEN ? AND ?)');
+        params.push(startAt, endAt);
+    }
     let attributes = [
         '`customer`.`id` AS `customer_id`',
         '`customer`.`email` AS `customer_email`',
@@ -130,10 +171,10 @@ async function getOrderCustomerReport(conn, query) {
     const [rows] = await conn.query(
         'SELECT ' + attributes.join(",")
         + ' FROM `customer`'
-        + ' LEFT JOIN `order` on `customer`.`id` = `order`.`customer_id` '
-        + ' WHERE `customer`.`is_deleted` = false AND (`order`.`status` IS NULL || `order`.status <> -1) '
-        + ' ORDER BY `customer`.`id` DESC ',
-        [false, orderModel.CANCELLED_STATUS]
+        + ' LEFT JOIN `order` on `customer`.`id` = `order`.`customer_id` AND `order`.status <> ? '
+        + (queryStr.length ? queryStr.join(" ") : " ")
+        + ' WHERE `customer`.`is_deleted` = ? ',
+        [orderModel.CANCELLED_STATUS].concat(params, [false])
     );
     let customerHash = {};
     for (let row of rows) {
