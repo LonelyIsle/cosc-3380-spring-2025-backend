@@ -421,7 +421,7 @@ async function createOne(conn, order) {
         if (!itemsHash[item.product_id]) {
             itemsHash[item.product_id] = item;
         } else {
-            itemsHash[item.product_id] = itemsHash[item.product_id] + item.quantity;
+            itemsHash[item.product_id].quantity = itemsHash[item.product_id].quantity + item.quantity;
         }
     }
     let itemsHashKeys = Object.keys(itemsHash);
