@@ -102,8 +102,10 @@ async function createOne(req, res) {
     await db.tx(req, res, async (conn) => {
         let body = req.body;
         body.role = auth.STAFF;
-        let data = await employeeModel.createOne(conn, body);
-        return data;
+        let employeeId = await employeeModel.createOne(conn, body);
+        let employee = await employeeModel.getOne(conn, employeeId);
+        employeeModel.prepare(employee);
+        return employee;
     });
 }
 
