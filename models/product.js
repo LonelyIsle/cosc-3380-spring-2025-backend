@@ -251,7 +251,7 @@ async function createOne(conn, product) {
         ]
     );
     let productId = rows.insertId;
-    if (data.category_id.length !== 0) {
+    if (data.category_id && data.category_id.length !== 0) {
         await productCategoryModel.createCategoryByProductId(conn, productId, data.category_id);
     }
     return productId;
@@ -302,7 +302,7 @@ async function updateOne(conn, newProduct) {
         ]
     );
     await productCategoryModel.deleteCategoryByProductId(conn, newProduct.id);
-    if (data.category_id.length !== 0) {
+    if (data.category_id && data.category_id.length !== 0) {
         await productCategoryModel.createCategoryByProductId(conn, newProduct.id, data.category_id);
     }
     return data.id;
