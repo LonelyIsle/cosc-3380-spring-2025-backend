@@ -68,6 +68,7 @@ async function getOrderProductReport(conn, query) {
                 product_threshold: row.product_threshold,
                 product_created_at: row.product_created_at,
                 product_total_quantity: 0,
+                product_total_price: 0,
                 product_category: await productCategoryModel.getCategoryByProductId(conn, row.product_id),
                 product_order_count: 0,
                 product_order_total_origin: 0,
@@ -80,6 +81,7 @@ async function getOrderProductReport(conn, query) {
         }
         let obj = productHash[row.product_id];
         obj.product_total_quantity += row.order_product_quantity ? row.order_product_quantity : 0;
+        obj.product_total_price += row.order_product_price ? row.order_product_quantity * row.order_product_price : 0;
         obj.product_order_count += row.order_id ? 1 : 0;
         obj.product_order_total_origin += row.order_total_origin ? row.order_total_origin : 0;
         obj.product_order_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0;
