@@ -124,22 +124,22 @@ async function getOrderCouponReport(conn, query) {
                 coupon_description: row.coupon_subscription,
                 coupon_created_at: row.coupon_created_at,
                 coupon_order_count: 0,
-                coupon_total_origin: 0,
-                coupon_total_subscription: 0,
-                coupon_total_coupon: 0,
-                coupon_total_shipping: 0,
-                coupon_total_sale_tax: 0,
-                coupon_total_final: 0
+                coupon_order_total_origin: 0,
+                coupon_order_total_subscription: 0,
+                coupon_order_total_coupon: 0,
+                coupon_order_total_shipping: 0,
+                coupon_order_total_sale_tax: 0,
+                coupon_order_total_final: 0
             }
         }
         let obj = couponHash[row.coupon_id];
         obj.coupon_order_count += row.order_id ? 1 : 0,
-        obj.coupon_total_origin += row.order_total_origin ? row.order_total_origin : 0,
-        obj.coupon_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0,
-        obj.coupon_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0,
-        obj.coupon_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0,
-        obj.coupon_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0,
-        obj.coupon_total_final += row.order_total_final ? row.order_total_final : 0
+        obj.coupon_order_total_origin += row.order_total_origin ? row.order_total_origin : 0,
+        obj.coupon_order_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0,
+        obj.coupon_order_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0,
+        obj.coupon_order_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0,
+        obj.coupon_order_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0,
+        obj.coupon_order_total_final += row.order_total_final ? row.order_total_final : 0
     }
     return Object.values(couponHash);
 }
@@ -211,7 +211,7 @@ async function getOrderCustomerReport(conn, query) {
         obj.customer_order_total_origin += row.order_total_origin ? row.order_total_origin : 0;
         obj.customer_order_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0;
         obj.customer_order_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0;
-        obj.customer_order_total_shipping += row.order_total_shipping ? row.order_total_shipping : 0;
+        obj.customer_order_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0;
         obj.customer_order_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0;
         obj.customer_order_total_final += row.order_total_final ? row.order_total_final : 0;
         if (row.order_subscription_id) {
@@ -219,7 +219,7 @@ async function getOrderCustomerReport(conn, query) {
             obj.customer_order_subscription_total_origin += row.order_total_origin ? row.order_total_origin : 0;
             obj.customer_order_subscription_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0;
             obj.customer_order_subscription_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0;
-            obj.customer_order_subscription_total_shipping += row.order_total_shipping ? row.order_total_shipping : 0;
+            obj.customer_order_subscription_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0;
             obj.customer_order_subscription_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0;
             obj.customer_order_subscription_total_final += row.order_total_final ? row.order_total_final : 0;
         } else {
@@ -227,7 +227,7 @@ async function getOrderCustomerReport(conn, query) {
             obj.customer_order_no_subscription_total_origin += row.order_total_origin ? row.order_total_origin : 0;
             obj.customer_order_no_subscription_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0;
             obj.customer_order_no_subscription_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0;
-            obj.customer_order_no_subscription_total_shipping += row.order_total_shipping ? row.order_total_shipping : 0;
+            obj.customer_order_no_subscription_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0;
             obj.customer_order_no_subscription_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0;
             obj.customer_order_no_subscription_total_final += row.order_total_final ? row.order_total_final : 0;
         }
