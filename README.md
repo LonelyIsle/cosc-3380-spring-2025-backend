@@ -12,7 +12,10 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 - [Node.js](https://nodejs.org/en)
 - [MySQL](https://www.mysql.com/)
 #### How To Run (Linux/MacOS)
-- Import dump file into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommend)
+- Import dump file into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommend): <br>
+*When importing this way, you may encounter the error:
+"...The user specified as a definer ('...'@'%') does not exist..."
+If this occurs, try using alternative import method.*
     - Drop and Create database (recommend):
         ```
         DROP DATABASE IF EXISTS `db-name`;
