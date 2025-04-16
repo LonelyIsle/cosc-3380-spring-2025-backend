@@ -38,7 +38,13 @@ async function getOrderProductReport(conn, query) {
         '`product`.`created_at` AS `product_created_at`',
         '`order_product`.`quantity` AS `order_product_quantity`',
         '`order_product`.`price` AS `order_product_price`',
-        '`order`.`id` AS `order_id`'
+        '`order`.`id` AS `order_id`',
+        '`order`.`total_origin` AS `order_total_origin`',
+        '`order`.`total_subscription` AS `order_total_subscription`',
+        '`order`.`total_coupon` AS `order_total_coupon`',
+        '`order`.`shipping_fee` AS `order_shipping_fee`',
+        '`order`.`total_sale_tax` AS `order_total_sale_tax`',
+        '`order`.`total_final` AS `order_total_final`',
     ]
     const [rows] = await conn.query(
         'SELECT ' + attributes.join(",")
@@ -61,16 +67,26 @@ async function getOrderProductReport(conn, query) {
                 product_quantity: row.product_quantity,
                 product_threshold: row.product_threshold,
                 product_created_at: row.product_created_at,
-                product_order_count: 0,
                 product_total_quantity: 0,
-                product_total_price: 0,
-                product_category: await productCategoryModel.getCategoryByProductId(conn, row.product_id)
+                product_category: await productCategoryModel.getCategoryByProductId(conn, row.product_id),
+                product_order_count: 0,
+                product_order_total_origin: 0,
+                product_order_total_subscription: 0,
+                product_order_total_coupon: 0,
+                product_order_total_shipping: 0,
+                product_order_total_sale_tax: 0,
+                product_order_total_final: 0
             }
         }
         let obj = productHash[row.product_id];
-        obj.product_order_count += row.order_id ? 1 : 0,
-        obj.product_total_quantity += row.order_product_quantity ? row.order_product_quantity : 0,
-        obj.product_total_price += row.order_product_price ? row.order_product_quantity * row.order_product_price : 0
+        obj.product_total_quantity += row.order_product_quantity ? row.order_product_quantity : 0;
+        obj.product_order_count += row.order_id ? 1 : 0;
+        obj.product_order_total_origin += row.order_total_origin ? row.order_total_origin : 0;
+        obj.product_order_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0;
+        obj.product_order_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0;
+        obj.product_order_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0;
+        obj.product_order_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0;
+        obj.product_order_total_final += row.order_total_final ? row.order_total_final : 0;
     }
     return Object.values(productHash);
 }
@@ -133,13 +149,13 @@ async function getOrderCouponReport(conn, query) {
             }
         }
         let obj = couponHash[row.coupon_id];
-        obj.coupon_order_count += row.order_id ? 1 : 0,
-        obj.coupon_order_total_origin += row.order_total_origin ? row.order_total_origin : 0,
-        obj.coupon_order_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0,
-        obj.coupon_order_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0,
-        obj.coupon_order_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0,
-        obj.coupon_order_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0,
-        obj.coupon_order_total_final += row.order_total_final ? row.order_total_final : 0
+        obj.coupon_order_count += row.order_id ? 1 : 0;
+        obj.coupon_order_total_origin += row.order_total_origin ? row.order_total_origin : 0;
+        obj.coupon_order_total_subscription += row.order_total_subscription ? row.order_total_subscription : 0;
+        obj.coupon_order_total_coupon += row.order_total_coupon ? row.order_total_coupon : 0;
+        obj.coupon_order_total_shipping += row.order_shipping_fee ? row.order_shipping_fee : 0;
+        obj.coupon_order_total_sale_tax += row.order_total_sale_tax ? row.order_total_sale_tax : 0;
+        obj.coupon_order_total_final += row.order_total_final ? row.order_total_final : 0;
     }
     return Object.values(couponHash);
 }
