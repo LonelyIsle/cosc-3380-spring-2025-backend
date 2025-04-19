@@ -49,7 +49,6 @@ If it occurs, try this importing method.*
     ```
 - The server is now listening on ```127.0.0.1``` at the ```PORT``` specified in ```[name].env```.
 - When deploying, ```--env=[name]``` option can be omitted, allowing the server to use environment variables set by the hosting machine.
-- Note that even when using the ```--env=[name]``` option, the server will prioritize environment variables set by the hosting machine and ignore ```[name].env``` file.
 #### How To Run (Windows)
 - Similar to Linux/MacOS. However, to start the server, run below commands one by one in **Command Prompt** from the **same directory as /app.js**:
     ```
