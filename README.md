@@ -58,7 +58,7 @@ If it occurs, try this importing method.*
     SET DB_USER=user_name
     SET DB_PASSWORD=user_password
     SET DB_SSL=false
-    SET PORT=3000
+    SET PORT=4000
     SET JWT_SECRET=secret
     npm start
     ```
