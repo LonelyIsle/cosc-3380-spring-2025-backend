@@ -11,15 +11,15 @@ This is the official github of Team 4 for COSC3380 Database Systems for the Mond
 #### Tech Stack
 - [Node.js](https://nodejs.org/en)
 - [MySQL](https://www.mysql.com/)
-#### How To Run (Linux/MacOS)
-- Import dump file into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommended): <br>
+#### Initialize Database (MySQL **8.0**)
+- Import dump file using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommended): <br>
     - Drop and Create database (recommended):
         ```
         DROP DATABASE IF EXISTS `db-name`;
         CREATE DATABASE `db-name`;
         ```
     - Import /scripts/dump.sql
-- **OR** import the following SQL files into MySQL **8.0** using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommended) in specified order: <br>
+- **OR** import the following SQL files using [MySQL Workbench](https://www.mysql.com/products/workbench/) (recommended) in specified order: <br>
 *When importing using dump file, you may encounter the error:
 "...The user specified as a definer ('...'@'%') does not exist..."
 If it occurs, try this importing method.*
@@ -34,6 +34,7 @@ If it occurs, try this importing method.*
     - Import /scripts/data.sql
     - Import /scripts/report-1.sql
     - Import /scripts/report-2.sql
+#### How To Run (Linux/MacOS)
 - In project directory, execute the following commands
     ```
     npm install
@@ -46,8 +47,9 @@ If it occurs, try this importing method.*
     cp example.env dev.env
     npm start --env=dev
     ```
-- When deploying, ```--env=[name]``` option can be omitted, allowing the server to use environment variables set by the user.
-- Note that even when using the ```--env=[name]``` option, the server will prioritize environment variables set by the user and ignore ```[name].env``` file.
+- The server is now listening on ```127.0.0.1``` at the ```PORT``` specified in ```[name].env```.
+- When deploying, ```--env=[name]``` option can be omitted, allowing the server to use environment variables set by the hosting machine.
+- Note that even when using the ```--env=[name]``` option, the server will prioritize environment variables set by the hosting machine and ignore ```[name].env``` file.
 #### How To Run (Windows)
 - Similar to Linux/MacOS. However, to start the server, run below commands one by one in **Command Prompt** from the **same directory as /app.js**:
     ```
